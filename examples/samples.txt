@@ -1,1 +1,220 @@
 //these are desired language features for caspian
+
+//types
+bool
+null
+int
+float
+str
+Array
+Map
+function
+lambda
+class
+Union
+
+Union by itself will take anything, Union[type1, type2] will only take type1 or type2
+
+//operators
+<
+>
+>=
+<=
++
+-
+*
+/
+%
+==
+!=
+|
+&
+and
+or
+in
+not
+as
+
+//literals
+true, false (bool)
+13, 32323232 (int)
+32.23 (float)
+-23 (int)
+-23.232 (int)
+"James", `James Joe Lilly`, 'James Joe'
+null
+
+//string formatting
+`Hello, {"James"+" Petullo"}`
+
+//array
+[1, 3, 4, 5], [[[2, "James", 3.23], null], [true, -32]]
+
+//map
+{1:2, "james":10}
+
+//arrays and maps can be made immutable via the '#' character:
+arr = #[1, 2, 3, 4]
+//accessing works: arr[0]
+//but not setting: arr[1] = 10 => raises "Immutable Container Error"
+[1, 2, 3, #[1, 34, 3]]
+v = #{1:2, 3:42, "james":10}
+v['james'] = 1000 =>  "Immutable Container Error"
+
+//1.1 type checking (variable assignment)
+val = 10 //no type, can be reassigned to other types (val = "James")
+val:int = 10 //can only be assigned integers
+val:int* = 10 //weak assignment, can be reassigned, but will fail if type checked against i.e if val = "James"; f(val), and f expects and integer
+
+//unpacking
+
+a, ..b = [1, 2, 3, 4]
+// => a = 1; b = [2, 3, 4]
+[[a, ..b], c], ..d = [[[1, 2, 3, 4], 5], 5, 6]
+// => a = 1; b = [2, 3, 4]; c = 5; d = [5, 6]
+//be able to retain immutability in unpacking
+a, ..b = #{1, 2, 3, 4}
+//a = 1; b = #{2, 3, 4}
+//unpacking maps
+a, ...b = {'james':21, 'joe':18, 'lilly':15}
+//a = 'james'; b = {'joe':18, 'lilly':15}
+//"..." syntax runs a full unpacking and passes it back to an object.create handler
+{'james':a}, ...b = {'james':21, 'joe':18, 'lilly':15}
+//a = 21; b = {'joe':18, 'lilly':15}
+
+
+//imports
+
+import file1
+import file1 or file2 => file1 is imported if it is found, else file2. If file2 is not found, an import error is thrown
+import file1 as f1
+import (file1 or file2) as f
+import file1.function1 as f1 => function1 is now stored under the name f1 in this context
+
+//raising exceptions
+raise Exception("Some error occured")
+
+//control flow
+
+if statement
+    x = 10
+elif another_statement
+    v = 1000
+else
+    v = 1000
+
+//inline if-else
+val if statement else 10
+
+//switch-case
+//switch-case is indended for pattern matching
+switch something
+    case 10
+        something
+    case [a, b, c]
+        something_else
+    case [a, ..b]
+        another_thing
+    case {'a':a, 'b':c}
+        new_thing
+        break //break statement used to stop execution flow of switch
+    default
+        do_something
+
+//suppress-then
+
+suppress
+    raise Exception
+then status, e
+    print(status, e)
+
+suppress TypeError, SyntaxError
+    raise TypeError 
+then status, e //since TypeError is explicity suppressed, nothing will be passed to the "then" block
+    print(status, e)
+
+//suppress does not need a then block
+suppress TypeError
+    raise Exception
+
+//iteration
+
+//for loops:
+
+for i in iterable
+    do_something
+
+//while loops
+
+do
+    something
+while condition
+
+while condition
+    do_something
+
+//for-loop comprehensions
+
+//array
+[i for i in iterable if something]
+[i for b in j for i in b]
+
+//map
+{a:b for i in iterable if something}
+
+//while loop comprehensions
+//lambda function with no params, must return map with keys 'response' and 'variables'
+[():map[str, Union[Any, map]]({'response':x + 1, 'variables':{'x':x + 1}}) while x != 3]
+
+//functions
+
+fun get_results(a:int, b:c):int
+    return something
+
+fun get_results(a:int*, b:int*):int*
+    return something_else
+
+fun get_results(a, ..args, ...kwargs):Any
+    pass
+
+get_results(10, 10, 10, 10, val1=10, val2=10)
+
+fun get_results(a, b = 10, c = 20)
+    return
+
+abstract fun test()
+    `docstring for test`
+
+fun::abstract test()
+    pass
+
+
+fun test()
+    return
+
+//abstract has to be overwritten or error will be raised
+
+//chaining calls
+
+
+
+//lambdas
+(a:int, b:int, c:int):int(a+b+c)(1, 2, 3)
+
+//decorators
+
+//any callable
+
+@is_loggedin
+@route('/blog/<post>', methods=['GET', 'POST'])
+fun serve_blog(post)
+    return "<h1>this is blog post ({post})</h1>"
+
+//classes
+
+//magic methods
+
+//async
+
+
+
