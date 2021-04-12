@@ -12,6 +12,8 @@ function
 lambda
 class
 Union
+iterator
+Type
 
 Union by itself will take anything, Union[type1, type2] will only take type1 or type2
 
@@ -66,12 +68,15 @@ val = 10 //no type, can be reassigned to other types (val = "James")
 val:int = 10 //can only be assigned integers
 val:int* = 10 //weak assignment, can be reassigned, but will fail if type checked against i.e if val = "James"; f(val), and f expects and integer
 
+order_of_op = (1+2)*3
+
 //unpacking
 
 a, ..b = [1, 2, 3, 4]
 // => a = 1; b = [2, 3, 4]
 [[a, ..b], c], ..d = [[[1, 2, 3, 4], 5], 5, 6]
 // => a = 1; b = [2, 3, 4]; c = 5; d = [5, 6]
+v = [...[3, 4, 5]]
 //be able to retain immutability in unpacking
 a, ..b = #{1, 2, 3, 4}
 //a = 1; b = #{2, 3, 4}
@@ -185,7 +190,7 @@ fun get_results(a, b = 10, c = 20)
 abstract fun test()
     `docstring for test`
 
-fun::abstract test()
+abstract fun test()
     pass
 
 
@@ -196,12 +201,40 @@ fun test()
 
 //chaining calls
 
+x = "James" |> get_length |> compute_factorial
+
+x1 = "james"
+    |> get_length
+    |> compute_factorial
+    |> new_fact(1, 2, _, 3) // result from compute_factorial passed to new_fact at the position of the throwaway variable
+    |> final_result(1, 2) //result from new_fact passed to final_result after "2"
+    |> unpack_stuff(1, .._) //result from final_result passed to unpack_stuff and unpacked (as an array)
+
 
 
 //lambdas
+
+(a:int, b:int, c:int):int(a+b+c) //callable object
+f = (a:int, b:int, c:int):int(a+b+c)
 (a:int, b:int, c:int):int(a+b+c)(1, 2, 3)
 
+//multiline lambdas
+((a, b, c):int*
+    x = a + b + c
+    while true  
+        x = x + 1
+        if x%3
+            break
+    return x)(1, 2, 3)
+
+
 //decorators
+
+//generators
+
+fun my_gen()
+    yield 10
+    yield from my_gen()
 
 //any callable
 
@@ -211,10 +244,102 @@ fun serve_blog(post)
     return "<h1>this is blog post ({post})</h1>"
 
 //classes
+class Node
+    fun constructor(val):null
+        this.head = val
+
+    fun test_method():int
+        return this.head + 1
+    
+    static fun new_node(val):class
+        return Node(val)
+  
+    //iterator magic method
+    fun primative::iterator()
+        yield 10
+        yield 20
+        yield 30
+    
+    //getitem magic method
+    fun primative::getattr(val)
+        return val
+
+    //getattr magic method
+    fun primative::getattr(val)
+        return val
+
+    fun primative::type_check(type_obj:Type)
+        if type_obj.class != this.__class__
+            return false
+        
+        return type_obj.type_vals[0] == int
+
+    //all objects will inherit this primative
+    static fun primative::type_check(type_obj:Type)
+        return type_obj.class == this.__class__
+
+    static abstract fun test()
+        return 10
+
+
+//inheritence
+
+class A inherits B
+    fun constructor(val)
+        parent().constructor(val)
+
+class A inherits B, C
+    fun constructor(val)
+        parent(B).constructor(val)
+        parent(C).constructor(val+20)
+
+//abstract classes and methods
+
+abstract class A
+    abstract fun test()
+        `test`
+
+//abstract classes cannot be instantiated
+
+abstract class A
+    fun test()
+        `test`
+
+a = A() //error raised
+
+//abstract methods cannot be called without being overridden in a child class
+class A
+    abstract fun test()
+        `something`
+
+
+a = A() //raises Abstract error, because test was not overridden
+
+class B
+    abstract* fun test()
+        `something`
+
+b = B() // no error raised, test is weak (from the addition of the "*")
 
 //magic methods
+getitem
+setitem
+getattr
+setattr
+get
+set
+eq
+ne
+lt
+le
+gt
+ge
+iterator
+next
+type_check
+and
+or
 
 //async
-
 
 
