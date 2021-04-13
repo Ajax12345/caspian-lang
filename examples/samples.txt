@@ -1,4 +1,4 @@
-//these are desired language features for caspian
+//Caspian language features proposal 
 
 //types
 bool
@@ -42,7 +42,7 @@ true, false (bool)
 13, 32323232 (int)
 32.23 (float)
 -23 (int)
--23.232 (int)
+-23.232 (float)
 "James", `James Joe Lilly`, 'James Joe'
 null
 
@@ -51,6 +51,8 @@ null
 
 //array
 [1, 3, 4, 5], [[[2, "James", 3.23], null], [true, -32]]
+//with await
+arr = [1, 3, 4, await func()]
 
 //map
 {1:2, "james":10}
@@ -91,10 +93,10 @@ a, ...b = {'james':21, 'joe':18, 'lilly':15}
 //imports
 
 import file1
-import file1 or file2 => file1 is imported if it is found, else file2. If file2 is not found, an import error is thrown
+import file1 or file2 // => file1 is imported if it is found, else file2. If file2 is not found, an import error is thrown
 import file1 as f1
 import (file1 or file2) as f
-import file1.function1 as f1 => function1 is now stored under the name f1 in this context
+import file1.function1 as f1 // function1 is now stored under the name f1 in this context
 
 //raising exceptions
 raise Exception("Some error occured")
@@ -138,7 +140,7 @@ suppress TypeError, SyntaxError
 then status, e //since TypeError is explicity suppressed, nothing will be passed to the "then" block
     print(status, e)
 
-//suppress does not need a then block
+//suppress does not need a "then" block
 suppress TypeError
     raise Exception
 
@@ -148,6 +150,10 @@ suppress TypeError
 
 for i in iterable
     do_something
+
+//unpacking can also be accomplished in for loops:
+for {'a':a, 'b':[b, ..c]}, [[j, k], l] in iterable:
+    pass
 
 //while loops
 
@@ -321,9 +327,11 @@ class B
 
 b = B() // no error raised, test is weak (from the addition of the "*")
 
-//magic methods
-getitem
-setitem
+//should all objects inherit from an Object class?
+
+//primatives
+getitem //supports multiple getitem paramters o[1, 2, 3]
+setitem //supports multiple getitem paramters o[1, 2, 3] = 10
 getattr
 setattr
 get
@@ -340,6 +348,64 @@ type_check
 and
 or
 
+//for any object o, attaching a primative can be accomplished via o[primative::prim_func]:
+o[primative::iterator] = ():iterator
+                            yield 10
+                            yield 20
+                            yield 30
+
+fun iter_add()
+    for i in range(10)
+        yield i
+
+o[primative::iterator] = iter_add
+
+
+
 //async
 
+async fun test()
+    ``
+
+async fun main()
+    r = await test()
+
+main()
+
+//implicitly, all async objects return a promise object
+//Promise(complete:bool, result:Union[null, Any])
+//Promise should contain any errors
+//when an async function is called, the function is executed and the promise returned.
+//if the promise is awaited, the program blocks until the promise's complete attribute is true
+//if the promise is not awaited and the complete attribute is false, then it is put back into the message queue and the program execution proceeds
+//when a coroutine is put back into the queue, the params originally passed to it are also included
+//async for loop:
+
+for i in (await coroute):
+    f(i)
+
+//both valid uses of iterator with async
+
+async for i in coroutine:
+    f(i)
+
+
+//await, like yield has to be in function
+
+//run coroutines concurrently
+
+import random.randint as rdnt
+import asyncio
+
+async fun get_random()
+    await asyncio.sleep(3)
+    return rdnt(1, 10)
+
+async fun main()
+    return await get_random()
+
+//asyncio.run blocks the rest of the program from running until main has been run
+result1 = asyncio.run(main)
+//imagine, want to run get_random ten times, but only in 3 seconds total, and get back all get_results
+result = asyncio.parallel(..[get_random for _ in range(10)])
 
