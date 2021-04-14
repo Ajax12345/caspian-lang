@@ -164,6 +164,14 @@ while condition
 while condition
     do_something
 
+while //infinite while-loop, requires return/break to stop it
+    do_something
+    break
+
+for _ in x:
+    if true
+        continue //continue jumps the execution back to the top of the loop
+
 //for-loop comprehensions
 
 //array
