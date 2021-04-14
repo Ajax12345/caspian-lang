@@ -194,7 +194,7 @@ fun get_results(a:int*, b:int*):int*
     return something_else
 
 fun get_results(a, ..args, ...kwargs):Any
-    pass
+    ... //empty body (pass)
 
 get_results(10, 10, 10, 10, val1=10, val2=10)
 

@@ -1,9 +1,9 @@
-import typing, collections
+import typing, collections, csp_types.caspian_types
 
 __all__ = ('TokenMain',)
 
 class TokenMain:
-    class TokenRoot:
+    class TokenRoot(csp_types.caspian_types.TokenRoot):
         def __init__(self, _name:str) -> None:
             self.name = _name
         
@@ -29,7 +29,7 @@ class TokenMain:
         def __repr__(self) -> str:
             return f'Token({self.name})'
 
-    class TokenGroup:
+    class TokenGroup(csp_types.caspian_types.TokenGroup):
         '''Token&Token'''
         def __init__(self, *tokens:typing.List[typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']]) -> None:
             self.token_groups, self.token_head = collections.deque(tokens), None
@@ -55,11 +55,11 @@ class TokenMain:
             return self.token_head.raw_token_name
 
         def __repr__(self) -> str:
-            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, tokens={self.token_groups})'
+            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, tokens={[*self.token_groups]})'
 
         
 
-    class TokenOr:
+    class TokenOr(csp_types.caspian_types.TokenOr):
         '''Token|Token'''
         def __init__(self, *tokens:typing.List[typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']]) -> None:
             self.token_groups, self.token_head = collections.deque(tokens), None
@@ -86,7 +86,7 @@ class TokenMain:
             return self.t_add_back(_t_group)
 
         def __repr__(self) -> str:
-            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, tokens={self.token_groups})'
+            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, tokens={[*self.token_groups]})'
 
 
     class TokenBase:
