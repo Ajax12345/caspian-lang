@@ -38,9 +38,9 @@ tokens = [
 ]
 
 grammar = [
-    (Token.Bool, Token.Label.match('true')
+    (Token.Bool,    Token.Label.match('true')
                     |Token.Label.match('false')),
-    (Token.Null, Token.Label.match('null')),
+    (Token.Null,    Token.Label.match('null')),
     (Token.Operator, Token.Plus
                     |Token.Minus
                     |Token.Star
@@ -58,12 +58,29 @@ grammar = [
 
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star&Token.Slash)),
     (Token.NegativeVal, Token.Minus&Token.Expr),
-    (Token.Expr, Token.Label
+    (Token.Comment,   Token.Slash&Token.Slash),
+    (Token.CommaList, Token.Expr&Token.Comma&Token.Expr
+                      |Token.Expr&Token.Comma&Token.CommaList),
+    (Token.MapCommaList, Token.Expr&Token.Colon&Token.Expr&Token.Comma&Token.Expr&Token.Colon&Token.Expr
+                         |Token.Expr&Token.Colon&Token.Expr&Token.Comma&Token.MapCommaList),
+    (Token.Array,   Token.OBracket&Token.CBracket
+                    |Token.OBracket&Token.Expr&Token.CBracket
+                    |Token.OBracket&Token.CommaList&Token.CBracket),
+    (Token.Map,     Token.OBrace&Token.CBrace
+                    |Token.OBrace&Token.Expr&Token.Colon&Token.Expr&Token.CBrace
+                    |Token.OBrace&Token.MapCommaList&Token.CBrace),
+    (Token.ImmutableContainer, Token.Pound&Token.Array
+                               |Token.Pound&Token.Map),
+    (Token.Expr,    Token.Label
                     |Token.Operation
                     |Token.Integer
                     |Token.Float
                     |Token.String
-                    |Token.NegativeVal),
+                    |Token.NegativeVal
+                    |Token.ImmutableContainer
+                    |Token.Array
+                    |Token.Map
+                    ),
 ]
 if __name__ == '__main__':
-    print(grammar[2])
+    print(grammar)
