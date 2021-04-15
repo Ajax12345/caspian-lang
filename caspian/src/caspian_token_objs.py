@@ -20,11 +20,17 @@ class TokenMain:
             return self.name == _token.raw_token_name
 
         def __add__(self, _t_group:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
-            if isinstance(_t_group, TokenMain.TokenRoot):
+            if isinstance(_t_group, TokenMain.TokenRoot) or not isinstance(_t_group, TokenMain.TokenGroup):
                 return TokenMain.TokenGroup(self, _t_group)
-
+            
             return _t_group.t_add_front(self)
             
+        def __or__(self, _t_or:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenOr':
+            if isinstance(_t_or, TokenMain.TokenRoot) or not isinstance(_t_or, TokenMain.TokenOr):
+                return TokenMain.TokenOr(self, _t_or)
+            
+            return _t_or.t_add_front(self)
+
 
         def __repr__(self) -> str:
             return f'Token({self.name})'
@@ -49,6 +55,9 @@ class TokenMain:
 
         def __add__(self, _t_group:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             return self.t_add_back(_t_group)
+
+        def __or__(self, _t_or:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenOr':
+            return TokenMain.TokenOr(self, _t_or)
         
         @property
         def raw_token_name(self) -> str:
@@ -81,9 +90,11 @@ class TokenMain:
             self.token_group_name = _label
             return self
 
-
         def __add__(self, _t_group:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
-            return self.t_add_back(_t_group)
+            return TokenMain.TokenGroup(self, _t_group)
+
+        def __or__(self, _t_or:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenOr':
+            return self.t_add_back(_t_or)
 
         def __repr__(self) -> str:
             return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, tokens={[*self.token_groups]})'
