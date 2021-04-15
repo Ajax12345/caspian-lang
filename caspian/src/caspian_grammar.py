@@ -60,17 +60,32 @@ grammar = [
     (Token.NegativeVal, Token.Minus&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.CommaList, Token.Expr&Token.Comma&Token.Expr
-                      |Token.Expr&Token.Comma&Token.CommaList),
+                      |Token.Expr&Token.Comma&Token.CommaList
+                      |Token.ArrayUnpack
+                      |Token.CommaList&Token.Comma&Token.CommaList
+                      |Token.CommaList&Token.Comma&Token.Expr),
     (Token.MapCommaList, Token.Expr&Token.Colon&Token.Expr&Token.Comma&Token.Expr&Token.Colon&Token.Expr
-                         |Token.Expr&Token.Colon&Token.Expr&Token.Comma&Token.MapCommaList),
+                      |Token.Expr&Token.Colon&Token.Expr&Token.Comma&Token.MapCommaList
+                      |Token.MapUnpack
+                      |Token.MapCommaList&Token.Comma&Token.MapCommaList
+                      |Token.MapCommaList&Token.Comma&Token.Expr&Token.Colon&Token.Expr),
     (Token.Array,   Token.OBracket&Token.CBracket
-                    |Token.OBracket&Token.Expr&Token.CBracket
-                    |Token.OBracket&Token.CommaList&Token.CBracket),
+                      |Token.OBracket&Token.Expr&Token.CBracket
+                      |Token.OBracket&Token.CommaList&Token.CBracket),
     (Token.Map,     Token.OBrace&Token.CBrace
-                    |Token.OBrace&Token.Expr&Token.Colon&Token.Expr&Token.CBrace
-                    |Token.OBrace&Token.MapCommaList&Token.CBrace),
+                      |Token.OBrace&Token.Expr&Token.Colon&Token.Expr&Token.CBrace
+                      |Token.OBrace&Token.MapCommaList&Token.CBrace),
     (Token.ImmutableContainer, Token.Pound&Token.Array
                                |Token.Pound&Token.Map),
+    (Token.ArrayUnpack, Token.Dot&Token.Dot&Token.Expr),
+    (Token.MapUnpack, Token.Dot&Token.Dot&Token.Dot&Token.Expr),
+    #TODO: function calling
+    #TODO: function chaining
+    #TODO: getattr
+    #TODO: getitem
+    #TODO: inline conditional
+    #TODO: array comprehension
+    #TODO: map comprehension
     (Token.Expr,    Token.Label
                     |Token.Operation
                     |Token.Integer
@@ -80,7 +95,18 @@ grammar = [
                     |Token.ImmutableContainer
                     |Token.Array
                     |Token.Map
+                    |(Token.OParen&Token.Expr&Token.CParen)._('paren_group')
+                    |
                     ),
+
+    (Token.Assign, (Token.Label
+                    |Token.Array
+                    |Token.Map
+                    |Token.CommaList)
+                    &Token.Eq
+                    &(Token.Expr
+                    |Token.CommaList)),
+
 ]
 if __name__ == '__main__':
     print(grammar)
