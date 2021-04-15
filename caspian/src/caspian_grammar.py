@@ -55,13 +55,13 @@ grammar = [
                     |Token.Label.match('and')._('bool_and')
                     |Token.Label.match('or')._('bool_or')
                     |Token.Label.match('in')._('in')),
-
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star&Token.Slash)),
     (Token.NegativeVal, Token.Minus&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.CommaList, Token.Expr&Token.Comma&Token.Expr
                       |Token.Expr&Token.Comma&Token.CommaList
                       |Token.ArrayUnpack
+                      |Token.MapUnpack
                       |Token.CommaList&Token.Comma&Token.CommaList
                       |Token.CommaList&Token.Comma&Token.Expr),
     (Token.MapCommaList, Token.Expr&Token.Colon&Token.Expr&Token.Comma&Token.Expr&Token.Colon&Token.Expr
@@ -79,13 +79,7 @@ grammar = [
                                |Token.Pound&Token.Map),
     (Token.ArrayUnpack, Token.Dot&Token.Dot&Token.Expr),
     (Token.MapUnpack, Token.Dot&Token.Dot&Token.Dot&Token.Expr),
-    #TODO: function calling
-    #TODO: function chaining
-    #TODO: getattr
-    #TODO: getitem
-    #TODO: inline conditional
-    #TODO: array comprehension
-    #TODO: map comprehension
+    (Token.Primative, Token.Label.match('primative')&Token.Colon&Token.Colon&Token.Label),
     (Token.Expr,    Token.Label
                     |Token.Operation
                     |Token.Integer
@@ -96,7 +90,9 @@ grammar = [
                     |Token.Array
                     |Token.Map
                     |(Token.OParen&Token.Expr&Token.CParen)._('paren_group')
-                    |
+                    |Token.Primative
+                    |Token.Expr&Token.OParen&Token.CParen._('f_call')
+                    |Token.Expr&Token.OParen&Token.CommaList&Token.CParen._('f_call')
                     ),
 
     (Token.Assign, (Token.Label
@@ -106,7 +102,15 @@ grammar = [
                     &Token.Eq
                     &(Token.Expr
                     |Token.CommaList)),
+    
 
 ]
+#TODO: multiline search notation (.ml)
+#TODO: function chaining
+#TODO: getattr
+#TODO: getitem
+#TODO: inline conditional
+#TODO: array comprehension
+#TODO: map comprehension
 if __name__ == '__main__':
     print(grammar)
