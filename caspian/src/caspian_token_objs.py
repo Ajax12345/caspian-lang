@@ -5,12 +5,22 @@ __all__ = ('TokenMain',)
 class TokenMain:
     class TokenRoot(csp_types.caspian_types.TokenRoot):
         def __init__(self, _name:str) -> None:
-            self.name = _name
+            self.name, self.direct_match = _name, None
+
+        def match(self, _m_str:str) -> 'TokenRoot':
+            self.direct_match = _m_str
+            return self
         
         def _(self, _label:str) -> 'TokenGroup':
             t = TokenMain.TokenGroup(self)
             t.token_group_name = _label
             return t
+
+        def neg_lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
+            return TokenMain.TokenGroup(self).neg_lookahead(_t_obj)
+        
+        def lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
+           return TokenMain.TokenGroup(self).lookahead(_t_obj)
 
         @property
         def raw_token_name(self) -> str:
@@ -40,7 +50,8 @@ class TokenMain:
         def __init__(self, *tokens:typing.List[typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']]) -> None:
             self.token_groups, self.token_head = collections.deque(tokens), None
             self.token_group_name = None
-
+            self._neg_lookahead, self._lookahead = None, None
+        
         def t_add_front(self, _t:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             self.token_groups.appendleft(_t)
             return self
@@ -51,6 +62,14 @@ class TokenMain:
 
         def _(self, _label:str) -> 'TokenGroup':
             self.token_group_name = _label
+            return self
+
+        def neg_lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
+            self._neg_lookahead = _t_obj
+            return self
+        
+        def lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
+            self._lookahead = _t_obj
             return self
 
         def __and__(self, _t_group:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
@@ -73,6 +92,7 @@ class TokenMain:
         def __init__(self, *tokens:typing.List[typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']]) -> None:
             self.token_groups, self.token_head = collections.deque(tokens), None
             self.token_group_name = None
+            self._neg_lookahead, self._lookahead = None, None
 
         @property
         def raw_token_name(self) -> str:
@@ -88,6 +108,14 @@ class TokenMain:
         
         def _(self, _label:str) -> 'TokenOr':
             self.token_group_name = _label
+            return self
+
+        def neg_lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenOr':
+            self._neg_lookahead = _t_obj
+            return self
+        
+        def lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenOr':
+            self._lookahead = _t_obj
             return self
 
         def __and__(self, _t_group:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':

@@ -38,7 +38,32 @@ tokens = [
 ]
 
 grammar = [
-    (Token.Expr, (Token.Label & Token.Plus) | Token.Pound)
+    (Token.Bool, Token.Label.match('true')
+                    |Token.Label.match('false')),
+    (Token.Null, Token.Label.match('null')),
+    (Token.Operator, Token.Plus
+                    |Token.Minus
+                    |Token.Star
+                    |Token.Mod
+                    |Token.Slash
+                    |(Token.Eq&Token.Eq)._('equals')
+                    |Token.LArrow
+                    |Token.RArrow
+                    |Token.Or
+                    |Token.And
+                    |(Token.Not&Token.Eq)._('not_equals')
+                    |Token.Label.match('and')._('bool_and')
+                    |Token.Label.match('or')._('bool_or')
+                    |Token.Label.match('in')._('in')),
+
+    (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star&Token.Slash)),
+    (Token.NegativeVal, Token.Minus&Token.Expr),
+    (Token.Expr, Token.Label
+                    |Token.Operation
+                    |Token.Integer
+                    |Token.Float
+                    |Token.String
+                    |Token.NegativeVal),
 ]
 if __name__ == '__main__':
-    print(grammar)
+    print(grammar[2])
