@@ -38,7 +38,7 @@ tokens = [
 ]
 
 grammar = [
-    (Token.Expr, (Token.Label | Token.Plus)._('testing') + Token.Colon)
+    (Token.Expr, (Token.Label & Token.Plus) | Token.Pound)
 ]
 if __name__ == '__main__':
     print(grammar)
