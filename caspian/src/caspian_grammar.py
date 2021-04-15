@@ -80,6 +80,8 @@ grammar = [
     (Token.ArrayUnpack, Token.Dot&Token.Dot&Token.Expr),
     (Token.MapUnpack, Token.Dot&Token.Dot&Token.Dot&Token.Expr),
     (Token.Primative, Token.Label.match('primative')&Token.Colon&Token.Colon&Token.Label),
+    (Token.ChainCall, (Token.Expr&Token.Pipe&Token.RArrow&Token.Expr
+                      |Token.Expr&Token.Pipe&Token.RArrow&Token.ChainCall).ml),
     (Token.Expr,    Token.Label
                     |Token.Operation
                     |Token.Integer
@@ -93,6 +95,7 @@ grammar = [
                     |Token.Primative
                     |Token.Expr&Token.OParen&Token.CParen._('f_call')
                     |Token.Expr&Token.OParen&Token.CommaList&Token.CParen._('f_call')
+                    |Token.ChainCall
                     ),
 
     (Token.Assign, (Token.Label
@@ -105,12 +108,11 @@ grammar = [
     
 
 ]
-#TODO: multiline search notation (.ml)
-#TODO: function chaining
 #TODO: getattr
 #TODO: getitem
 #TODO: inline conditional
 #TODO: array comprehension
 #TODO: map comprehension
+#TODO: await <promise>
 if __name__ == '__main__':
     print(grammar[6][-1])
