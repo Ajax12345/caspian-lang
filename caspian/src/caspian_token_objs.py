@@ -51,6 +51,7 @@ class TokenMain:
             self.token_groups, self.token_head = collections.deque(tokens), None
             self.token_group_name = None
             self._neg_lookahead, self._lookahead = None, None
+            self.token_search_ml = False
         
         def t_add_front(self, _t:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             self.token_groups.appendleft(_t)
@@ -72,6 +73,11 @@ class TokenMain:
             self._lookahead = _t_obj
             return self
 
+        @property
+        def ml(self) -> 'TokenGroup':
+            self.token_search_ml = True
+            return self
+
         def __and__(self, _t_group:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             return self.t_add_back(_t_group)
 
@@ -83,7 +89,7 @@ class TokenMain:
             return self.token_head.raw_token_name
 
         def __repr__(self) -> str:
-            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, tokens={[*self.token_groups]})'
+            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, tokens={[*self.token_groups]})'
 
         
 
@@ -93,6 +99,7 @@ class TokenMain:
             self.token_groups, self.token_head = collections.deque(tokens), None
             self.token_group_name = None
             self._neg_lookahead, self._lookahead = None, None
+            self.token_search_ml = False
 
         @property
         def raw_token_name(self) -> str:
@@ -118,6 +125,12 @@ class TokenMain:
             self._lookahead = _t_obj
             return self
 
+        @property
+        def ml(self) -> 'TokenOr':
+            self.token_search_ml = True
+            return self
+            
+
         def __and__(self, _t_group:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             return TokenMain.TokenGroup(self, _t_group)
 
@@ -125,7 +138,7 @@ class TokenMain:
             return self.t_add_back(_t_or)
 
         def __repr__(self) -> str:
-            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, tokens={[*self.token_groups]})'
+            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, tokens={[*self.token_groups]})'
 
 
     class TokenBase:
