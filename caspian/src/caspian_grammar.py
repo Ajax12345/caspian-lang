@@ -114,9 +114,9 @@ grammar = [
                     |Token.Getattr
                     |Token.Getitem
                     |(Token.Expr&Token.If&Token.Expr&Token.Else&Token.Expr)._('inline_conditional')
-                    |(Token.Await&Token.Expr)._('await'),
-                    |Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket)._('array_comp')
-                    |Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket)._('array_comp_conditional')
+                    |(Token.Await&Token.Expr)._('await')
+                    |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket)._('array_comp')
+                    |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket)._('array_comp_conditional')
                     
                     ),
 
@@ -141,4 +141,4 @@ grammar = [
 
 
 if __name__ == '__main__':
-    print(grammar[-2][-1])
+    print(grammar)
