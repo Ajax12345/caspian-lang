@@ -1,5 +1,8 @@
 import typing, abc
 
+class TokenEOF(abc.ABC):
+    pass
+
 class TokenRoot(abc.ABC):
     @abc.abstractmethod
     def _(self, _label:str) -> 'TokenGroup':

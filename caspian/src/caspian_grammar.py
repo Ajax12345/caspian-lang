@@ -3,7 +3,7 @@ from caspian_token_objs import *
 
 __all__ = ('Token', 'tokens', 'grammar')
 
-Token = TokenMain.TokenBase()
+Token, TokenEOF = TokenMain.TokenBase(), TokenMain.TokenEOF()
 
 tokens = [
     (Token.Space, r'^\s+'),
@@ -40,6 +40,7 @@ tokens = [
 grammar = [
     (Token.Bool,    Token.Label.match('true')
                     |Token.Label.match('false')),
+    (Token.As,      Token.Label.match('as')),
     (Token.Null,    Token.Label.match('null')),
     (Token.In, Token.Label.match('in')),
     (Token.Operator, Token.Plus
@@ -59,23 +60,20 @@ grammar = [
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star&Token.Slash)),
     (Token.NegativeVal, Token.Minus&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
-    (Token.CommaList, (Token.Expr&Token.Comma&Token.Expr
+    (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
+    (Token.SignatureEq, Token.Label&Token.Eq&Token.Expr
+                        |Token.KeyValue&Token.Eq&Token.Expr),
+    (Token.CommaList, (Token.Expr
                       |Token.Expr&Token.Comma&Token.CommaList
+                      |Token.KeyValue
+                      |Token.SignatureEq
                       |Token.ArrayUnpack
                       |Token.MapUnpack
-                      |Token.CommaList&Token.Comma&Token.CommaList
-                      |Token.CommaList&Token.Comma&Token.Expr).ml),
-    (Token.MapCommaList, (Token.Expr&Token.Colon&Token.Expr&Token.Comma&Token.Expr&Token.Colon&Token.Expr
-                      |Token.Expr&Token.Colon&Token.Expr&Token.Comma&Token.MapCommaList
-                      |Token.MapUnpack
-                      |Token.MapCommaList&Token.Comma&Token.MapCommaList
-                      |Token.MapCommaList&Token.Comma&Token.Expr&Token.Colon&Token.Expr).ml),
+                      |Token.CommaList&Token.Comma&Token.CommaList).ml),
     (Token.Array,   (Token.OBracket&Token.CBracket
-                      |Token.OBracket&Token.Expr&Token.CBracket
                       |Token.OBracket&Token.CommaList&Token.CBracket).ml),
     (Token.Map,     (Token.OBrace&Token.CBrace
-                      |Token.OBrace&Token.Expr&Token.Colon&Token.Expr&Token.CBrace
-                      |Token.OBrace&Token.MapCommaList&Token.CBrace).ml),
+                      |Token.OBrace&Token.CommaList&Token.CBrace).ml),
     (Token.ImmutableContainer, Token.Pound&Token.Array
                                |Token.Pound&Token.Map),
     (Token.ArrayUnpack, Token.Dot&Token.Dot&Token.Expr),
@@ -84,7 +82,7 @@ grammar = [
     (Token.ChainCall, (Token.Expr&Token.Pipe&Token.RArrow&Token.Expr
                       |Token.Expr&Token.Pipe&Token.RArrow&Token.ChainCall).ml),
     (Token.Getattr, Token.Expr&Token.Dot&Token.Expr),
-    (Token.Getitem, Token.Expr&Token.OBracket&Token.Expr&Token.CBracket),
+    (Token.Getitem, Token.Expr&Token.OBracket&Token.CommaList&Token.CBracket),
     (Token.If,      Token.Label.match('if')),
     (Token.Elif,    Token.Label.match('elif')),
     (Token.Else,    Token.Label.match('else')),
@@ -117,7 +115,8 @@ grammar = [
                     |(Token.Await&Token.Expr)._('await')
                     |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket)._('array_comp')
                     |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket)._('array_comp_conditional')
-                    
+                    |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.CBrace)._('map_comp')
+                    |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBrace)._('map_comp_conditional')
                     ),
 
     (Token.Assign, (Token.Label
@@ -125,19 +124,21 @@ grammar = [
                     |Token.Map
                     |Token.CommaList
                     |Token.Getattr
-                    |Token.Getitem)
+                    |Token.Getitem
+                    |Token.KeyValue)
                     &Token.Eq
                     &(Token.Expr
                     |Token.CommaList)),
+    (Token.Import,  Token.Label.match('import')&Token.Expr
+                    |Token.Import&Token.As&Token.Label),
+    (Token.Stmn,    (Token.Label.match('raise')&Token.Expr&TokenEOF)._('raise')
+                    |(Token.Label.match('continue')&TokenEOF)._('continue')
+                    |(Token.Label.match('break')&TokenEOF)._('break')
+                    |Token.Import),
     (Token.IfCond, Token.If&Token.Expr),
     (Token.ElifCond, Token.Elif&Token.Expr),
     
-
 ]
-#Expr TODO: array comprehension
-#Expr TODO: map comprehension
-#TODO: need key-value pair (see below)
-#TODO: merge Token.CommaList and Token.MapCommaList and update rest of grammar accordingly
 
 
 if __name__ == '__main__':

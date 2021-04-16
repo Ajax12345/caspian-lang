@@ -68,7 +68,7 @@ v['james'] = 1000 =>  "Immutable Container Error"
 //1.1 type checking (variable assignment)
 val = 10 //no type, can be reassigned to other types (val = "James")
 val:int = 10 //can only be assigned integers
-val:int* = 10 //weak assignment, can be reassigned, but will fail if type checked against i.e if val = "James"; f(val), and f expects and integer
+val:int[weak=true] = 10 //weak assignment, can be reassigned, but will fail if type checked against i.e if val = "James"; f(val), and f expects and integer
 
 order_of_op = (1+2)*3
 
@@ -190,7 +190,7 @@ for _ in x:
 fun get_results(a:int, b:c):int
     return something
 
-fun get_results(a:int*, b:int*):int*
+fun get_results(a:int[weak=true], b:int[weak=true]):int[weak=true]
     return something_else
 
 fun get_results(a, ..args, ...kwargs):Any
@@ -233,7 +233,7 @@ f = (a:int, b:int, c:int):int(a+b+c)
 (a:int, b:int, c:int):int(a+b+c)(1, 2, 3)
 
 //multiline lambdas
-((a, b, c):int*
+((a, b, c):int[weak=true]
     x = a + b + c
     while true  
         x = x + 1

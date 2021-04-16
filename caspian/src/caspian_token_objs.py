@@ -3,6 +3,10 @@ import typing, collections, csp_types.caspian_types
 __all__ = ('TokenMain',)
 
 class TokenMain:
+    class TokenEOF(csp_types.caspian_types.TokenEOF):
+        def __repr__(self) -> str:
+            return f'<{self.__class__.__name__}>'
+        
     class TokenRoot(csp_types.caspian_types.TokenRoot):
         def __init__(self, _name:str) -> None:
             self.name, self.direct_match = _name, None
