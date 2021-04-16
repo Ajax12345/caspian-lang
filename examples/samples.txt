@@ -350,6 +350,10 @@ lt
 le
 gt
 ge
+add
+sub
+mul
+div
 iterator
 next
 type_check
