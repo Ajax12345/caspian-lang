@@ -82,6 +82,8 @@ grammar = [
     (Token.Primative, Token.Label.match('primative')&Token.Colon&Token.Colon&Token.Label),
     (Token.ChainCall, (Token.Expr&Token.Pipe&Token.RArrow&Token.Expr
                       |Token.Expr&Token.Pipe&Token.RArrow&Token.ChainCall).ml),
+    (Token.Getattr, Token.Expr&Token.Dot&Token.Expr),
+    (Token.Getitem, Token.Expr&Token.OBracket&Token.Expr&Token.CBracket),
     (Token.Expr,    Token.Label
                     |Token.Operation
                     |Token.Integer
@@ -96,20 +98,22 @@ grammar = [
                     |Token.Expr&Token.OParen&Token.CParen._('f_call')
                     |Token.Expr&Token.OParen&Token.CommaList&Token.CParen._('f_call')
                     |Token.ChainCall
+                    |Token.Getattr
+                    |Token.Getitem
                     ),
 
     (Token.Assign, (Token.Label
                     |Token.Array
                     |Token.Map
-                    |Token.CommaList)
+                    |Token.CommaList
+                    |Token.Getattr
+                    |Token.Getitem)
                     &Token.Eq
                     &(Token.Expr
                     |Token.CommaList)),
     
 
 ]
-#TODO: getattr
-#TODO: getitem
 #TODO: inline conditional
 #TODO: array comprehension
 #TODO: map comprehension
