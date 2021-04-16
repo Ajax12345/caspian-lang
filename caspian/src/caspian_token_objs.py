@@ -3,6 +3,18 @@ import typing, collections, csp_types.caspian_types
 __all__ = ('TokenMain',)
 
 class TokenMain:
+    class BlockTokenGroup(csp_types.caspian_types.BlockTokenGroup):
+        def __init__(self) -> None:
+            self.indent, self.indent_level = None, None
+            self.lines = collections.deque()
+        
+        def __call__(self, indent:typing.Optional[bool]=False, indent_level:typing.Optional[int]=0) -> 'BlockTokenGroup':
+            self.indent, self.indent_level = indent, indent_level
+            return self
+
+        def __repr__(self) -> str:
+            return f'{self.__class__.__name__}(indent={self.indent}, ind_level = {self.indent_level})'
+
     class TokenEOF(csp_types.caspian_types.TokenEOF):
         def __repr__(self) -> str:
             return f'<{self.__class__.__name__}>'

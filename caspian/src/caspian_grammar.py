@@ -3,7 +3,9 @@ from caspian_token_objs import *
 
 __all__ = ('Token', 'tokens', 'grammar')
 
-Token, TokenEOF = TokenMain.TokenBase(), TokenMain.TokenEOF()
+Token = TokenMain.TokenBase()
+TokenEOF = TokenMain.TokenEOF()
+BlockTokenGroup  = TokenMain.BlockTokenGroup()
 
 tokens = [
     (Token.Space, r'^\s+'),
@@ -130,13 +132,18 @@ grammar = [
                     &(Token.Expr
                     |Token.CommaList)),
     (Token.Import,  Token.Label.match('import')&Token.Expr
-                    |Token.Import&Token.As&Token.Label),
+                    |(Token.Import&Token.As&Token.Label)._('import_as')),
     (Token.Stmn,    (Token.Label.match('raise')&Token.Expr&TokenEOF)._('raise')
                     |(Token.Label.match('continue')&TokenEOF)._('continue')
                     |(Token.Label.match('break')&TokenEOF)._('break')
                     |Token.Import),
     (Token.IfCond, Token.If&Token.Expr),
     (Token.ElifCond, Token.Elif&Token.Expr),
+    (Token.ElifBlock, Token.ElifCond&BlockTokenGroup(indent=True)
+                      |Token.ElifBlock&Token.ElifBlock),
+    (Token.Control, Token.IfCond&BlockTokenGroup(indent=True)
+                    |Token.Control&Token.ElifBlock
+                    |Token.Control&Token.Else&BlockTokenGroup(indent=True)),
     
 ]
 
