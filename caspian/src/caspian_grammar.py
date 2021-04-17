@@ -89,8 +89,10 @@ grammar = [
     (Token.Elif,    Token.Label.match('elif')),
     (Token.Else,    Token.Label.match('else')),
     (Token.Switch,  Token.Label.match('switch')),
-    (Token.Case,  Token.Label.match('case')),
-    (Token.Default,  Token.Label.match('default')),
+    (Token.Case,    Token.Label.match('case')),
+    (Token.Default, Token.Label.match('default')),
+    (Token.Suppress,Token.Label.match('suppress')),
+    (Token.Then, Token.Label.match('then')),
     (Token.For,     Token.Label.match('for')),
     (Token.Yield,   Token.Label.match('yield')),
     (Token.YieldFrom,   Token.Yield&Token.Label.match('from')),
@@ -101,7 +103,27 @@ grammar = [
     (Token.ForBlockInline, Token.ForExpr&Token.ForExpr
                            |Token.ForExpr&Token.ForBlockInline),
     (Token.ParenGroup, Token.OParen&Token.CommaList&Token.CParen),
-    (Token.Expr,    Token.Label.nonmatch('true', 'false', 'null', 'if', 'elif', 'else', 'for', 'async', 'fun', 'case', 'switch', 'yield', 'await', 'default', 'continue', 'break', 'raise', 'import', 'from')
+    (Token.Expr,    Token.Label.nonmatch('true', 
+                                         'false', 
+                                         'null', 
+                                         'if', 
+                                         'elif', 
+                                         'else', 
+                                         'for', 
+                                         'async', 
+                                         'fun', 
+                                         'case', 
+                                         'switch', 
+                                         'yield', 
+                                         'await', 
+                                         'default', 
+                                         'continue', 
+                                         'break', 
+                                         'raise', 
+                                         'import', 
+                                         'from', 
+                                         'suppress', 
+                                         'then')
                     |Token.Operation
                     |Token.Integer
                     |Token.Float
@@ -152,9 +174,11 @@ grammar = [
                     |Token.CaseBlock&Token.CaseBlock),
     (Token.SwitchCase, Token.Switch&Token.Expr&BlockTokenGroup(indent=True)&Token.CaseBlock
                     |Token.SwitchCase&Token.Default&BlockTokenGroup(indent=True)),
+    (Token.SuppressBlock, ((Token.Suppress&Token.CommaList)|Token.Suppress)&BlockTokenGroup(indent=True)
+                    |Token.SuppressBlock&((Token.Then&Token.CommaList)|Token.Then)&BlockTokenGroup(indent=True)),
     
 ]
 
 
 if __name__ == '__main__':
-    print(grammar)
+    print(grammar[13])
