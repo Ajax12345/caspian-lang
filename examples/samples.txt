@@ -338,7 +338,7 @@ b = B() // no error raised, test is weak (from the addition of the "*")
 //should all objects inherit from an Object class?
 
 //primatives
-getitem //supports multiple getitem paramters o[1, 2, 3]
+getitem //supports multiple getitem paramters o[1, 2, 3], o[1, 2, 3:4]
 setitem //supports multiple getitem paramters o[1, 2, 3] = 10
 getattr
 setattr

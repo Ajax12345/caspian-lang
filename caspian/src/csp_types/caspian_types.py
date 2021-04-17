@@ -16,6 +16,10 @@ class TokenRoot(abc.ABC):
         '''sets raw parsed value to be matched'''
 
     @abc.abstractmethod
+    def nonmatch(self, *args:typing.List[str]) -> 'TokenRoot':
+        '''sets values to be matched against'''
+
+    @abc.abstractmethod
     def neg_lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
         '''set negative lookahead for token match'''
 

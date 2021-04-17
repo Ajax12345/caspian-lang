@@ -94,10 +94,11 @@ grammar = [
     (Token.Async,   Token.Label.match('async')),
     (Token.AsyncFor,  Token.Async&Token.For),
     (Token.Await,   Token.Label.match('await')),
-    (Token.ForExpr, (Token.For|Token.AsyncFor)&Token.CommaList&Token.In&Token.Expr),
+    (Token.ForExpr, (Token.AsyncFor|Token.For)&Token.CommaList&Token.In&Token.Expr),
     (Token.ForBlockInline, Token.ForExpr&Token.ForExpr
                            |Token.ForExpr&Token.ForBlockInline),
-    (Token.Expr,    Token.Label
+    (Token.ParenGroup, Token.OParen&Token.CommaList&Token.CParen),
+    (Token.Expr,    Token.Label.nonmatch('true', 'false', 'null', 'if', 'elif', 'else', 'for', 'async', 'fun', 'case', 'switch', 'yield', 'await', 'default', 'continue', 'break', 'raise', 'import', 'from')
                     |Token.Operation
                     |Token.Integer
                     |Token.Float
@@ -106,10 +107,10 @@ grammar = [
                     |Token.ImmutableContainer
                     |Token.Array
                     |Token.Map
-                    |(Token.OParen&Token.Expr&Token.CParen)._('paren_group')
+                    |Token.ParenGroup
                     |Token.Primative
                     |(Token.Expr&Token.OParen&Token.CParen)._('f_call')
-                    |(Token.Expr&Token.OParen&Token.CommaList&Token.CParen)._('f_call')
+                    |(Token.Expr&Token.ParenGroup)._('f_call')
                     |Token.ChainCall
                     |Token.Getattr
                     |Token.Getitem

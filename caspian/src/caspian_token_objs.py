@@ -22,9 +22,14 @@ class TokenMain:
     class TokenRoot(csp_types.caspian_types.TokenRoot):
         def __init__(self, _name:str) -> None:
             self.name, self.direct_match = _name, None
+            self.non_matches = []
 
         def match(self, _m_str:str) -> 'TokenRoot':
             self.direct_match = _m_str
+            return self
+
+        def nonmatch(self, *args:typing.List[str]) -> 'TokenRoot':
+            self.non_matches.extend(list(args))
             return self
         
         def _(self, _label:str) -> 'TokenGroup':
