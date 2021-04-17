@@ -88,6 +88,9 @@ grammar = [
     (Token.If,      Token.Label.match('if')),
     (Token.Elif,    Token.Label.match('elif')),
     (Token.Else,    Token.Label.match('else')),
+    (Token.Switch,  Token.Label.match('switch')),
+    (Token.Case,  Token.Label.match('case')),
+    (Token.Default,  Token.Label.match('default')),
     (Token.For,     Token.Label.match('for')),
     (Token.Yield,   Token.Label.match('yield')),
     (Token.YieldFrom,   Token.Yield&Token.Label.match('from')),
@@ -141,10 +144,14 @@ grammar = [
     (Token.IfCond, Token.If&Token.Expr),
     (Token.ElifCond, Token.Elif&Token.Expr),
     (Token.ElifBlock, Token.ElifCond&BlockTokenGroup(indent=True)
-                      |Token.ElifBlock&Token.ElifBlock),
+                    |Token.ElifBlock&Token.ElifBlock),
     (Token.Control, Token.IfCond&BlockTokenGroup(indent=True)
                     |Token.Control&Token.ElifBlock
                     |Token.Control&Token.Else&BlockTokenGroup(indent=True)),
+    (Token.CaseBlock, Token.Case&Token.Expr&BlockTokenGroup(indent=True)
+                    |Token.CaseBlock&Token.CaseBlock),
+    (Token.SwitchCase, Token.Switch&Token.Expr&BlockTokenGroup(indent=True)&Token.CaseBlock
+                    |Token.SwitchCase&Token.Default&BlockTokenGroup(indent=True)),
     
 ]
 
