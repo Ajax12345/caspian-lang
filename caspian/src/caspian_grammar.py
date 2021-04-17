@@ -94,6 +94,8 @@ grammar = [
     (Token.Suppress,Token.Label.match('suppress')),
     (Token.Then, Token.Label.match('then')),
     (Token.For,     Token.Label.match('for')),
+    (Token.While,     Token.Label.match('while')),
+    (Token.Do,     Token.Label.match('do')),
     (Token.Yield,   Token.Label.match('yield')),
     (Token.YieldFrom,   Token.Yield&Token.Label.match('from')),
     (Token.Async,   Token.Label.match('async')),
@@ -113,7 +115,9 @@ grammar = [
                                          'if', 
                                          'elif', 
                                          'else', 
-                                         'for', 
+                                         'for',
+                                         'while', 
+                                         'do',
                                          'async', 
                                          'fun', 
                                          'case', 
@@ -180,6 +184,9 @@ grammar = [
                     |Token.SwitchCase&Token.Default&BlockTokenGroup(indent=True)),
     (Token.SuppressBlock, ((Token.Suppress&Token.CommaList)._('suppress_params')|Token.Suppress)&BlockTokenGroup(indent=True)
                     |(Token.SuppressBlock&((Token.Then&Token.CommaList)._('then_block')|Token.Then)&BlockTokenGroup(indent=True))),
+    (Token.ForLoop, Token.ForExpr&BlockTokenGroup(indent=True)),
+    (Token.WhileLoop, ((Token.While&Token.Expr)|Token.While)&BlockTokenGroup(indent=True)
+                    |Token.Do&BlockTokenGroup(indent=True)&((Token.While&Token.Expr)|Token.While)),
     
 ]
 
