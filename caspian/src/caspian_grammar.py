@@ -105,7 +105,11 @@ grammar = [
     (Token.ParenGroup, Token.OParen&Token.CommaList&Token.CParen),
     (Token.Expr,    Token.Label.nonmatch('true', 
                                          'false', 
-                                         'null', 
+                                         'null',
+                                         'and',
+                                         'or',
+                                         'in',
+                                         'as' 
                                          'if', 
                                          'elif', 
                                          'else', 
@@ -174,11 +178,11 @@ grammar = [
                     |Token.CaseBlock&Token.CaseBlock),
     (Token.SwitchCase, Token.Switch&Token.Expr&BlockTokenGroup(indent=True)&Token.CaseBlock
                     |Token.SwitchCase&Token.Default&BlockTokenGroup(indent=True)),
-    (Token.SuppressBlock, ((Token.Suppress&Token.CommaList)|Token.Suppress)&BlockTokenGroup(indent=True)
-                    |Token.SuppressBlock&((Token.Then&Token.CommaList)|Token.Then)&BlockTokenGroup(indent=True)),
+    (Token.SuppressBlock, ((Token.Suppress&Token.CommaList)._('suppress_params')|Token.Suppress)&BlockTokenGroup(indent=True)
+                    |(Token.SuppressBlock&((Token.Then&Token.CommaList)._('then_block')|Token.Then)&BlockTokenGroup(indent=True))),
     
 ]
 
 
 if __name__ == '__main__':
-    print(grammar[13])
+    print(grammar[-1])
