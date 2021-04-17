@@ -97,6 +97,8 @@ grammar = [
     (Token.While,     Token.Label.match('while')),
     (Token.Do,     Token.Label.match('do')),
     (Token.Yield,   Token.Label.match('yield')),
+    (Token.Fun,   Token.Label.match('fun')),
+    (Token.Abstract,   Token.Label.match('abstract')),
     (Token.YieldFrom,   Token.Yield&Token.Label.match('from')),
     (Token.Async,   Token.Label.match('async')),
     (Token.AsyncFor,  Token.Async&Token.For),
@@ -105,6 +107,8 @@ grammar = [
     (Token.ForBlockInline, Token.ForExpr&Token.ForExpr
                            |Token.ForExpr&Token.ForBlockInline),
     (Token.ParenGroup, Token.OParen&Token.CommaList&Token.CParen),
+    (Token.FunSignature, (Token.Expr&Token.ParenGroup)
+                          |(Token.Expr&Token.OParen&Token.CParen)),
     (Token.Expr,    Token.Label.nonmatch('true', 
                                          'false', 
                                          'null',
@@ -120,6 +124,7 @@ grammar = [
                                          'do',
                                          'async', 
                                          'fun', 
+                                         'abstract',
                                          'case', 
                                          'switch', 
                                          'yield', 
@@ -142,8 +147,7 @@ grammar = [
                     |Token.Map
                     |Token.ParenGroup
                     |Token.Primative
-                    |(Token.Expr&Token.OParen&Token.CParen)._('f_call')
-                    |(Token.Expr&Token.ParenGroup)._('f_call')
+                    |Token.FunSignature
                     |Token.ChainCall
                     |Token.Getattr
                     |Token.Getitem
@@ -187,9 +191,15 @@ grammar = [
     (Token.ForLoop, Token.ForExpr&BlockTokenGroup(indent=True)),
     (Token.WhileLoop, ((Token.While&Token.Expr)|Token.While)&BlockTokenGroup(indent=True)
                     |Token.Do&BlockTokenGroup(indent=True)&((Token.While&Token.Expr)|Token.While)),
+    (Token.FunctionStub, Token.Fun&Token.FunSignature
+                         |Token.FunctionStub&Token.Colon&Token.Expr),
+    (Token.FunctionBlock, Token.FunctionStub&BlockTokenGroup(indent=True)),
+    (Token.AsyncFunctionBlock, Token.Async&Token.FunctionBlock),
+    (Token.AbstractFunctionBlock, Token.Abstract&Token.FunctionBlock),
+    (Token.AsyncAbstractFunctionBlock, Token.Abstract&Token.AsyncFunctionBlock),
     
 ]
-
+#NOTE: enforce indentation as a tab (five spaces)
 
 if __name__ == '__main__':
-    print(grammar[-1])
+    print(grammar)

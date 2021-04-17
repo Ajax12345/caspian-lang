@@ -48,7 +48,16 @@ class TokenMain:
             return self.name
             
         def __eq__(self, _token:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> bool:
-            return self.name == _token.raw_token_name
+            if self.name != _token.raw_token_name:
+                return False
+
+            if isinstance(_token, self.__class__):
+                if self.direct_match is not None:
+                    return self.direct_match == _token.direct_match
+                if _token.direct_match is not None:
+                    return _token.direct_match not in self.non_matches
+                    
+            return True
 
         def __and__(self, _t_group:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             if isinstance(_t_group, TokenMain.TokenRoot) or not isinstance(_t_group, TokenMain.TokenGroup):
