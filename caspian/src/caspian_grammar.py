@@ -1,7 +1,7 @@
 import re, typing
 from caspian_token_objs import *
 
-__all__ = ('Token', 'tokens', 'grammar')
+__all__ = ('Token', 'TokenEOF', 'BlockTokenGroup', 'tokens', 'grammar')
 
 Token = TokenMain.TokenBase()
 TokenEOF = TokenMain.TokenEOF()
