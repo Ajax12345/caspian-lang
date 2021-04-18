@@ -206,6 +206,9 @@ grammar = [
                     |Token.KeyValue&Token.ParenGroup),
     (Token.LambdaFunMulti, Token.ParenGroup&BlockTokenGroup(indent=True)
                     |Token.KeyValue&BlockTokenGroup(indent=True)),
+    (Token.Decorator, (Token.At&Token.Expr&Token.FunctionBlock)
+                    |(Token.At&Token.Expr&Token.AsyncFunctionBlock)
+                    |(Token.At&Token.Expr&Token.Decorator)),
     
 ]
 #NOTE: enforce indentation as a tab (five spaces)

@@ -242,14 +242,13 @@ f = (a:int, b:int, c:int):int(a+b+c)
     return x)(1, 2, 3)
 
 
-//decorators
-
 //generators
 
 fun my_gen()
     yield 10
     yield from my_gen()
 
+//decorators
 //any callable
 
 @is_loggedin
