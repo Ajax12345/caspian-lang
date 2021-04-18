@@ -8,35 +8,35 @@ TokenEOF = TokenMain.TokenEOF()
 BlockTokenGroup  = TokenMain.BlockTokenGroup()
 
 tokens = [
-    (Token.Space, r'^\s+'),
-    (Token.Label, r'^[a-zA-Z_]{1}(?:[a-zA-Z0-9_])+'),
-    (Token.String, r'^".*?"'),
-    (Token.String, r"^'.*?'"),
-    (Token.String, r'^`.*?`'),
-    (Token.Float, r'^\d+\.\d+'),
-    (Token.Integer, r'^\d+'),
-    (Token.OParen, r'^\('),
-    (Token.CParen, r'^\)'),
-    (Token.OBracket, r'^\['),
-    (Token.CBracket, r'^\]'),
-    (Token.OBrace, r'^\{'),
-    (Token.CBrace, r'^\}'),
-    (Token.Slash, r'^/'),
-    (Token.Plus, r'^\+'),
-    (Token.Minus, r'^\-'),
-    (Token.Star, r'^\*'),
-    (Token.Mod, r'^%'),
-    (Token.Eq, r'^\='),
-    (Token.LArrow, r'^\<'),
-    (Token.RArrow, r'^\>'),
-    (Token.Not, r'^\!'),
-    (Token.And, r'^\&'),
-    (Token.Or, r'^\|'),
-    (Token.Comma, r'^,'),
-    (Token.Colon, r'^:'),
-    (Token.Dot, r'^\.'),
-    (Token.Pound, r'^#'),
-    (Token.At, r'^@')
+    (Token.Space, re.compile(r'^\s')),
+    (Token.Label, re.compile(r'^[a-zA-Z_]{1}(?:[a-zA-Z0-9_]+)*')),
+    (Token.String, re.compile(r'^".*?"')),
+    (Token.String, re.compile(r"^'.*?'")),
+    (Token.String, re.compile(r'^`.*?`')),
+    (Token.Float, re.compile(r'^\d+\.\d+')),
+    (Token.Integer, re.compile(r'^\d+')),
+    (Token.OParen, re.compile(r'^\(')),
+    (Token.CParen, re.compile(r'^\)')),
+    (Token.OBracket, re.compile(r'^\[')),
+    (Token.CBracket, re.compile(r'^\]')),
+    (Token.OBrace, re.compile(r'^\{')),
+    (Token.CBrace, re.compile(r'^\}')),
+    (Token.Slash, re.compile(r'^/')),
+    (Token.Plus, re.compile(r'^\+')),
+    (Token.Minus, re.compile(r'^\-')),
+    (Token.Star, re.compile(r'^\*')),
+    (Token.Mod, re.compile(r'^%')),
+    (Token.Eq, re.compile(r'^\=')),
+    (Token.LArrow, re.compile(r'^\<')),
+    (Token.RArrow, re.compile(r'^\>')),
+    (Token.Not, re.compile(r'^\!')),
+    (Token.And, re.compile(r'^\&')),
+    (Token.Or, re.compile(r'^\|')),
+    (Token.Comma, re.compile(r'^,')),
+    (Token.Colon, re.compile(r'^:')),
+    (Token.Dot, re.compile(r'^\.')),
+    (Token.Pound, re.compile(r'^#')),
+    (Token.At, re.compile(r'^@'))
 ]
 
 grammar = [
@@ -51,6 +51,8 @@ grammar = [
                     |Token.Mod
                     |Token.Slash
                     |(Token.Eq&Token.Eq)._('equals')
+                    |(Token.LArrow&Token.Eq)._('le')
+                    |(Token.RArrow&Token.Eq)._('ge')
                     |Token.LArrow
                     |Token.RArrow
                     |Token.Or

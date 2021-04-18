@@ -20,9 +20,11 @@ class TokenMain:
             return f'<{self.__class__.__name__}>'
         
     class TokenRoot(csp_types.caspian_types.TokenRoot):
-        def __init__(self, _name:str) -> None:
-            self.name, self.direct_match = _name, None
-            self.non_matches = []
+        def __init__(self, _name:str, matched_str:str = None, direct_match:str=None, non_matches:list = [], line_num:int = None, char_num:int = None) -> None:
+            self.name, self.direct_match = _name, direct_match
+            self.non_matches = non_matches
+            self.matched_str = matched_str
+            self.line_num, self.char_num = line_num, char_num
 
         def match(self, _m_str:str) -> 'TokenRoot':
             self.direct_match = _m_str
@@ -36,6 +38,9 @@ class TokenMain:
             t = TokenMain.TokenGroup(self)
             t.token_group_name = _label
             return t
+
+        def __call__(self, _line_num:int, _char_num:int, _matched_val:str) -> 'TokenRoot':
+            return self.__class__(self.name, matched_str = _matched_val, direct_match = self.direct_match, non_matches = self.non_matches, line_num = _line_num, char_num = _char_num)
 
         def neg_lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             return TokenMain.TokenGroup(self).neg_lookahead(_t_obj)
@@ -52,12 +57,16 @@ class TokenMain:
                 return False
 
             if isinstance(_token, self.__class__):
-                if self.direct_match is not None:
-                    return self.direct_match == _token.direct_match
                 if _token.direct_match is not None:
-                    return _token.direct_match not in self.non_matches
+                    return self.matched_str == _token.direct_match
+                
+                if self.matched_str is not None:
+                    return self.matched_str not in _token.non_matches
                     
             return True
+
+        def __ne__(self, _token:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> bool:
+            return self.name != _token.raw_token_name
 
         def __and__(self, _t_group:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             if isinstance(_t_group, TokenMain.TokenRoot) or not isinstance(_t_group, TokenMain.TokenGroup):
@@ -71,9 +80,11 @@ class TokenMain:
             
             return _t_or.t_add_front(self)
 
+        def __str__(self) -> str:
+            return repr(self)
 
         def __repr__(self) -> str:
-            return f'Token({self.name})'
+            return f'Token({self.name})' if self.matched_str is None else f"""Token({self.name}, m = '{self.matched_str}')"""
 
     class TokenGroup(csp_types.caspian_types.TokenGroup):
         '''Token&Token'''
