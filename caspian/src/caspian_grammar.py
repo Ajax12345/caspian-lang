@@ -98,6 +98,8 @@ grammar = [
     (Token.Do,     Token.Label.match('do')),
     (Token.Yield,   Token.Label.match('yield')),
     (Token.Fun,   Token.Label.match('fun')),
+    (Token.Class,   Token.Label.match('class')),
+    (Token.Inherits, Token.Label.match('inherits')),
     (Token.Return, Token.Label.match('return')),
     (Token.Abstract,   Token.Label.match('abstract')),
     (Token.Static,   Token.Label.match('static')),
@@ -126,6 +128,8 @@ grammar = [
                                          'do',
                                          'async', 
                                          'fun',
+                                         'class',
+                                         'inherits',
                                          'return', 
                                          'abstract',
                                          'static',
@@ -180,7 +184,7 @@ grammar = [
                     |(Token.Label.match('continue')&TokenEOF)._('continue')
                     |(Token.Label.match('break')&TokenEOF)._('break')
                     |Token.Import
-                    |(Token.Return&Expr)._('return_stmn')),
+                    |(Token.Return&Token.Expr)._('return_stmn')),
     (Token.IfCond, Token.If&Token.Expr),
     (Token.ElifCond, Token.Elif&Token.Expr),
     (Token.ElifBlock, Token.ElifCond&BlockTokenGroup(indent=True)
@@ -214,6 +218,9 @@ grammar = [
     (Token.Decorator, (Token.At&Token.Expr&Token.FunctionBlock)
                     |(Token.At&Token.Expr&Token.AsyncFunctionBlock)
                     |(Token.At&Token.Expr&Token.Decorator)),
+    (Token.ClassStub, Token.Class&Token.Label),
+    (Token.ClassInherit, Token.ClassStub&Token.Inherits&Token.CommaList),
+    (Token.ClassBlock, (Token.ClassInherit|Token.ClassStub)&BlockTokenGroup(indent=True)),
     
 ]
 #NOTE: enforce indentation as a tab (five spaces)
