@@ -294,6 +294,9 @@ class Node
     static abstract fun test()
         return 10
 
+    static abstract async fun test()
+        return await this.some_coroutine()
+
 
 //inheritence
 

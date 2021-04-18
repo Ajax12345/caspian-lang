@@ -100,6 +100,7 @@ grammar = [
     (Token.Fun,   Token.Label.match('fun')),
     (Token.Return, Token.Label.match('return')),
     (Token.Abstract,   Token.Label.match('abstract')),
+    (Token.Static,   Token.Label.match('static')),
     (Token.YieldFrom,   Token.Yield&Token.Label.match('from')),
     (Token.Async,   Token.Label.match('async')),
     (Token.AsyncFor,  Token.Async&Token.For),
@@ -127,6 +128,7 @@ grammar = [
                                          'fun',
                                          'return', 
                                          'abstract',
+                                         'static',
                                          'case', 
                                          'switch', 
                                          'yield', 
@@ -160,8 +162,7 @@ grammar = [
                     |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.CBrace)._('map_comp')
                     |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBrace)._('map_comp_conditional')
                     |Token.LambdaFun
-                    |Token.LambdaFunMulti
-                    ),
+                    |Token.LambdaFunMulti),
 
     (Token.Assign, (Token.Label
                     |Token.Array
@@ -202,6 +203,10 @@ grammar = [
     (Token.AsyncFunctionBlock, Token.Async&Token.FunctionBlock),
     (Token.AbstractFunctionBlock, Token.Abstract&Token.FunctionBlock),
     (Token.AsyncAbstractFunctionBlock, Token.Abstract&Token.AsyncFunctionBlock),
+    (Token.StaticFunctionBlock, Token.Static&Token.FunctionBlock),
+    (Token.StaticAsyncFunctionBlock, Token.Static&Token.AsyncFunctionBlock),
+    (Token.StaticAbstractFunctionBlock, Token.Static&Token.AbstractFunctionBlock),
+    (Token.StaticAsyncAbstractFunctionBlock, Token.Static&Token.AsyncAbstractFunctionBlock),
     (Token.LambdaFun, Token.ParenGroup&Token.ParenGroup
                     |Token.KeyValue&Token.ParenGroup),
     (Token.LambdaFunMulti, Token.ParenGroup&BlockTokenGroup(indent=True)
