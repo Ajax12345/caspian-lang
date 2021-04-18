@@ -64,25 +64,25 @@ grammar = [
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
     (Token.SignatureEq, Token.Label&Token.Eq&Token.Expr
-                        |Token.KeyValue&Token.Eq&Token.Expr),
+                    |Token.KeyValue&Token.Eq&Token.Expr),
     (Token.CommaList, (Token.Expr
-                      |Token.Expr&Token.Comma&Token.CommaList
-                      |Token.KeyValue
-                      |Token.SignatureEq
-                      |Token.ArrayUnpack
-                      |Token.MapUnpack
-                      |Token.CommaList&Token.Comma&Token.CommaList).ml),
+                    |Token.Expr&Token.Comma&Token.CommaList
+                    |Token.KeyValue
+                    |Token.SignatureEq
+                    |Token.ArrayUnpack
+                    |Token.MapUnpack
+                    |Token.CommaList&Token.Comma&Token.CommaList).ml),
     (Token.Array,   (Token.OBracket&Token.CBracket
-                      |Token.OBracket&Token.CommaList&Token.CBracket).ml),
+                    |Token.OBracket&Token.CommaList&Token.CBracket).ml),
     (Token.Map,     (Token.OBrace&Token.CBrace
-                      |Token.OBrace&Token.CommaList&Token.CBrace).ml),
+                    |Token.OBrace&Token.CommaList&Token.CBrace).ml),
     (Token.ImmutableContainer, Token.Pound&Token.Array
-                               |Token.Pound&Token.Map),
+                    |Token.Pound&Token.Map),
     (Token.ArrayUnpack, Token.Dot&Token.Dot&Token.Expr),
     (Token.MapUnpack, Token.Dot&Token.Dot&Token.Dot&Token.Expr),
     (Token.Primative, Token.Label.match('primative')&Token.Colon&Token.Colon&Token.Label),
     (Token.ChainCall, (Token.Expr&Token.Pipe&Token.RArrow&Token.Expr
-                      |Token.Expr&Token.Pipe&Token.RArrow&Token.ChainCall).ml),
+                    |Token.Expr&Token.Pipe&Token.RArrow&Token.ChainCall).ml),
     (Token.Getattr, Token.Expr&Token.Dot&Token.Expr),
     (Token.Getitem, Token.Expr&Token.OBracket&Token.CommaList&Token.CBracket),
     (Token.If,      Token.Label.match('if')),
@@ -98,6 +98,7 @@ grammar = [
     (Token.Do,     Token.Label.match('do')),
     (Token.Yield,   Token.Label.match('yield')),
     (Token.Fun,   Token.Label.match('fun')),
+    (Token.Return, Token.Label.match('return')),
     (Token.Abstract,   Token.Label.match('abstract')),
     (Token.YieldFrom,   Token.Yield&Token.Label.match('from')),
     (Token.Async,   Token.Label.match('async')),
@@ -123,7 +124,8 @@ grammar = [
                                          'while', 
                                          'do',
                                          'async', 
-                                         'fun', 
+                                         'fun',
+                                         'return', 
                                          'abstract',
                                          'case', 
                                          'switch', 
@@ -157,6 +159,8 @@ grammar = [
                     |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket)._('array_comp_conditional')
                     |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.CBrace)._('map_comp')
                     |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBrace)._('map_comp_conditional')
+                    |Token.LambdaFun
+                    |Token.LambdaFunMulti
                     ),
 
     (Token.Assign, (Token.Label
@@ -174,7 +178,8 @@ grammar = [
     (Token.Stmn,    (Token.Label.match('raise')&Token.Expr&TokenEOF)._('raise')
                     |(Token.Label.match('continue')&TokenEOF)._('continue')
                     |(Token.Label.match('break')&TokenEOF)._('break')
-                    |Token.Import),
+                    |Token.Import
+                    |(Token.Return&Expr)._('return_stmn')),
     (Token.IfCond, Token.If&Token.Expr),
     (Token.ElifCond, Token.Elif&Token.Expr),
     (Token.ElifBlock, Token.ElifCond&BlockTokenGroup(indent=True)
@@ -192,11 +197,15 @@ grammar = [
     (Token.WhileLoop, ((Token.While&Token.Expr)|Token.While)&BlockTokenGroup(indent=True)
                     |Token.Do&BlockTokenGroup(indent=True)&((Token.While&Token.Expr)|Token.While)),
     (Token.FunctionStub, Token.Fun&Token.FunSignature
-                         |Token.FunctionStub&Token.Colon&Token.Expr),
+                    |Token.FunctionStub&Token.Colon&Token.Expr),
     (Token.FunctionBlock, Token.FunctionStub&BlockTokenGroup(indent=True)),
     (Token.AsyncFunctionBlock, Token.Async&Token.FunctionBlock),
     (Token.AbstractFunctionBlock, Token.Abstract&Token.FunctionBlock),
     (Token.AsyncAbstractFunctionBlock, Token.Abstract&Token.AsyncFunctionBlock),
+    (Token.LambdaFun, Token.ParenGroup&Token.ParenGroup
+                    |Token.KeyValue&Token.ParenGroup),
+    (Token.LambdaFunMulti, Token.ParenGroup&BlockTokenGroup(indent=True)
+                    |Token.KeyValue&BlockTokenGroup(indent=True)),
     
 ]
 #NOTE: enforce indentation as a tab (five spaces)
