@@ -4,16 +4,23 @@ __all__ = ('TokenMain',)
 
 class TokenMain:
     class BlockTokenGroup(csp_types.caspian_types.BlockTokenGroup):
-        def __init__(self) -> None:
-            self.indent, self.indent_level = None, None
-            self.lines = collections.deque()
+        __slots__ = ('body_lines', 'tokenized_statements')
+        def __init__(self, body_lines:typing.List['TokenizedLine']=None) -> None:
+            self.body_lines = body_lines
+            self.tokenized_statements = None
         
-        def __call__(self, indent:typing.Optional[bool]=False, indent_level:typing.Optional[int]=0) -> 'BlockTokenGroup':
-            self.indent, self.indent_level = indent, indent_level
-            return self
+        def __iter__(self) -> typing.Iterator:
+            yield from self.body_lines
+
+        def __call__(self, _lines:typing.List['TokenizedLine']) -> 'BlockTokenGroup':
+            return self.__class__(_lines)
+
+        @classmethod
+        def form_new_block(cls, _lines:typing.List['TokenizedLine']) -> 'BlockTokenGroup':
+            return cls([i.decrement_whitespace() for i in _lines])
 
         def __repr__(self) -> str:
-            return f'{self.__class__.__name__}(indent={self.indent}, ind_level = {self.indent_level})'
+            return f'<{self.__class__.__name__}>' if self.body_lines is None else f'<{self.__class__.__name__} ({(_l:=len(self.body_lines))} line{"s" if _l != 1 else ""})>'
 
     class TokenEOF(csp_types.caspian_types.TokenEOF):
         def __repr__(self) -> str:

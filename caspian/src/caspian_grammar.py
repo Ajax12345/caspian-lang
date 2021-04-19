@@ -189,23 +189,23 @@ grammar = [
                     |(Token.Return&Token.Expr)._('return_stmn')),
     (Token.IfCond, Token.If&Token.Expr),
     (Token.ElifCond, Token.Elif&Token.Expr),
-    (Token.ElifBlock, (Token.ElifCond&BlockTokenGroup(indent=True))
+    (Token.ElifBlock, (Token.ElifCond&BlockTokenGroup)
                     |(Token.ElifBlock&Token.ElifBlock)),
-    (Token.Control, (Token.IfCond&BlockTokenGroup(indent=True))
+    (Token.Control, (Token.IfCond&BlockTokenGroup)
                     |(Token.Control&Token.ElifBlock)
-                    |(Token.Control&Token.Else&BlockTokenGroup(indent=True))),
-    (Token.CaseBlock, (Token.Case&Token.Expr&BlockTokenGroup(indent=True))
+                    |(Token.Control&Token.Else&BlockTokenGroup)),
+    (Token.CaseBlock, (Token.Case&Token.Expr&BlockTokenGroup)
                     |(Token.CaseBlock&Token.CaseBlock)),
-    (Token.SwitchCase, (Token.Switch&Token.Expr&BlockTokenGroup(indent=True)&Token.CaseBlock)
-                    |(Token.SwitchCase&Token.Default&BlockTokenGroup(indent=True))),
-    (Token.SuppressBlock, ((Token.Suppress&Token.CommaList)._('suppress_params')|Token.Suppress)&BlockTokenGroup(indent=True)
-                    |(Token.SuppressBlock&((Token.Then&Token.CommaList)._('then_block')|Token.Then)&BlockTokenGroup(indent=True))),
-    (Token.ForLoop, Token.ForExpr&BlockTokenGroup(indent=True)),
-    (Token.WhileLoop, (((Token.While&Token.Expr)|Token.While)&BlockTokenGroup(indent=True))
-                    |(Token.Do&BlockTokenGroup(indent=True)&((Token.While&Token.Expr)|Token.While))),
+    (Token.SwitchCase, (Token.Switch&Token.Expr&BlockTokenGroup&Token.CaseBlock)
+                    |(Token.SwitchCase&Token.Default&BlockTokenGroup)),
+    (Token.SuppressBlock, ((Token.Suppress&Token.CommaList)._('suppress_params')|Token.Suppress)&BlockTokenGroup
+                    |(Token.SuppressBlock&((Token.Then&Token.CommaList)._('then_block')|Token.Then)&BlockTokenGroup)),
+    (Token.ForLoop, Token.ForExpr&BlockTokenGroup),
+    (Token.WhileLoop, (((Token.While&Token.Expr)|Token.While)&BlockTokenGroup)
+                    |(Token.Do&BlockTokenGroup&((Token.While&Token.Expr)|Token.While))),
     (Token.FunctionStub, (Token.Fun&Token.FunSignature)
                     |(Token.FunctionStub&Token.Colon&Token.Expr)),
-    (Token.FunctionBlock, Token.FunctionStub&BlockTokenGroup(indent=True)),
+    (Token.FunctionBlock, Token.FunctionStub&BlockTokenGroup),
     (Token.AsyncFunctionBlock, Token.Async&Token.FunctionBlock),
     (Token.AbstractFunctionBlock, Token.Abstract&Token.FunctionBlock),
     (Token.AsyncAbstractFunctionBlock, Token.Abstract&Token.AsyncFunctionBlock),
@@ -215,14 +215,14 @@ grammar = [
     (Token.StaticAsyncAbstractFunctionBlock, Token.Static&Token.AsyncAbstractFunctionBlock),
     (Token.LambdaFun, (Token.ParenGroup&Token.ParenGroup)
                     |(Token.KeyValue&Token.ParenGroup)),
-    (Token.LambdaFunMulti, (Token.ParenGroup&BlockTokenGroup(indent=True))
-                    |(Token.KeyValue&BlockTokenGroup(indent=True))),
+    (Token.LambdaFunMulti, (Token.ParenGroup&BlockTokenGroup)
+                    |(Token.KeyValue&BlockTokenGroup)),
     (Token.Decorator, (Token.At&Token.Expr&Token.FunctionBlock)
                     |(Token.At&Token.Expr&Token.AsyncFunctionBlock)
                     |(Token.At&Token.Expr&Token.Decorator)),
     (Token.ClassStub, Token.Class&Token.Label),
     (Token.ClassInherit, Token.ClassStub&Token.Inherits&Token.CommaList),
-    (Token.ClassBlock, (Token.ClassInherit|Token.ClassStub)&BlockTokenGroup(indent=True)),
+    (Token.ClassBlock, (Token.ClassInherit|Token.ClassStub)&BlockTokenGroup),
     
 ]
 #NOTE: enforce indentation as a tab (five spaces)
