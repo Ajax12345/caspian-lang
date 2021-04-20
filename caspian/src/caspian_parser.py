@@ -12,7 +12,7 @@ class TokenizedLine:
         return self
 
     def decrement_whitespace(self) -> 'TokenizedLine':
-        self.whitespace_count -= 5
+        self.whitespace_count -= 4
         return self
 
     def restore_token(self, _token:caspian_grammar.Token) -> None:

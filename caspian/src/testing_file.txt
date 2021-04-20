@@ -1,1 +1,5 @@
-[i if i == 10 else 0 for i in range(100)]
+fun test()
+    fun newtest()
+        return 100
+
+    return 20
