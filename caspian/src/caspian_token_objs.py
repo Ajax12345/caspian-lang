@@ -15,6 +15,9 @@ class TokenMain:
         def __call__(self, _lines:typing.List['TokenizedLine']) -> 'BlockTokenGroup':
             return self.__class__(_lines)
 
+        def __eq__(self, _token:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> bool:
+            return isinstance(_token, self.__class__)
+            
         @classmethod
         def form_new_block(cls, _lines:typing.List['TokenizedLine']) -> 'BlockTokenGroup':
             return cls([i.decrement_whitespace() for i in _lines])

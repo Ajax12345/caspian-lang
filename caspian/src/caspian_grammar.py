@@ -65,7 +65,7 @@ grammar = [
     (Token.NegativeVal, Token.Minus&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
-    (Token.SignatureEq, Token.Label&Token.Eq&Token.Expr
+    (Token.SignatureEq, Token.ValueLabel&Token.Eq&Token.Expr
                     |Token.KeyValue&Token.Eq&Token.Expr),
     (Token.CommaList, (Token.Expr
                     |Token.Expr&Token.Comma&Token.CommaList
@@ -115,7 +115,7 @@ grammar = [
     (Token.ParenGroup, Token.OParen&Token.CommaList&Token.CParen),
     (Token.FunSignature, (Token.Expr&Token.ParenGroup)
                           |(Token.Expr&Token.OParen&Token.CParen)),
-    (Token.Expr,    Token.Label.nonmatch('true', 
+    (Token.ValueLabel, Token.Label.nonmatch('true', 
                                          'false', 
                                          'null',
                                          'and',
@@ -146,7 +146,8 @@ grammar = [
                                          'import', 
                                          'from', 
                                          'suppress', 
-                                         'then')
+                                         'then')),
+    (Token.Expr,    Token.ValueLabel
                     |Token.Operation
                     |Token.Integer
                     |Token.Float
@@ -170,7 +171,7 @@ grammar = [
                     |Token.LambdaFun
                     |Token.LambdaFunMulti),
 
-    (Token.Assign, (Token.Label
+    (Token.Assign, (Token.ValueLabel
                     |Token.Array
                     |Token.Map
                     |Token.CommaList
@@ -220,7 +221,7 @@ grammar = [
     (Token.Decorator, (Token.At&Token.Expr&Token.FunctionBlock)
                     |(Token.At&Token.Expr&Token.AsyncFunctionBlock)
                     |(Token.At&Token.Expr&Token.Decorator)),
-    (Token.ClassStub, Token.Class&Token.Label),
+    (Token.ClassStub, Token.Class&Token.ValueLabel),
     (Token.ClassInherit, Token.ClassStub&Token.Inherits&Token.CommaList),
     (Token.ClassBlock, (Token.ClassInherit|Token.ClassStub)&BlockTokenGroup),
     

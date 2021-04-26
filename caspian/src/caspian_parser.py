@@ -1,6 +1,6 @@
 import typing, collections, itertools
 import caspian_errors, caspian_grammar
-import re
+import re, copy
 
 class TokenizedLine:
     def __init__(self) -> None:
@@ -20,6 +20,9 @@ class TokenizedLine:
 
     def add_token(self, _token:caspian_grammar.Token) -> None:
         self.token_line.append(_token)
+
+    def __iter__(self) -> typing.Iterator:
+        yield from self.token_line
 
     def __repr__(self) -> str:
         return f'<Tokenline: {", ".join(map(str, self.token_line))}; indent={self.whitespace_count}>'
@@ -70,11 +73,119 @@ class Parser:
     def __exit__(self, *_) -> None:
         pass
 
+class LRQueue:
+    def __init__(self, *args, **kwargs) -> None:
+        self.q_vals = collections.deque([*args])
+
+    def add_token(self, _token:caspian_grammar.Token) -> None:
+        self.q_vals.append(_token)
+
+    def load_token_line(self, _tokenline:TokenizedLine) -> None:
+        for token in _tokenline:
+            self.add_token(token)
+
+    def shift(self) -> caspian_grammar.Token:
+        return self.q_vals.popleft()
+
+    def __add__(self, _token:caspian_grammar.Token) -> 'LRQueue': 
+        self.q_vals.append(_token)
+        return self
+
+    def __getitem__(self, _ind) -> caspian_grammar.Token:
+        return self.q_vals[_ind]
+
+    def __bool__(self) -> bool:
+        return bool(self.q_vals)
+    
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__}[{", ".join(map(str, self.q_vals))}], ({len(self.q_vals)} items)>'
+
+class StreamQueue:
+    def __init__(self, _line_tokens) -> None:
+        self.stream_vals = collections.deque(_line_tokens)
+        self.last_popped = collections.deque()
+
+    def n_t_block(self) -> caspian_grammar.Token:
+        if not self.stream_vals:
+            return None
+        
+        self.last_popped.append(copy.deepcopy(l_obj:=self.stream_vals.popleft()))
+        return l_obj
+
+    def recover_token(self) -> None:
+        self.stream_vals.appendleft(self.last_popped.popleft())
+
+    @classmethod
+    def to_queue(cls, _line_tokens:list[caspian_grammar.Token]) -> 'StreamQueue':
+        return cls(_line_tokens)
+
+class ReduceQueue:  
+    def __init__(self) -> None:
+        self.streams:list[LRQueue] = []
+
+    def add_tokens(self, *tokens:list[caspian_grammar.Token]) -> None:
+        print('adding tokens here', tokens)
+        def _add_tokens():
+            if not self.streams:
+                yield from [LRQueue(i) for i in tokens]
+            else:
+                for t in self.streams:
+                    for i in tokens:
+                        yield t + i
+
+        self.streams = list(_add_tokens())
+
+    def __bool__(self) -> bool:
+        return bool(self.streams)
+
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} ({(k:=len(self.streams))} stream{"" if k == 1 else "s"})>'
+
+class SeenTokenQueue:
+    def __init__(self, *starting_tokens:list[caspian_grammar.Token]) -> None:
+        self.seen_tokens = starting_tokens
+
+    def add(self, _token:caspian_grammar.Token) -> None:
+        self.seen_tokens.append(_token)
+    
+    def __contains__(self, _token:caspian_grammar.Token) -> bool:
+        return any(i == _token for i in self.seen_tokens)
+
 class ASTGen:
+    def __init__(self) -> None:
+        self.stack = None
+
     def __enter__(self) -> 'ASTGen':
         return self
 
+    def reduce_token(self, _token:caspian_grammar.Token) -> typing.Iterator:
+        r_queue, seen = collections.deque([_token]), SeenTokenQueue()
+        while r_queue:
+            yield (_s_t:=r_queue.popleft())
+            seen.add(_s_t)
+            for t1, t_m_obj in caspian_grammar.grammar:
+                if t_m_obj.match(_s_t):
+                    r_queue.append(t1)
 
+
+    def to_ast_stream(self, _row_blocks:StreamQueue) -> typing.Union[typing.Tuple[dict, caspian_errors.ErrorPacket], LRQueue]:
+        full_stack, line_stack, running_l_stream = ReduceQueue(), ReduceQueue(), LRQueue()
+        while True:
+            if not running_l_stream:
+                if (nl_obj:=_row_blocks.n_t_block()) is not None: 
+                    if isinstance(nl_obj, TokenizedLine):
+                        running_l_stream.load_token_line(nl_obj)
+                    else:
+                        full_stack.add_tokens(nl_obj)
+                        #run reduce on full_stack
+                    continue
+
+            line_stack.add_tokens(*self.reduce_token(running_l_stream.shift()))
+
+        return None, None
+
+
+                
     def parse_group_block(self, _block:caspian_grammar.BlockTokenGroup) -> typing.Iterator:
         full_blocked_result, running_block = [], []
         for line in _block:
@@ -93,6 +204,11 @@ class ASTGen:
             running_block = []
         
         print(full_blocked_result)
+        _status, _s_obj = self.to_ast_stream(StreamQueue.to_queue(full_blocked_result))
+        if not _status['status']:
+            print(_s_obj.gen_error)
+            return
+        _block.tokenized_statements = _s_obj
 
     def create_ast(self, token_lines:typing.List[TokenizedLine]) -> caspian_grammar.BlockTokenGroup:
         block_head = caspian_grammar.BlockTokenGroup(token_lines)
