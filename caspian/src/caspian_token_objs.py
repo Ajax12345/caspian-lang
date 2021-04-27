@@ -22,12 +22,27 @@ class TokenMain:
         def form_new_block(cls, _lines:typing.List['TokenizedLine']) -> 'BlockTokenGroup':
             return cls([i.decrement_whitespace() for i in _lines])
 
+        def is_match(self, token_arr:'MatchQueue', multiline:bool=False, l_queue:'LRQueue' = None) -> typing.Tuple[typing.Union[None, 'TokenRoot'], bool]:
+            if not token_arr:
+                return token_arr, None, False
+
+            if self == (t_p:=token_arr.pop()):
+                return token_arr, t_p, True
+            
+            return token_arr, None, False
+
         def __repr__(self) -> str:
             return f'<{self.__class__.__name__}>' if self.body_lines is None else f'<{self.__class__.__name__} ({(_l:=len(self.body_lines))} line{"s" if _l != 1 else ""})>'
 
     class TokenEOF(csp_types.caspian_types.TokenEOF):
         def __repr__(self) -> str:
             return f'<{self.__class__.__name__}>'
+
+        def is_match(self, token_arr:'MatchQueue', multiline:bool=False, l_queue:'LRQueue' = None) -> typing.Tuple[typing.Union[None, 'TokenRoot'], bool]:
+            if l_queue.peek() is None:
+                return token_arr, None, True
+
+            return token_arr, None, False
         
     class TokenRoot(csp_types.caspian_types.TokenRoot):
         def __init__(self, _name:str, matched_str:str = None, direct_match:str=None, non_matches:list = [], line_num:int = None, char_num:int = None) -> None:
@@ -35,6 +50,25 @@ class TokenMain:
             self.non_matches = non_matches
             self.matched_str = matched_str
             self.line_num, self.char_num = line_num, char_num
+            self.pointer_next = None
+
+        def copy(self) -> 'TokenRoot':
+            return copy.deepcopy(self)
+
+        def set_token_head(self, _head:'TokenRoot') -> 'TokenGroup':
+            _head = _head.copy()
+            _head.pointer_next = self
+            return _head
+
+        def is_match(self, token_arr:'MatchQueue', multiline:bool=False, l_queue:'LRQueue' = None) -> typing.Tuple[typing.Union[None, 'TokenRoot'], bool]:
+            if not token_arr:
+                return token_arr, None, False
+
+            if (t_p:=token_arr.pop()) == self:
+                return token_arr, t_p, True
+            
+            return token_arr, None, False
+
 
         def match(self, _m_str:str) -> 'TokenRoot':
             self.direct_match = _m_str
@@ -134,7 +168,36 @@ class TokenMain:
 
         def __or__(self, _t_or:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenOr':
             return TokenMain.TokenOr(self, _t_or)
-        
+
+        def set_token_head(self, _head:'TokenRoot') -> 'TokenGroup':
+            self.token_head = _head
+            return self
+
+        def attach_block_results(self, _block:list) -> 'TokenGroup':
+            tg = self.__class__()
+            tg.__dict__ = self.__dict__
+            tg.ast_blocks = _block
+            return tg
+
+        def is_match(self, token_arr:'MatchQueue', multiline:bool=False, l_queue:'LRQueue' = None) -> typing.Tuple[typing.Union[None, 'TokenRoot'], bool]:
+            if not self.token_search_ml and multiline:
+                return token_arr, None, False
+            
+            if not token_arr:
+                return token_arr, None, False
+
+            block_t_results = collections.deque()
+            for i in list(self.token_groups)[::-1]:
+                t_arr, t_packet, m_status = i.is_match(token_arr.copy(), multiline = multiline, l_queue = l_queue)
+                if not m_status:
+                    return token_arr, None, False
+
+                token_arr = t_arr
+
+                block_t_results.appendleft(t_packet)
+            
+            return token_arr, self.attach_block_results(block_t_results), True
+            
         @property
         def raw_token_name(self) -> str:
             return self.token_head.raw_token_name
@@ -151,6 +214,22 @@ class TokenMain:
             self.token_group_name = None
             self._neg_lookahead, self._lookahead = None, None
             self.token_search_ml = False
+
+        def is_match(self, token_arr:'MatchQueue', multiline:bool=False, l_queue:'LRQueue' = None) -> typing.Tuple[typing.Union[None, 'TokenRoot'], bool]:
+            if not self.token_search_ml and multiline:
+                return token_arr, None, False
+            
+            if not token_arr:
+                return token_arr, None, False
+            
+            for group in self.token_groups:
+                t_arr, t_packet, m_status = group.is_match(token_arr.copy(), multiline = multiline, l_queue = l_queue)
+                if m_status:
+                    token_arr = t_arr
+                    return token_arr, t_packet, m_status
+
+            
+            return token_arr, None, False
 
         @property
         def raw_token_name(self) -> str:

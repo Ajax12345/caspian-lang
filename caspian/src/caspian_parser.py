@@ -73,6 +73,26 @@ class Parser:
     def __exit__(self, *_) -> None:
         pass
 
+class MatchQueue:
+    def __init__(self, *_start_queue:typing.Iterable, op_queue:collections.deque=collections.deque(), op_count:int = 0) -> None:
+        self.queue = collections.deque([*_start_queue])
+        self.op_queue, self.op_count = op_queue, op_count
+        self.previous, self.found_match = None, False
+    
+    def pop(self) -> caspian_grammar.Token:
+        self.op_queue.append((t_p:=self.queue.pop()))
+        self.op_count += 1
+        return t_p
+
+    def __bool__(self) -> bool:
+        return bool(self.queue)
+
+    def copy(self) -> 'MatchQueue':
+        return self.__class__(*self.queue, op_queue = self.op_queue, op_count = self.op_count)
+    
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({list(self.queue)})'
+
 class LRQueue:
     def __init__(self, *args, **kwargs) -> None:
         self.q_vals = collections.deque([*args])
@@ -83,6 +103,9 @@ class LRQueue:
     def load_token_line(self, _tokenline:TokenizedLine) -> None:
         for token in _tokenline:
             self.add_token(token)
+
+    def peek(self) -> typing.Union['Token', None]:
+        return None if not self.q_vals else self.q_vals[0]
 
     def shift(self) -> caspian_grammar.Token:
         return self.q_vals.popleft()
@@ -96,6 +119,12 @@ class LRQueue:
 
     def __bool__(self) -> bool:
         return bool(self.q_vals)
+
+    def __iter__(self) -> typing.Iterator:
+        yield from self.q_vals
+
+    def to_match_queue(self) -> MatchQueue:
+        return MatchQueue(*self)
     
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__}[{", ".join(map(str, self.q_vals))}], ({len(self.q_vals)} items)>'
@@ -124,10 +153,9 @@ class ReduceQueue:
         self.streams:list[LRQueue] = []
 
     def add_tokens(self, *tokens:list[caspian_grammar.Token]) -> None:
-        print('adding tokens here', tokens)
         def _add_tokens():
             if not self.streams:
-                yield from [LRQueue(i) for i in tokens]
+                yield from (LRQueue(i) for i in tokens)
             else:
                 for t in self.streams:
                     for i in tokens:
@@ -164,8 +192,10 @@ class ASTGen:
             yield (_s_t:=r_queue.popleft())
             seen.add(_s_t)
             for t1, t_m_obj in caspian_grammar.grammar:
-                if t_m_obj.match(_s_t):
-                    r_queue.append(t1)
+                if t1 not in seen:
+                    _, tr, _status = t_m_obj.is_match(MatchQueue(_s_t))
+                    if _status:
+                        r_queue.append(tr.set_token_head(t1))
 
 
     def to_ast_stream(self, _row_blocks:StreamQueue) -> typing.Union[typing.Tuple[dict, caspian_errors.ErrorPacket], LRQueue]:
@@ -224,11 +254,20 @@ class ASTGen:
 
 
 if __name__ == '__main__':
+    '''
     with open('testing_file.txt') as f, Parser() as p, ASTGen() as astgen:
         status, _r_obj = p.parse(f.read())
         if not status['status']:
             print(_r_obj.gen_error)
         else:
             ast = astgen.create_ast(_r_obj)
-        
+    '''
+    Token = caspian_grammar.Token
+    tokens = [Token.ValueLabel, Token.Eq, Token.Expr]
+    #tokens = [Token.Label(0, 0, 'if')]
+    for a, b in caspian_grammar.grammar:
+        t, j, k = b.is_match(MatchQueue(*tokens), l_queue = LRQueue())
+        if k:
+            print(a, t.op_count)
+    print(tokens)
 
