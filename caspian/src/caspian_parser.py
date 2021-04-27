@@ -263,12 +263,22 @@ if __name__ == '__main__':
             ast = astgen.create_ast(_r_obj)
     '''
     Token = caspian_grammar.Token
+    BlockTokenGroup = caspian_grammar.BlockTokenGroup
     #tokens = [Token.ValueLabel, Token.Eq, Token.Expr]
     #tokens = [Token.Label(0, 0, 'if')]
-    tokens = [Token.OBracket, Token.Expr, Token.ForExpr, Token.IfCond, Token.CBracket]
+    #tokens = [Token.OBracket, Token.Expr, Token.ForExpr, Token.IfCond, Token.CBracket]
+    #tokens = [Token.If, Token.Expr]
+    #tokens = [Token.ForExpr, BlockTokenGroup]
+    #tokens = [Token.At, Token.Expr, Token.FunctionBlock]
+    #tokens = [Token.Label(0, 0, 'raise'), Token.Expr.eof]
+    #tokens = [Token.Switch, Token.Expr, BlockTokenGroup, Token.CaseBlock]
+    #tokens = [Token.CaseBlock, Token.CaseBlock]
+    #tokens = [Token.Expr, Token.OParen, Token.CParen]
+    #tokens = [Token.ClassStub, BlockTokenGroup]
+    tokens = [Token.Expr, Token.Comma, Token.CommaList]
     for a, b in caspian_grammar.grammar:
         t, j, k = b.is_match(MatchQueue(*tokens), l_queue = LRQueue())
         if k:
-            print(a, t.op_count, j)
+            print(a, t.op_count)
     print(tokens)
 

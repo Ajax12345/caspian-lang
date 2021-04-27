@@ -4,7 +4,7 @@ from caspian_token_objs import *
 __all__ = ('Token', 'TokenEOF', 'BlockTokenGroup', 'tokens', 'grammar')
 
 Token = TokenMain.TokenBase()
-TokenEOF = TokenMain.TokenEOF()
+#TokenEOF = TokenMain.TokenEOF()
 BlockTokenGroup  = TokenMain.BlockTokenGroup()
 
 tokens = [
@@ -183,9 +183,9 @@ grammar = [
                     |Token.CommaList)),
     (Token.Import,  Token.Label.match('import')&Token.Expr
                     |(Token.Import&Token.As&Token.Label)._('import_as')),
-    (Token.Stmn,    (Token.Label.match('raise')&Token.Expr&TokenEOF)._('raise')
-                    |(Token.Label.match('continue')&TokenEOF)._('continue')
-                    |(Token.Label.match('break')&TokenEOF)._('break')
+    (Token.Stmn,    (Token.Label.match('raise')&Token.Expr.eof)._('raise')
+                    |(Token.Label.match('continue').eof)._('continue')
+                    |(Token.Label.match('break').eof)._('break')
                     |Token.Import
                     |(Token.Return&Token.Expr)._('return_stmn')),
     (Token.IfCond, Token.If&Token.Expr),

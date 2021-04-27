@@ -35,6 +35,9 @@ class TokenMain:
             return f'<{self.__class__.__name__}>' if self.body_lines is None else f'<{self.__class__.__name__} ({(_l:=len(self.body_lines))} line{"s" if _l != 1 else ""})>'
 
     class TokenEOF(csp_types.caspian_types.TokenEOF):
+        def __init__(self) -> None:
+            raise Exception('Depreciated. Scheduled for removal')
+
         def __repr__(self) -> str:
             return f'<{self.__class__.__name__}>'
 
@@ -45,12 +48,12 @@ class TokenMain:
             return token_arr, None, False
         
     class TokenRoot(csp_types.caspian_types.TokenRoot):
-        def __init__(self, _name:str, matched_str:str = None, direct_match:str=None, non_matches:list = [], line_num:int = None, char_num:int = None) -> None:
+        def __init__(self, _name:str, matched_str:str = None, direct_match:str=None, non_matches:list = [], line_num:int = None, char_num:int = None, eof_flag:bool = False) -> None:
             self.name, self.direct_match = _name, direct_match
             self.non_matches = non_matches
             self.matched_str = matched_str
             self.line_num, self.char_num = line_num, char_num
-            self.pointer_next = None
+            self.pointer_next, self.eof_flag = None, eof_flag
 
         def copy(self) -> 'TokenRoot':
             return copy.deepcopy(self)
@@ -60,7 +63,15 @@ class TokenMain:
             _head.pointer_next = self
             return _head
 
+        @property
+        def eof(self) -> 'TokenRoot':
+            self.eof_flag = True
+            return self
+
         def is_match(self, token_arr:'MatchQueue', multiline:bool=False, l_queue:'LRQueue' = None) -> typing.Tuple[typing.Union[None, 'TokenRoot'], bool]:
+            if self.eof_flag and l_queue.peek() is not None:
+                return token_arr, None, False
+            
             if not token_arr:
                 return token_arr, None, False
 
@@ -84,7 +95,7 @@ class TokenMain:
             return t
 
         def __call__(self, _line_num:int, _char_num:int, _matched_val:str) -> 'TokenRoot':
-            return self.__class__(self.name, matched_str = _matched_val, direct_match = self.direct_match, non_matches = self.non_matches, line_num = _line_num, char_num = _char_num)
+            return self.__class__(self.name, matched_str = _matched_val, direct_match = self.direct_match, non_matches = self.non_matches, line_num = _line_num, char_num = _char_num, eof_flag = self.eof_flag)
 
         def neg_lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             return TokenMain.TokenGroup(self).neg_lookahead(_t_obj)
