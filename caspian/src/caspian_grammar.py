@@ -121,7 +121,7 @@ grammar = [
                                          'and',
                                          'or',
                                          'in',
-                                         'as' 
+                                         'as', 
                                          'if', 
                                          'elif', 
                                          'else', 
