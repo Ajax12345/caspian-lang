@@ -203,6 +203,16 @@ class TokenMain:
             
             if not token_arr:
                 return token_arr, None, False
+            
+            if self._neg_lookahead is not None:
+                _, _, s = self._neg_lookahead.is_match(l_queue.to_match_queue(reverse=True))
+                if s:
+                    return token_arr, None, False
+
+            if self._lookahead is not None:
+                _, _, s = self._lookahead.is_match(l_queue.to_match_queue(reverse=True))
+                if not s:
+                    return token_arr, None, False 
 
             block_t_results = collections.deque()
             for i in list(self.token_groups)[::-1]:
