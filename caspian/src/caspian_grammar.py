@@ -61,7 +61,7 @@ grammar = [
                     |Token.Label.match('and')._('bool_and')
                     |Token.Label.match('or')._('bool_or')
                     |Token.In),
-    (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star&Token.Slash)),
+    (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash)),
     (Token.NegativeVal, Token.Minus&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
@@ -164,10 +164,10 @@ grammar = [
                     |Token.Getitem
                     |(Token.Expr&Token.If&Token.Expr&Token.Else&Token.Expr)._('inline_conditional')
                     |(Token.Await&Token.Expr)._('await')
-                    |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket)._('array_comp')
-                    |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket)._('array_comp_conditional')
-                    |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.CBrace)._('map_comp')
-                    |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBrace)._('map_comp_conditional')
+                    |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket)._('array_comp').ml
+                    |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket)._('array_comp_conditional').ml
+                    |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.CBrace)._('map_comp').ml
+                    |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBrace)._('map_comp_conditional').ml
                     |Token.LambdaFun
                     |Token.LambdaFunMulti),
 

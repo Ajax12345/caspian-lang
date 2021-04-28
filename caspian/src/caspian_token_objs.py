@@ -1,4 +1,5 @@
 import typing, collections, csp_types.caspian_types
+import copy
 
 __all__ = ('TokenMain',)
 
@@ -69,7 +70,7 @@ class TokenMain:
             return self
 
         def is_match(self, token_arr:'MatchQueue', multiline:bool=False, l_queue:'LRQueue' = None) -> typing.Tuple[typing.Union[None, 'TokenRoot'], bool]:
-            if self.eof_flag and l_queue.peek() is not None:
+            if self.eof_flag and l_queue is not None and l_queue.peek() is not None:
                 return token_arr, None, False
             
             if not token_arr:
@@ -180,13 +181,19 @@ class TokenMain:
         def __or__(self, _t_or:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenOr':
             return TokenMain.TokenOr(self, _t_or)
 
+        def __eq__(self, _token:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> bool:
+            if self.token_head is None:
+                return False
+
+            return self.raw_token_name == _token.raw_token_name
+             
         def set_token_head(self, _head:'TokenRoot') -> 'TokenGroup':
             self.token_head = _head
             return self
 
         def attach_block_results(self, _block:list) -> 'TokenGroup':
             tg = self.__class__()
-            tg.__dict__ = self.__dict__
+            tg.__dict__ = copy.deepcopy(self.__dict__)
             tg.ast_blocks = _block
             return tg
 
