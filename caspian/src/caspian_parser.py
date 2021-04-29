@@ -87,6 +87,9 @@ class MatchQueue:
     def __bool__(self) -> bool:
         return bool(self.queue)
 
+    def __iter__(self) -> typing.Iterator:
+        yield from self.queue
+
     def copy(self) -> 'MatchQueue':
         return self.__class__(*self.queue, op_queue = self.op_queue, op_count = self.op_count)
     
@@ -96,6 +99,9 @@ class MatchQueue:
 class LRQueue:
     def __init__(self, *args, **kwargs) -> None:
         self.q_vals = collections.deque([*args])
+    
+    def copy(self) -> 'LRQueue':
+        return self.__class__(*self.q_vals)
 
     def add_token(self, _token:caspian_grammar.Token) -> None:
         self.q_vals.append(_token)
@@ -110,9 +116,19 @@ class LRQueue:
     def shift(self) -> caspian_grammar.Token:
         return self.q_vals.popleft()
 
+    def shift_reduce(self, new_token:caspian_grammar.Token, offset:int) -> 'LRQqueue':
+        for _ in range(offset):
+            _ = self.q_vals.popleft()
+
+        self.q_vals.append(new_token)
+        return self
+
     def __add__(self, _token:caspian_grammar.Token) -> 'LRQueue': 
         self.q_vals.append(_token)
         return self
+
+    def __eq__(self, _lr_queue:'LRQueue') -> bool:
+        return len(self.q_vals) == len(_lr_queue.q_vals) and all(a.raw_token_name == b.raw_token_name for a, b in zip(self.q_vals, _lr_queue.q_vals))
 
     def __getitem__(self, _ind) -> caspian_grammar.Token:
         return self.q_vals[_ind]
@@ -150,18 +166,22 @@ class StreamQueue:
 
 class ReduceQueue:  
     def __init__(self) -> None:
-        self.streams:list[LRQueue] = []
+        self.streams:list[LRQueue] = collections.deque()
 
     def add_tokens(self, *tokens:list[caspian_grammar.Token]) -> None:
         def _add_tokens():
-            if not self.streams:
+            if not self:
                 yield from (LRQueue(i) for i in tokens)
             else:
-                for t in self.streams:
+                for t in self:
                     for i in tokens:
                         yield t + i
 
-        self.streams = list(_add_tokens())
+        self.streams = collections.deque(list(_add_tokens()))
+
+    def __iter__(self) -> typing.Iterator:
+        while self.streams:
+            yield self.streams.popleft()
 
     def __bool__(self) -> bool:
         return bool(self.streams)
@@ -171,13 +191,17 @@ class ReduceQueue:
 
 class SeenTokenQueue:
     def __init__(self, *starting_tokens:list[caspian_grammar.Token]) -> None:
-        self.seen_tokens = starting_tokens
+        self.seen_tokens = list(starting_tokens)
 
     def add(self, _token:caspian_grammar.Token) -> None:
         self.seen_tokens.append(_token)
     
     def __contains__(self, _token:caspian_grammar.Token) -> bool:
         return any(i == _token for i in self.seen_tokens)
+
+class SeenLRQueue(SeenTokenQueue):
+    def __contains__(self, _lr_queue:LRQueue) -> bool:
+        return any(i == _lr_queue for i in self.seen_tokens)
 
 class ASTGen:
     def __init__(self) -> None:
@@ -186,20 +210,25 @@ class ASTGen:
     def __enter__(self) -> 'ASTGen':
         return self
 
-    def reduce_token(self, _token:caspian_grammar.Token) -> typing.Iterator:
-        r_queue, seen = collections.deque([_token]), SeenTokenQueue()
+    def reduce_tokens(self, stack:ReduceQueue, running_l_stream:LRQueue = None, multiline:bool=False) -> typing.Iterator:
+        r_queue, seen = collections.deque(), SeenLRQueue()
+        for i in stack:
+            r_queue.append(i.to_match_queue())
+            seen.add(i)
+
         while r_queue:
-            yield (_s_t:=r_queue.popleft())
-            seen.add(_s_t)
+            yield (n_lr:=LRQueue(*(n_mq:=r_queue.popleft())))
             for t1, t_m_obj in caspian_grammar.grammar:
-                if t1 not in seen:
-                    _, tr, _status = t_m_obj.is_match(MatchQueue(_s_t))
-                    if _status:
-                        r_queue.append(tr.set_token_head(t1))
+                tr_match_queue, tr, _status = t_m_obj.is_match(n_mq.copy(), multiline = multiline, l_queue = running_l_stream)
+                if _status:
+                    if (new_lr:=n_lr.copy().shift_reduce(tr.set_token_head(t1), tr_match_queue.op_count)) not in seen:
+                        r_queue.append(new_lr.to_match_queue())
+                        seen.add(new_lr)
 
 
     def to_ast_stream(self, _row_blocks:StreamQueue) -> typing.Union[typing.Tuple[dict, caspian_errors.ErrorPacket], LRQueue]:
         full_stack, line_stack, running_l_stream = ReduceQueue(), ReduceQueue(), LRQueue()
+        ml_state = False
         while True:
             if not running_l_stream:
                 if (nl_obj:=_row_blocks.n_t_block()) is not None: 
@@ -210,9 +239,15 @@ class ASTGen:
                         #run reduce on full_stack
                     continue
 
-            line_stack.add_tokens(*self.reduce_token(running_l_stream.shift()))
+            print('running_l_stream', running_l_stream)
+            line_stack.add_tokens(running_l_stream.shift())
+            print('line_stack below')
+            print(line_stack)
+            reduced_results = list(self.reduce_tokens(line_stack, running_l_stream = running_l_stream, multiline = ml_state))
+            print('reduced results in here', reduced_results)
+            break
 
-        return None, None
+        return {'status':True}, None
 
 
                 
@@ -233,7 +268,6 @@ class ASTGen:
             full_blocked_result.append(new_block)
             running_block = []
         
-        print(full_blocked_result)
         _status, _s_obj = self.to_ast_stream(StreamQueue.to_queue(full_blocked_result))
         if not _status['status']:
             print(_s_obj.gen_error)
@@ -247,6 +281,8 @@ class ASTGen:
             for sub_block in self.parse_group_block(block_queue.popleft()):
                 block_queue.append(sub_block)
 
+            break #WARNING: FOR TESTING PURPOSES ONLY (remove this later)
+
         return block_head
     
     def __exit__(self, *_) -> None:
@@ -254,13 +290,14 @@ class ASTGen:
 
 
 if __name__ == '__main__':
-    '''
+    
     with open('testing_file.txt') as f, Parser() as p, ASTGen() as astgen:
         status, _r_obj = p.parse(f.read())
         if not status['status']:
             print(_r_obj.gen_error)
         else:
             ast = astgen.create_ast(_r_obj)
+    
     '''
     Token = caspian_grammar.Token
     BlockTokenGroup = caspian_grammar.BlockTokenGroup
@@ -277,9 +314,11 @@ if __name__ == '__main__':
     #tokens = [Token.ClassStub, BlockTokenGroup]
     #tokens = [Token.Expr, Token.Comma, Token.CommaList]
     #tokens = [Token.Expr, Token.Operator, Token.Expr]
+    #tokens = [Token.Async, Token.FunctionBlock]
+    #tokens = [Token.Label(0, 0, 'fun')]
     for a, b in caspian_grammar.grammar:
         t, j, k = b.is_match(MatchQueue(*tokens), l_queue = LRQueue())
         if k:
             print(a, t.op_count)
     print(tokens)
-
+    '''
