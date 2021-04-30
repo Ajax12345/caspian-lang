@@ -269,7 +269,11 @@ class ASTGen:
                     l_num, char_num = token_base.line_num, token_base.char_num
                     return {'status':False}, caspian_errors.ErrorPacket(l_num, char_num, caspian_errors.InvalidSyntax, self.stack, caspian_errors.ErrorPacket.char_error_marker(char_num, l_num, caspian_errors.InvalidSyntax))
                 
-                return {'status':True}, [i for i in full_stack.streams if len(i) == 1]
+                if not full_stack:
+                    return {'status':True}, []
+
+                m_len = min([len(i) for i in full_stack.streams])
+                return {'status':True}, [i for i in full_stack if len(i) == m_len]
 
             #print('running_l_stream', running_l_stream)
             line_stack.add_tokens(running_l_stream.shift())
@@ -307,7 +311,9 @@ class ASTGen:
         _status, _s_obj = self.to_ast_stream(StreamQueue.to_queue(full_blocked_result))
         if not _status['status']:
             print(_s_obj.gen_error)
+            #add error yielding here
             return
+
         print('='*20)
         print('final ast obj', _s_obj)
         _block.tokenized_statements = _s_obj
@@ -318,7 +324,9 @@ class ASTGen:
         while block_queue:
             for sub_block in self.parse_group_block(block_queue.popleft()):
                 block_queue.append(sub_block)
-            break #REMOVE THIS LATER
+            
+            #break #REMOVE THIS LATER
+        
         return block_head
     
     def __exit__(self, *_) -> None:
@@ -332,6 +340,8 @@ if __name__ == '__main__':
             print(_r_obj.gen_error)
         else:
             ast = astgen.create_ast(_r_obj)
+            print('+'*20)
+            print('resulting ast', ast)
     
     '''
     Token = caspian_grammar.Token

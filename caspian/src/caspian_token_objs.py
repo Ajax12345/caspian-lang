@@ -33,6 +33,9 @@ class TokenMain:
             return token_arr, None, False
 
         def __repr__(self) -> str:
+            if self.tokenized_statements is not None:
+                return f'<{self.__class__.__name__} (tokenized_statements = {self.tokenized_statements})>'
+
             return f'<{self.__class__.__name__}>' if self.body_lines is None else f'<{self.__class__.__name__} ({(_l:=len(self.body_lines))} line{"s" if _l != 1 else ""})>'
 
     class TokenEOF(csp_types.caspian_types.TokenEOF):
@@ -57,7 +60,9 @@ class TokenMain:
             self.pointer_next, self.eof_flag = None, eof_flag
 
         def copy(self) -> 'TokenRoot':
-            return copy.deepcopy(self)
+            _c = self.__class__(self.name)
+            _c.__dict__ = {a:b for a, b in self.__dict__.items()}
+            return _c
 
         def set_token_head(self, _head:'TokenRoot') -> 'TokenGroup':
             _head = _head.copy()
@@ -194,12 +199,14 @@ class TokenMain:
             return self.raw_token_name == _token.raw_token_name
              
         def set_token_head(self, _head:'TokenRoot') -> 'TokenGroup':
-            _c = copy.deepcopy(self)
+            _c = self.__class__()
+            _c.__dict__ = {a:b for a, b in self.__dict__.items()}
             _c.token_head = _head
             return _c
 
         def attach_block_results(self, _block:list) -> 'TokenGroup':
-            tg = copy.deepcopy(self)
+            tg = self.__class__()
+            tg.__dict__ = {a:b for a, b in self.__dict__.items()}
             tg.ast_blocks = _block
             return tg
 

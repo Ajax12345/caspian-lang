@@ -2,4 +2,4 @@ fun test()
     fun newtest()
         return 100
 
-    return 20
+    return 200
