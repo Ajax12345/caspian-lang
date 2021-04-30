@@ -338,6 +338,44 @@ class ASTGen:
 
 
 if __name__ == '__main__':
+    def display_ast(ast):
+        import matplotlib.pyplot as plt
+        import networkx as nx
+        from networkx.drawing.nx_agraph import graphviz_layout
+        ast_graph, c_obj = nx.DiGraph(), itertools.count(1)
+        def load_ast_graph(graph, ast_obj, parent_id = None):
+            l_val, trav_obj, ignore = None, [], False
+            if hasattr(ast_obj, 'tokenized_statements'):
+                l_val, trav_obj = ast_obj.__class__.__name__, ast_obj.tokenized_statements
+            elif hasattr(ast_obj, 'q_vals'):
+                ignore = True
+                trav_obj = ast_obj.q_vals
+            elif hasattr(ast_obj, 'ast_blocks'):
+                l_val = ast_obj.raw_token_name
+                trav_obj = ast_obj.ast_blocks
+            elif hasattr(ast_obj, 'pointer_next'):
+                l_val = ast_obj.raw_token_name
+                if ast_obj.pointer_next is not None:
+                    trav_obj = [ast_obj.pointer_next]
+            
+            n_id = parent_id
+            if not ignore:
+                n_id = next(c_obj)
+                yield (n_id, f'{l_val}')
+                graph.add_node(n_id)
+                if parent_id is not None:
+                    graph.add_edge(parent_id, n_id)
+
+            for i in trav_obj:
+                yield from load_ast_graph(graph, i, n_id)
+        
+        labels = dict(load_ast_graph(ast_graph, ast))
+        print(labels)
+        nx.nx_agraph.write_dot(ast_graph,'ast_stuff.dot')
+        pos=graphviz_layout(ast_graph, prog='dot')
+        nx.draw(ast_graph, pos, labels=labels, with_labels = True)
+        plt.show()
+
     with open('testing_file.txt') as f, Parser() as p, ASTGen() as astgen:
         status, _r_obj = p.parse(f.read())
         if not status['status']:
@@ -347,8 +385,10 @@ if __name__ == '__main__':
             print('+'*20)
             if status['status']:
                 print('resulting ast', ast)
+                display_ast(ast)
             else:
                 print(ast.gen_error)
+    
     '''
     Token = caspian_grammar.Token
     BlockTokenGroup = caspian_grammar.BlockTokenGroup
@@ -368,7 +408,8 @@ if __name__ == '__main__':
     #tokens = [Token.Async, Token.FunctionBlock]
     #tokens = [Token.Label(0, 0, 'fun')]
     #tokens = [Token.Label(0, 0, 'fun'), Token.ValueLabel]
-    tokens = [Token.Fun, Token.Expr, Token.OParen, Token.CParen]
+    #tokens = [Token.Fun, Token.Expr, Token.OParen, Token.CParen]
+    tokens = [Token.Expr, Token.Pipe, Token.RArrow, Token.Expr]
     for a, b in caspian_grammar.grammar:
         t, j, k = b.is_match(MatchQueue(*tokens), l_queue = LRQueue())
         if k:
