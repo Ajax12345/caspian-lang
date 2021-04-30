@@ -186,7 +186,7 @@ class ReduceQueue:
         self.streams = collections.deque(_stack)
 
     def queue_status(self) -> bool:
-        return all(self.streams)
+        return self.streams and all(self.streams)
 
     def __iter__(self) -> typing.Iterator:
         while self.streams:
@@ -236,7 +236,7 @@ class ASTGen:
                     if (new_lr:=n_lr.copy().shift_reduce(tr.set_token_head(t1), tr_match_queue.op_count)) not in seen:
                         r_queue.append(new_lr.to_match_queue())
                         seen.add(new_lr)
-
+                    
     def get_token_bases(self, *args) -> typing.Iterator:
         for i in args:
             if isinstance(i, caspian_grammar.TokenMain.TokenRoot):
@@ -255,6 +255,8 @@ class ASTGen:
                     else:
                         full_stack.add_tokens(nl_obj)
                         full_stack_reduced_results = list(self.reduce_tokens(full_stack, running_l_stream = running_l_stream))
+                        print('full stack reduced results', full_stack_reduced_results)
+                        print('line stack status new', line_stack, line_stack.queue_status())
                         full_stack.set_stack(full_stack_reduced_results)
                     
                     ml_state = line_stack.queue_status()
@@ -276,6 +278,7 @@ class ASTGen:
             if not running_l_stream and (single_reduced:=[i[0] for i in reduced_results if len(i) == 1]):
                 full_stack.add_tokens(*single_reduced)
                 full_stack_reduced_results = list(self.reduce_tokens(full_stack, running_l_stream = running_l_stream))
+                print('full stack reduced results 2', full_stack_reduced_results)
                 full_stack.set_stack(full_stack_reduced_results)
                 reduced_results = []
 

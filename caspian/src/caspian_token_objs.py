@@ -140,7 +140,13 @@ class TokenMain:
             return repr(self)
 
         def __repr__(self) -> str:
-            return f'Token({self.name})' if self.matched_str is None else f"""Token({self.name}, m = '{self.matched_str}')"""
+            if self.matched_str:
+                return f"""Token({self.name}, m = '{self.matched_str}')"""
+
+            if self.pointer_next is not None:
+                return f"""Token({self.name}, pointer = True)"""
+
+            return f'Token({self.name})'
 
     class TokenGroup(csp_types.caspian_types.TokenGroup):
         '''Token&Token'''
@@ -188,12 +194,12 @@ class TokenMain:
             return self.raw_token_name == _token.raw_token_name
              
         def set_token_head(self, _head:'TokenRoot') -> 'TokenGroup':
-            self.token_head = _head
-            return self
+            _c = copy.deepcopy(self)
+            _c.token_head = _head
+            return _c
 
         def attach_block_results(self, _block:list) -> 'TokenGroup':
-            tg = self.__class__()
-            tg.__dict__ = copy.deepcopy(self.__dict__)
+            tg = copy.deepcopy(self)
             tg.ast_blocks = _block
             return tg
 
