@@ -144,7 +144,7 @@ class TokenMain:
                 return f"""Token({self.name}, m = '{self.matched_str}')"""
 
             if self.pointer_next is not None:
-                return f"""Token({self.name}, pointer = True)"""
+                return f"""Token({self.name}, pointer = {self.pointer_next})"""
 
             return f'Token({self.name})'
 
@@ -237,8 +237,10 @@ class TokenMain:
             return self.token_head.raw_token_name
 
         def __repr__(self) -> str:
-            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, tokens={[*self.token_groups]})'
-
+            if not hasattr(self, 'ast_blocks'):
+                return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, tokens={[*self.token_groups]})'
+            
+            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, ast_blocks={self.ast_blocks})'
         
 
     class TokenOr(csp_types.caspian_types.TokenOr):

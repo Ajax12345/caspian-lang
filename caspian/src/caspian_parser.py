@@ -239,10 +239,12 @@ class ASTGen:
                     
     def get_token_bases(self, *args) -> typing.Iterator:
         for i in args:
-            if isinstance(i, caspian_grammar.TokenMain.TokenRoot):
+            if isinstance(i, caspian_grammar.TokenMain.TokenRoot) and i.pointer_next is None:
                 yield i
-            else:
-                yield from get_token_bases(*getattr(i, 'ast_blocks', []))
+            elif (v:=getattr(i, 'ast_blocks', [])):
+                yield from get_token_bases(*v)
+            elif (v:=getattr(i, 'pointer_next', None)) is not None:
+                yield from get_token_bases(v)
 
     def to_ast_stream(self, _row_blocks:StreamQueue) -> typing.Union[typing.Tuple[dict, caspian_errors.ErrorPacket], LRQueue]:
         full_stack, line_stack, running_l_stream = ReduceQueue(), ReduceQueue(), LRQueue()
@@ -255,8 +257,8 @@ class ASTGen:
                     else:
                         full_stack.add_tokens(nl_obj)
                         full_stack_reduced_results = list(self.reduce_tokens(full_stack, running_l_stream = running_l_stream))
-                        print('full stack reduced results', full_stack_reduced_results)
-                        print('line stack status new', line_stack, line_stack.queue_status())
+                        #print('full stack reduced results', full_stack_reduced_results)
+                        #print('line stack status new', line_stack, line_stack.queue_status())
                         full_stack.set_stack(full_stack_reduced_results)
                     
                     ml_state = line_stack.queue_status()
@@ -267,23 +269,23 @@ class ASTGen:
                     l_num, char_num = token_base.line_num, token_base.char_num
                     return {'status':False}, caspian_errors.ErrorPacket(l_num, char_num, caspian_errors.InvalidSyntax, self.stack, caspian_errors.ErrorPacket.char_error_marker(char_num, l_num, caspian_errors.InvalidSyntax))
                 
-                return {'status':True}, full_stack
+                return {'status':True}, [i for i in full_stack.streams if len(i) == 1]
 
-            print('running_l_stream', running_l_stream)
+            #print('running_l_stream', running_l_stream)
             line_stack.add_tokens(running_l_stream.shift())
-            print('line_stack below')
-            print(line_stack)
+            #print('line_stack below')
+            #print(line_stack)
             reduced_results = list(self.reduce_tokens(line_stack, running_l_stream = running_l_stream, multiline = ml_state))
-            print('reduced results in here', reduced_results)
+            #print('reduced results in here', reduced_results)
             if not running_l_stream and (single_reduced:=[i[0] for i in reduced_results if len(i) == 1]):
                 full_stack.add_tokens(*single_reduced)
                 full_stack_reduced_results = list(self.reduce_tokens(full_stack, running_l_stream = running_l_stream))
-                print('full stack reduced results 2', full_stack_reduced_results)
+                #print('full stack reduced results 2', full_stack_reduced_results)
                 full_stack.set_stack(full_stack_reduced_results)
                 reduced_results = []
 
             line_stack.set_stack(reduced_results)
-            print('-'*20)
+            #print('-'*20)
                 
     def parse_group_block(self, _block:caspian_grammar.BlockTokenGroup) -> typing.Iterator:
         full_blocked_result, running_block = [], []
@@ -306,6 +308,8 @@ class ASTGen:
         if not _status['status']:
             print(_s_obj.gen_error)
             return
+        print('='*20)
+        print('final ast obj', _s_obj)
         _block.tokenized_statements = _s_obj
 
     def create_ast(self, token_lines:typing.List[TokenizedLine]) -> caspian_grammar.BlockTokenGroup:
