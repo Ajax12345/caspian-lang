@@ -298,13 +298,13 @@ class ASTGen:
                 running_block.append(line)
             else:
                 if running_block:
-                    yield (new_block:=caspian_grammar.BlockTokenGroup.form_new_block(running_block))
+                    yield {'status':True}, (new_block:=caspian_grammar.BlockTokenGroup.form_new_block(running_block))
                     full_blocked_result.append(new_block)
                     running_block = []
                 full_blocked_result.append(line)
 
         if running_block:
-            yield (new_block:=caspian_grammar.BlockTokenGroup.form_new_block(running_block))
+            yield {'status':True}, (new_block:=caspian_grammar.BlockTokenGroup.form_new_block(running_block))
             full_blocked_result.append(new_block)
             running_block = []
         
@@ -312,6 +312,7 @@ class ASTGen:
         if not _status['status']:
             print(_s_obj.gen_error)
             #add error yielding here
+            yield {'status':False}, _s_obj
             return
 
         print('='*20)
@@ -322,12 +323,15 @@ class ASTGen:
         block_head = caspian_grammar.BlockTokenGroup(token_lines)
         block_queue = collections.deque([block_head])
         while block_queue:
-            for sub_block in self.parse_group_block(block_queue.popleft()):
+            for status, sub_block in self.parse_group_block(block_queue.popleft()):
+                if not status['status']:
+                    return status, sub_block
+
                 block_queue.append(sub_block)
             
             #break #REMOVE THIS LATER
         
-        return block_head
+        return {'status':True}, block_head
     
     def __exit__(self, *_) -> None:
         pass
@@ -339,10 +343,12 @@ if __name__ == '__main__':
         if not status['status']:
             print(_r_obj.gen_error)
         else:
-            ast = astgen.create_ast(_r_obj)
+            status, ast = astgen.create_ast(_r_obj)
             print('+'*20)
-            print('resulting ast', ast)
-    
+            if status['status']:
+                print('resulting ast', ast)
+            else:
+                print(ast.gen_error)
     '''
     Token = caspian_grammar.Token
     BlockTokenGroup = caspian_grammar.BlockTokenGroup
