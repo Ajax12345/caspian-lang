@@ -1,5 +1,4 @@
+@decorator
+@decorator2
 fun test()
-    fun newtest()
-        return 100
-
-    return 200
+    return 100

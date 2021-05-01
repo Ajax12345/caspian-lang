@@ -251,15 +251,18 @@ class ASTGen:
         ml_state = False
         while True:
             if not running_l_stream:
-                if (nl_obj:=_row_blocks.n_t_block()) is not None: 
+                if (nl_obj:=_row_blocks.n_t_block()) is not None:
                     if isinstance(nl_obj, TokenizedLine):
                         running_l_stream.load_token_line(nl_obj)
                     else:
-                        full_stack.add_tokens(nl_obj)
-                        full_stack_reduced_results = list(self.reduce_tokens(full_stack, running_l_stream = running_l_stream))
-                        #print('full stack reduced results', full_stack_reduced_results)
-                        #print('line stack status new', line_stack, line_stack.queue_status())
-                        full_stack.set_stack(full_stack_reduced_results)
+                        if not line_stack:
+                            full_stack.add_tokens(nl_obj)
+                            full_stack_reduced_results = list(self.reduce_tokens(full_stack, running_l_stream = running_l_stream))
+                            #print('full stack reduced results', full_stack_reduced_results)
+                            #print('line stack status new', line_stack, line_stack.queue_status())
+                            full_stack.set_stack(full_stack_reduced_results)
+                        else:
+                            running_l_stream.add_token(nl_obj)
                     
                     ml_state = line_stack.queue_status()
                     continue
