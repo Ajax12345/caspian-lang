@@ -3,6 +3,22 @@ import copy
 
 __all__ = ('TokenMain',)
 
+class TokenGroupAbout:
+    def __init__(self, _token_head:typing.Union['TokenRoot', 'TokenGroup'], _group_name:typing.Union[str, None]) -> None:
+        self.token, self.group_name = _token_head, _group_name
+    
+    def __str__(self) -> str:
+        return f'{self.__class__.__name__}({self.token.raw_token_name}, {self.group_name})'
+
+    @classmethod
+    def form_token_about(cls, _token:typing.Union['TokenRoot', 'TokenGroup']) -> 'TokenGroupAbout':
+        if _token.token_head is None:
+            return 
+        return cls(_token.token_head, _token.token_group_name)
+
+    def __repr__(self) -> str:
+        return str(self)
+
 class TokenMain:
     class BlockTokenGroup(csp_types.caspian_types.BlockTokenGroup):
         __slots__ = ('body_lines', 'tokenized_statements')
@@ -58,6 +74,7 @@ class TokenMain:
             self.matched_str = matched_str
             self.line_num, self.char_num = line_num, char_num
             self.pointer_next, self.eof_flag = None, eof_flag
+            self.head_chain = []
 
         def copy(self) -> 'TokenRoot':
             _c = self.__class__(self.name)
@@ -160,6 +177,7 @@ class TokenMain:
             self.token_group_name = None
             self._neg_lookahead, self._lookahead = None, None
             self.token_search_ml = False
+            self.head_chain = collections.deque()
         
         def t_add_front(self, _t:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             self.token_groups.appendleft(_t)
@@ -201,7 +219,13 @@ class TokenMain:
         def set_token_head(self, _head:'TokenRoot') -> 'TokenGroup':
             _c = self.__class__()
             _c.__dict__ = {a:b for a, b in self.__dict__.items()}
+            _c.head_chain = collections.deque([TokenGroupAbout.form_token_about(_c), *_c.head_chain])
             _c.token_head = _head
+            
+            '''
+            _h = _head.copy()
+            _h.pointer_next = _c
+            '''
             return _c
 
         def attach_block_results(self, _block:list) -> 'TokenGroup':
@@ -245,9 +269,9 @@ class TokenMain:
 
         def __repr__(self) -> str:
             if not hasattr(self, 'ast_blocks'):
-                return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, tokens={[*self.token_groups]})'
+                return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, heads = [{", ".join(map(str, self.head_chain))}], tokens={[*self.token_groups]})'
             
-            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, ast_blocks={self.ast_blocks})'
+            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, heads = [{", ".join(map(str, self.head_chain))}], ast_blocks={self.ast_blocks})'
         
 
     class TokenOr(csp_types.caspian_types.TokenOr):

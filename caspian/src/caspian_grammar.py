@@ -75,7 +75,7 @@ grammar = [
                     |Token.MapUnpack
                     |Token.CommaList&Token.Comma&Token.CommaList).ml),
     (Token.Array,   (Token.OBracket&Token.CBracket
-                    |Token.OBracket&Token.CommaList&Token.CBracket).ml),
+                    |(Token.OBracket&Token.CommaList&Token.CBracket).ml)._('test_array')),
     (Token.Map,     (Token.OBrace&Token.CBrace
                     |Token.OBrace&Token.CommaList&Token.CBrace).ml),
     (Token.ImmutableContainer, Token.Pound&Token.Array
@@ -113,8 +113,8 @@ grammar = [
     (Token.ForBlockInline, Token.ForExpr&Token.ForExpr
                            |Token.ForExpr&Token.ForBlockInline),
     (Token.ParenGroup, Token.OParen&Token.CommaList&Token.CParen),
-    (Token.FunSignature, (Token.Expr&Token.ParenGroup)
-                          |(Token.Expr&Token.OParen&Token.CParen)),
+    (Token.FunSignature, (Token.Expr&Token.ParenGroup)._('fun_call')
+                          |(Token.Expr&Token.OParen&Token.CParen)._('fun_call')),
     (Token.ValueLabel, Token.Label.nonmatch('true', 
                                          'false', 
                                          'null',

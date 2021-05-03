@@ -354,7 +354,8 @@ if __name__ == '__main__':
                 ignore = True
                 trav_obj = ast_obj.q_vals
             elif hasattr(ast_obj, 'ast_blocks'):
-                l_val = ast_obj.raw_token_name
+                l_val = ast_obj.raw_token_name + ('' if ast_obj.token_group_name is None else f'({ast_obj.token_group_name})')
+                #ignore = True
                 trav_obj = ast_obj.ast_blocks
             elif hasattr(ast_obj, 'pointer_next'):
                 l_val = ast_obj.raw_token_name
