@@ -219,14 +219,12 @@ class TokenMain:
         def set_token_head(self, _head:'TokenRoot') -> 'TokenGroup':
             _c = self.__class__()
             _c.__dict__ = {a:b for a, b in self.__dict__.items()}
-            _c.head_chain = collections.deque([TokenGroupAbout.form_token_about(_c), *_c.head_chain])
-            _c.token_head = _head
-            
-            '''
+            #_c.head_chain = collections.deque([TokenGroupAbout.form_token_about(_c), *_c.head_chain]) #possibly unecessary
+            #_c.token_head = _head #possibly unecessary
             _h = _head.copy()
             _h.pointer_next = _c
-            '''
-            return _c
+            #return _c
+            return _h
 
         def attach_block_results(self, _block:list) -> 'TokenGroup':
             tg = self.__class__()

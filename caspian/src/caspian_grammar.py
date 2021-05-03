@@ -67,16 +67,15 @@ grammar = [
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
     (Token.SignatureEq, Token.ValueLabel&Token.Eq&Token.Expr
                     |Token.KeyValue&Token.Eq&Token.Expr),
-    (Token.CommaList, (Token.Expr
+    (Token.CommaList, (Token.Expr&Token.Comma&Token.Expr
                     |Token.Expr&Token.Comma&Token.CommaList
-                    |Token.KeyValue
-                    |Token.SignatureEq
-                    |Token.ArrayUnpack
-                    |Token.MapUnpack
+                    |Token.CommaList&Token.Comma&Token.Expr
                     |Token.CommaList&Token.Comma&Token.CommaList).ml),
     (Token.Array,   (Token.OBracket&Token.CBracket
-                    |(Token.OBracket&Token.CommaList&Token.CBracket).ml)._('test_array')),
+                    |Token.OBracket&Token.Expr&Token.CBracket
+                    |Token.OBracket&Token.CommaList&Token.CBracket).ml),
     (Token.Map,     (Token.OBrace&Token.CBrace
+                    |Token.OBrace&Token.Expr&Token.CBrace
                     |Token.OBrace&Token.CommaList&Token.CBrace).ml),
     (Token.ImmutableContainer, Token.Pound&Token.Array
                     |Token.Pound&Token.Map),
@@ -86,7 +85,9 @@ grammar = [
     (Token.ChainCall, (Token.Expr&Token.Pipe&Token.RArrow&Token.Expr
                     |Token.Expr&Token.Pipe&Token.RArrow&Token.ChainCall).ml),
     (Token.Getattr, Token.Expr&Token.Dot&Token.Expr),
-    (Token.Getitem, Token.Expr&Token.OBracket&Token.CommaList&Token.CBracket),
+    (Token.Getitem, Token.Expr&Token.OBracket&Token.CBracket
+                    |Token.Expr&Token.OBracket&Token.Expr&Token.CBracket
+                    |Token.Expr&Token.OBracket&Token.CommaList&Token.CBracket),
     (Token.If,      Token.Label.match('if')),
     (Token.Elif,    Token.Label.match('elif')),
     (Token.Else,    Token.Label.match('else')),
@@ -109,10 +110,10 @@ grammar = [
     (Token.Async,   Token.Label.match('async')),
     (Token.AsyncFor,  Token.Async&Token.For),
     (Token.Await,   Token.Label.match('await')),
-    (Token.ForExpr, (Token.AsyncFor|Token.For)&Token.CommaList&Token.In&Token.Expr),
+    (Token.ForExpr, (Token.AsyncFor|Token.For)&(Token.Expr|Token.CommaList)&Token.In&Token.Expr),
     (Token.ForBlockInline, Token.ForExpr&Token.ForExpr
                            |Token.ForExpr&Token.ForBlockInline),
-    (Token.ParenGroup, Token.OParen&Token.CommaList&Token.CParen),
+    (Token.ParenGroup, Token.OParen&(Token.Expr|Token.CommaList)&Token.CParen),
     (Token.FunSignature, (Token.Expr&Token.ParenGroup)._('fun_call')
                           |(Token.Expr&Token.OParen&Token.CParen)._('fun_call')),
     (Token.ValueLabel, Token.Label.nonmatch('true', 
@@ -162,6 +163,10 @@ grammar = [
                     |Token.ChainCall
                     |Token.Getattr
                     |Token.Getitem
+                    |Token.SignatureEq
+                    |Token.KeyValue
+                    |Token.ArrayUnpack
+                    |Token.MapUnpack
                     |(Token.Expr&Token.If&Token.Expr&Token.Else&Token.Expr)._('inline_conditional')
                     |(Token.Await&Token.Expr)._('await')
                     |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket)._('array_comp').ml
@@ -199,8 +204,8 @@ grammar = [
                     |(Token.CaseBlock&Token.CaseBlock)),
     (Token.SwitchCase, (Token.Switch&Token.Expr&BlockTokenGroup&Token.CaseBlock)
                     |(Token.SwitchCase&Token.Default&BlockTokenGroup)),
-    (Token.SuppressBlock, ((Token.Suppress&Token.CommaList)._('suppress_params')|Token.Suppress)&BlockTokenGroup
-                    |(Token.SuppressBlock&((Token.Then&Token.CommaList)._('then_block')|Token.Then)&BlockTokenGroup)),
+    (Token.SuppressBlock, ((Token.Suppress&(Token.Expr|Token.CommaList))._('suppress_params')|Token.Suppress)&BlockTokenGroup
+                    |(Token.SuppressBlock&((Token.Then&(Token.Expr|Token.CommaList))._('then_block')|Token.Then)&BlockTokenGroup)),
     (Token.ForLoop, Token.ForExpr&BlockTokenGroup),
     (Token.WhileLoop, (((Token.While&Token.Expr)|Token.While)&BlockTokenGroup)
                     |(Token.Do&BlockTokenGroup&((Token.While&Token.Expr)|Token.While))),
@@ -222,11 +227,10 @@ grammar = [
                     |(Token.At&Token.Expr&Token.AsyncFunctionBlock)
                     |(Token.At&Token.Expr&Token.Decorator)),
     (Token.ClassStub, Token.Class&Token.ValueLabel),
-    (Token.ClassInherit, Token.ClassStub&Token.Inherits&Token.CommaList),
+    (Token.ClassInherit, Token.ClassStub&Token.Inherits&(Token.Expr|Token.CommaList)),
     (Token.ClassBlock, (Token.ClassInherit|Token.ClassStub)&BlockTokenGroup),
     
 ]
-#NOTE: enforce indentation as a tab (five spaces)
 
 if __name__ == '__main__':
     print(grammar)

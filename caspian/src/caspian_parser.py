@@ -90,6 +90,9 @@ class MatchQueue:
     def __iter__(self) -> typing.Iterator:
         yield from self.queue
 
+    def __len__(self) -> int:
+        return len(self.queue)
+
     def copy(self) -> 'MatchQueue':
         return self.__class__(*self.queue, op_queue = self.op_queue, op_count = self.op_count)
     
@@ -242,9 +245,9 @@ class ASTGen:
             if isinstance(i, caspian_grammar.TokenMain.TokenRoot) and i.pointer_next is None:
                 yield i
             elif (v:=getattr(i, 'ast_blocks', [])):
-                yield from get_token_bases(*v)
+                yield from self.get_token_bases(*v)
             elif (v:=getattr(i, 'pointer_next', None)) is not None:
-                yield from get_token_bases(v)
+                yield from self.get_token_bases(v)
 
     def to_ast_stream(self, _row_blocks:StreamQueue) -> typing.Union[typing.Tuple[dict, caspian_errors.ErrorPacket], LRQueue]:
         full_stack, line_stack, running_l_stream = ReduceQueue(), ReduceQueue(), LRQueue()
@@ -258,8 +261,8 @@ class ASTGen:
                         if not line_stack:
                             full_stack.add_tokens(nl_obj)
                             full_stack_reduced_results = list(self.reduce_tokens(full_stack, running_l_stream = running_l_stream))
-                            #print('full stack reduced results', full_stack_reduced_results)
-                            #print('line stack status new', line_stack, line_stack.queue_status())
+                            print('full stack reduced results', full_stack_reduced_results)
+                            print('line stack status new', line_stack, line_stack.queue_status())
                             full_stack.set_stack(full_stack_reduced_results)
                         else:
                             running_l_stream.add_token(nl_obj)
@@ -278,21 +281,21 @@ class ASTGen:
                 m_len = min([len(i) for i in full_stack.streams])
                 return {'status':True}, [i for i in full_stack if len(i) == m_len]
 
-            #print('running_l_stream', running_l_stream)
+            print('running_l_stream', running_l_stream)
             line_stack.add_tokens(running_l_stream.shift())
-            #print('line_stack below')
-            #print(line_stack)
+            print('line_stack below')
+            print(line_stack)
             reduced_results = list(self.reduce_tokens(line_stack, running_l_stream = running_l_stream, multiline = ml_state))
-            #print('reduced results in here', reduced_results)
+            print('reduced results in here', reduced_results)
             if not running_l_stream and (single_reduced:=[i[0] for i in reduced_results if len(i) == 1]):
                 full_stack.add_tokens(*single_reduced)
                 full_stack_reduced_results = list(self.reduce_tokens(full_stack, running_l_stream = running_l_stream))
-                #print('full stack reduced results 2', full_stack_reduced_results)
+                print('full stack reduced results 2', full_stack_reduced_results)
                 full_stack.set_stack(full_stack_reduced_results)
                 reduced_results = []
 
             line_stack.set_stack(reduced_results)
-            #print('-'*20)
+            print('-'*20)
                 
     def parse_group_block(self, _block:caspian_grammar.BlockTokenGroup) -> typing.Iterator:
         full_blocked_result, running_block = [], []
@@ -341,6 +344,8 @@ class ASTGen:
 
 
 if __name__ == '__main__':
+    #TODO: add comment filtering in parser
+    #TODO: determine what version of set_token_head should be implemented
     def display_ast(ast):
         import matplotlib.pyplot as plt
         import networkx as nx
@@ -354,8 +359,8 @@ if __name__ == '__main__':
                 ignore = True
                 trav_obj = ast_obj.q_vals
             elif hasattr(ast_obj, 'ast_blocks'):
-                l_val = ast_obj.raw_token_name + ('' if ast_obj.token_group_name is None else f'({ast_obj.token_group_name})')
-                #ignore = True
+                #l_val = ast_obj.raw_token_name + ('' if ast_obj.token_group_name is None else f'({ast_obj.token_group_name})')
+                ignore = True
                 trav_obj = ast_obj.ast_blocks
             elif hasattr(ast_obj, 'pointer_next'):
                 l_val = ast_obj.raw_token_name
