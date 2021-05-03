@@ -232,7 +232,10 @@ class ASTGen:
             seen.add(i)
 
         while r_queue:
-            yield (n_lr:=LRQueue(*(n_mq:=r_queue.popleft())))
+            n_lr = LRQueue(*(n_mq:=r_queue.popleft()))
+            if not any(i.reduce_flag for i in n_lr):
+                yield n_lr
+
             for t1, t_m_obj in caspian_grammar.grammar:
                 tr_match_queue, tr, _status = t_m_obj.is_match(n_mq.copy(), l_queue = running_l_stream)
                 if _status:
@@ -281,7 +284,7 @@ class ASTGen:
                 m_len = min([len(i) for i in full_stack.streams])
                 return {'status':True}, [i for i in full_stack if len(i) == m_len]
 
-            print('running_l_stream', running_l_stream)
+            #print('running_l_stream', running_l_stream)
             line_stack.add_tokens(running_l_stream.shift())
             print('line_stack below')
             print(line_stack)

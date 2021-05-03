@@ -25,6 +25,11 @@ class TokenMain:
         def __init__(self, body_lines:typing.List['TokenizedLine']=None) -> None:
             self.body_lines = body_lines
             self.tokenized_statements = None
+            self.reduce_flag = False
+
+        @property
+        def raw_token_name(self) -> str:
+            return self.__class__.__name__
         
         def __iter__(self) -> typing.Iterator:
             yield from self.body_lines
@@ -75,6 +80,12 @@ class TokenMain:
             self.line_num, self.char_num = line_num, char_num
             self.pointer_next, self.eof_flag = None, eof_flag
             self.head_chain = []
+            self.reduce_flag = False
+
+        @property
+        def rd(self) -> 'TokenRoot':
+            self.reduce_flag = True
+            return self
 
         def copy(self) -> 'TokenRoot':
             _c = self.__class__(self.name)
@@ -142,6 +153,9 @@ class TokenMain:
                     return self.matched_str not in _token.non_matches
                     
             return True
+
+        def __hash__(self) -> str:
+            return hash(self.raw_token_name)
 
         def __ne__(self, _token:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> bool:
             return self.name != _token.raw_token_name

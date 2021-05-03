@@ -9,12 +9,12 @@ BlockTokenGroup  = TokenMain.BlockTokenGroup()
 
 tokens = [
     (Token.Space, re.compile(r'^\s')),
-    (Token.Label, re.compile(r'^[a-zA-Z_]{1}(?:[a-zA-Z0-9_]+)*')),
-    (Token.String, re.compile(r'^".*?"')),
-    (Token.String, re.compile(r"^'.*?'")),
-    (Token.String, re.compile(r'^`.*?`')),
-    (Token.Float, re.compile(r'^\d+\.\d+')),
-    (Token.Integer, re.compile(r'^\d+')),
+    (Token.Label.rd, re.compile(r'^[a-zA-Z_]{1}(?:[a-zA-Z0-9_]+)*')),
+    (Token.String.rd, re.compile(r'^".*?"')),
+    (Token.String.rd, re.compile(r"^'.*?'")),
+    (Token.String.rd, re.compile(r'^`.*?`')),
+    (Token.Float.rd, re.compile(r'^\d+\.\d+')),
+    (Token.Integer.rd, re.compile(r'^\d+')),
     (Token.OParen, re.compile(r'^\(')),
     (Token.CParen, re.compile(r'^\)')),
     (Token.OBracket, re.compile(r'^\[')),
@@ -40,10 +40,10 @@ tokens = [
 ]
 
 grammar = [
-    (Token.Bool,    Token.Label.match('true')
+    (Token.Bool.rd,    Token.Label.match('true')
                     |Token.Label.match('false')),
     (Token.As,      Token.Label.match('as')),
-    (Token.Null,    Token.Label.match('null')),
+    (Token.Null.rd,    Token.Label.match('null')),
     (Token.In, Token.Label.match('in')),
     (Token.Operator, Token.Plus
                     |Token.Minus
@@ -62,7 +62,7 @@ grammar = [
                     |Token.Label.match('or')._('bool_or')
                     |Token.In),
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash)),
-    (Token.NegativeVal, Token.Minus&Token.Expr),
+    (Token.NegativeVal.rd, Token.Minus&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
     (Token.SignatureEq, Token.ValueLabel&Token.Eq&Token.Expr
@@ -77,11 +77,11 @@ grammar = [
     (Token.Map,     (Token.OBrace&Token.CBrace
                     |Token.OBrace&Token.Expr&Token.CBrace
                     |Token.OBrace&Token.CommaList&Token.CBrace).ml),
-    (Token.ImmutableContainer, Token.Pound&Token.Array
+    (Token.ImmutableContainer.rd, Token.Pound&Token.Array
                     |Token.Pound&Token.Map),
     (Token.ArrayUnpack, Token.Dot&Token.Dot&Token.Expr),
     (Token.MapUnpack, Token.Dot&Token.Dot&Token.Dot&Token.Expr),
-    (Token.Primative, Token.Label.match('primative')&Token.Colon&Token.Colon&Token.Label),
+    (Token.Primative.rd, Token.Label.match('primative')&Token.Colon&Token.Colon&Token.Label),
     (Token.ChainCall, (Token.Expr&Token.Pipe&Token.RArrow&Token.Expr
                     |Token.Expr&Token.Pipe&Token.RArrow&Token.ChainCall).ml),
     (Token.Getattr, Token.Expr&Token.Dot&Token.Expr),
@@ -219,9 +219,9 @@ grammar = [
     (Token.StaticAsyncFunctionBlock, Token.Static&Token.AsyncFunctionBlock),
     (Token.StaticAbstractFunctionBlock, Token.Static&Token.AbstractFunctionBlock),
     (Token.StaticAsyncAbstractFunctionBlock, Token.Static&Token.AsyncAbstractFunctionBlock),
-    (Token.LambdaFun, (Token.ParenGroup&Token.ParenGroup)
+    (Token.LambdaFun.rd, (Token.ParenGroup&Token.ParenGroup)
                     |(Token.KeyValue&Token.ParenGroup)),
-    (Token.LambdaFunMulti, (Token.ParenGroup&BlockTokenGroup)
+    (Token.LambdaFunMulti.rd, (Token.ParenGroup&BlockTokenGroup)
                     |(Token.KeyValue&BlockTokenGroup)),
     (Token.Decorator, (Token.At&Token.Expr&Token.FunctionBlock)
                     |(Token.At&Token.Expr&Token.AsyncFunctionBlock)
@@ -232,5 +232,21 @@ grammar = [
     
 ]
 
+goto = {
+    Token.Expr:{
+        'status':True,
+        'ops':{
+            Token.OParen:False,
+            
+        }
+    },
+    Token.Await:{
+        'status':False
+        'ops':{
+
+        }
+    }
+}
+
 if __name__ == '__main__':
-    print(grammar)
+    print(goto)
