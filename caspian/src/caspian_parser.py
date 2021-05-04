@@ -245,7 +245,7 @@ class ASTGen:
                 f_rd = i.reduce_flag or f_rd
                 f_rd1 = i.reduce_flag1 or f_rd1
             '''
-            if any(i.reduce_flag1 for i in n_lr):
+            if any(getattr(i, 'reduce_flag1', False) for i in n_lr):
                 yield n_lr
 
             to_r = False

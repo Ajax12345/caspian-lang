@@ -148,6 +148,7 @@ grammar = [
                                          'from', 
                                          'suppress', 
                                          'then')),
+    (Token.AwaitStmn, Token.Await&Token.Expr.neg_lookahead(Token.OParen)),
     (Token.Expr,    Token.ValueLabel
                     |Token.Operation
                     |Token.Integer
@@ -168,7 +169,7 @@ grammar = [
                     |Token.ArrayUnpack
                     |Token.MapUnpack
                     |(Token.Expr&Token.If&Token.Expr&Token.Else&Token.Expr)._('inline_conditional')
-                    |(Token.Await&Token.Expr)._('await')
+                    |Token.AwaitStmn
                     |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket)._('array_comp').ml
                     |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket)._('array_comp_conditional').ml
                     |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.CBrace)._('map_comp').ml
@@ -329,9 +330,6 @@ def generate_goto() -> dict:
     
     
 
-
-goto = generate_goto()
-
-
 if __name__ == '__main__':
+    goto = generate_goto()
     print(goto['Await'])
