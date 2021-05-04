@@ -254,38 +254,84 @@ def generate_goto() -> dict:
         else:
             yield from get_first_root(block.token_groups[0], seen)
 
-            
-    def _group_block_stream(block:'TokenGroup') -> typing.Iterator:
-        for i in itertools.product(*[get_token_stream(j) for j in block.token_groups]):
+    def traverse_parents(block:'TokenRoot', seen = []) -> typing.Iterator:
+        yield block
+        for a, b in grammar:
+            if a.raw_token_name not in seen:
+                status = False
+                if isinstance(b, TokenMain.TokenGroup):
+                    status = isinstance(b.token_groups[-1], TokenMain.TokenRoot) and b.token_groups[-1] == block
+                elif isinstance(b, TokenMain.TokenOr):
+                    status = any(isinstance(j, TokenMain.TokenRoot) and j == block for j in b.token_groups)
+                else:
+                    status = b == block
+                if status:
+                    yield from traverse_parents(a, seen+[a.raw_token_name])
+
+    grammar_trail = {a.raw_token_name:[*traverse_parents(a, [a.raw_token_name])] for a, _ in grammar}
+
+    def _group_block_stream(block:'TokenGroup', parent:'TokenRoot') -> typing.Iterator:
+        for i in itertools.product(*[get_token_stream(j) for j in block.token_groups]+[grammar_trail[parent.raw_token_name]]):
             for j in range(0, (l1:=len(i)) - 1):
-                if l1 == 2 or j < l1-2:
+                #if l1 == 2 or j < l1-2:
+                if j+1 < l1 - 1:
                     if i[j+1].raw_token_name not in full_grammar:
-                        yield (i[j].raw_token_name, i[j+1].raw_token_name)
+                        yield (i[j].raw_token_name, i[j+1].raw_token_name, False)
                     else:
                         for k in get_first_root(i[j+1]):
-                            yield (i[j].raw_token_name, k.raw_token_name)
+                            yield (i[j].raw_token_name, k.raw_token_name, False)
+                else:
+                    yield (i[j].raw_token_name, i[j+1].raw_token_name, True)
 
-    def _generate_goto(grammar_op:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> typing.Iterator:
+    def _generate_goto(grammar_op:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr'], parent_op:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> typing.Iterator:
         if isinstance(grammar_op, TokenMain.TokenGroup):
             if len(grammar_op.token_groups) > 1:
-                yield from _group_block_stream(grammar_op)
+                yield from _group_block_stream(grammar_op, parent_op)
         elif isinstance(grammar_op, TokenMain.TokenOr):
             for i in grammar_op.token_groups:
-                yield from _generate_goto(i)
+                yield from _generate_goto(i, parent_op)
                 
+    def full_flatten(rr, tr, s, seen = []):
+        yield from rr.get(s, [])
+        for i in tr.get(s, []):
+            if i not in seen:
+                yield from full_flatten(rr, tr, i, seen+[i])
 
     _r_result = collections.defaultdict(set)
-    for _, b in grammar:
-        for j, k in _generate_goto(b):
-            _r_result[j].add(k)
+    _t_result = collections.defaultdict(set)
+    for a, b in grammar:
+        for j, k, f in _generate_goto(b, a):
+            if not f:
+                _r_result[j].add(k)
+            elif j != k:
+                _t_result[j].add(k)
+
+    _buffer = collections.defaultdict(set)
+    
+    for a, b in _t_result.items():
+        for j in b:
+            for k in full_flatten(_r_result, _t_result, j, [j]):
+                _buffer[a].add(k)
+    
+    for a, b in _buffer.items():
+        for l in b:
+            _r_result[a].add(l)
+
+    for a, b in grammar_trail.items():
+        for j in b:
+            for k in _r_result[j.raw_token_name]:
+                _r_result[a].add(k)
+
+    
+
 
     return _r_result
     
     
 
 
-#goto = generate_goto()
+goto = generate_goto()
 
 
 if __name__ == '__main__':
-    print(grammar)
+    print(goto['Await'])
