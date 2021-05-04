@@ -73,19 +73,25 @@ class TokenMain:
             return token_arr, None, False
         
     class TokenRoot(csp_types.caspian_types.TokenRoot):
-        def __init__(self, _name:str, matched_str:str = None, direct_match:str=None, non_matches:list = [], line_num:int = None, char_num:int = None, eof_flag:bool = False) -> None:
+        def __init__(self, _name:str, matched_str:str = None, direct_match:str=None, non_matches:list = [], line_num:int = None, char_num:int = None, eof_flag:bool = False, reduce_flag:bool = False, reduce_flag1:bool = False) -> None:
             self.name, self.direct_match = _name, direct_match
             self.non_matches = non_matches
             self.matched_str = matched_str
             self.line_num, self.char_num = line_num, char_num
             self.pointer_next, self.eof_flag = None, eof_flag
             self.head_chain = []
-            self.reduce_flag = False
+            self.reduce_flag = reduce_flag
+            self.reduce_flag1 = reduce_flag1
 
         @property
         def rd(self) -> 'TokenRoot':
             self.reduce_flag = True
             return self
+
+        @property
+        def rd1(self) -> 'TokenRoot':
+            self.reduce_flag = True
+            return self   
 
         def copy(self) -> 'TokenRoot':
             _c = self.__class__(self.name)
@@ -129,7 +135,7 @@ class TokenMain:
             return t
 
         def __call__(self, _line_num:int, _char_num:int, _matched_val:str) -> 'TokenRoot':
-            return self.__class__(self.name, matched_str = _matched_val, direct_match = self.direct_match, non_matches = self.non_matches, line_num = _line_num, char_num = _char_num, eof_flag = self.eof_flag)
+            return self.__class__(self.name, matched_str = _matched_val, direct_match = self.direct_match, non_matches = self.non_matches, line_num = _line_num, char_num = _char_num, eof_flag = self.eof_flag, reduce_flag = self.reduce_flag, reduce_flag1 = self.reduce_flag1)
 
         def neg_lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             return TokenMain.TokenGroup(self).neg_lookahead(_t_obj)
@@ -153,9 +159,6 @@ class TokenMain:
                     return self.matched_str not in _token.non_matches
                     
             return True
-
-        def __hash__(self) -> str:
-            return hash(self.raw_token_name)
 
         def __ne__(self, _token:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> bool:
             return self.name != _token.raw_token_name

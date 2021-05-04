@@ -2,6 +2,8 @@ import typing, collections, itertools
 import caspian_errors, caspian_grammar
 import re, copy
 
+goto = caspian_grammar.generate_goto()
+
 class TokenizedLine:
     def __init__(self) -> None:
         self.token_line = collections.deque()
@@ -115,6 +117,9 @@ class LRQueue:
 
     def peek(self) -> typing.Union['Token', None]:
         return None if not self.q_vals else self.q_vals[0]
+
+    def peek_back(self) -> typing.Union['Token', None]:
+        return None if not self.q_vals else self.q_vals[-1]
 
     def shift(self) -> caspian_grammar.Token:
         return self.q_vals.popleft()
@@ -233,15 +238,24 @@ class ASTGen:
 
         while r_queue:
             n_lr = LRQueue(*(n_mq:=r_queue.popleft()))
-            if not any(i.reduce_flag for i in n_lr):
+            f_goto = (rs_p:=running_l_stream.peek()) is not None and rs_p.raw_token_name in goto.get(n_lr.peek_back().raw_token_name, set())
+            f_rd, f_rd1 = False, False
+            for i in n_lr:
+                f_rd = i.reduce_flag or f_rd
+                f_rd1 = i.reduce_flag1 or f_rd1
+
+            #print('f_rd1 stuff', f_rd, f_rd1, n_lr)
+
+            if f_goto or f_rd1 or not f_rd:
                 yield n_lr
 
-            for t1, t_m_obj in caspian_grammar.grammar:
-                tr_match_queue, tr, _status = t_m_obj.is_match(n_mq.copy(), l_queue = running_l_stream)
-                if _status:
-                    if (new_lr:=n_lr.copy().shift_reduce(tr.set_token_head(t1), tr_match_queue.op_count)) not in seen:
-                        r_queue.append(new_lr.to_match_queue())
-                        seen.add(new_lr)
+            if f_rd or f_rd1 or not f_goto:
+                for t1, t_m_obj in caspian_grammar.grammar:
+                    tr_match_queue, tr, _status = t_m_obj.is_match(n_mq.copy(), l_queue = running_l_stream)
+                    if _status:
+                        if (new_lr:=n_lr.copy().shift_reduce(tr.set_token_head(t1), tr_match_queue.op_count)) not in seen:
+                            r_queue.append(new_lr.to_match_queue())
+                            seen.add(new_lr)
                     
     def get_token_bases(self, *args) -> typing.Iterator:
         for i in args:
@@ -284,7 +298,7 @@ class ASTGen:
                 m_len = min([len(i) for i in full_stack.streams])
                 return {'status':True}, [i for i in full_stack if len(i) == m_len]
 
-            #print('running_l_stream', running_l_stream)
+            print('running_l_stream', running_l_stream)
             line_stack.add_tokens(running_l_stream.shift())
             print('line_stack below')
             print(line_stack)
@@ -397,6 +411,7 @@ if __name__ == '__main__':
             print('+'*20)
             if status['status']:
                 print('resulting ast', ast)
+                ast.tokenized_statements = ast.tokenized_statements[:1]
                 display_ast(ast)
             else:
                 print(ast.gen_error)

@@ -1,4 +1,4 @@
-import re, typing
+import re, typing, itertools, collections
 from caspian_token_objs import *
 
 __all__ = ('Token', 'TokenEOF', 'BlockTokenGroup', 'tokens', 'grammar')
@@ -71,7 +71,7 @@ grammar = [
                     |Token.Expr&Token.Comma&Token.CommaList
                     |Token.CommaList&Token.Comma&Token.Expr
                     |Token.CommaList&Token.Comma&Token.CommaList).ml),
-    (Token.Array,   (Token.OBracket&Token.CBracket
+    (Token.Array.rd1,   (Token.OBracket&Token.CBracket
                     |Token.OBracket&Token.Expr&Token.CBracket
                     |Token.OBracket&Token.CommaList&Token.CBracket).ml),
     (Token.Map,     (Token.OBrace&Token.CBrace
@@ -116,7 +116,7 @@ grammar = [
     (Token.ParenGroup, Token.OParen&(Token.Expr|Token.CommaList)&Token.CParen),
     (Token.FunSignature, (Token.Expr&Token.ParenGroup)._('fun_call')
                           |(Token.Expr&Token.OParen&Token.CParen)._('fun_call')),
-    (Token.ValueLabel, Token.Label.nonmatch('true', 
+    (Token.ValueLabel.rd1, Token.Label.nonmatch('true', 
                                          'false', 
                                          'null',
                                          'and',
@@ -177,6 +177,7 @@ grammar = [
                     |Token.LambdaFunMulti),
 
     (Token.Assign, (Token.ValueLabel
+                    |Token.Expr
                     |Token.Array
                     |Token.Map
                     |Token.CommaList
@@ -232,21 +233,59 @@ grammar = [
     
 ]
 
-goto = {
-    Token.Expr:{
-        'status':True,
-        'ops':{
-            Token.OParen:False,
-            
-        }
-    },
-    Token.Await:{
-        'status':False
-        'ops':{
+def generate_goto() -> dict:
+    full_grammar = {a.raw_token_name:b for a, b in grammar}
+    def get_token_stream(grammar_op:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> typing.Iterator:
+        if hasattr(grammar_op, 'token_groups'):
+            for i in grammar_op.token_groups:
+                yield from get_token_stream(i)
+        else:
+            yield grammar_op
 
-        }
-    }
-}
+    def get_first_root(block:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr'], seen = []) -> typing.Iterator:
+        if not hasattr(block, 'token_groups'):
+            if block.raw_token_name not in full_grammar:
+                yield block
+            elif block.raw_token_name not in seen:
+                yield from get_first_root(full_grammar[block.raw_token_name], seen=seen+[block.raw_token_name])
+        elif isinstance(block, TokenMain.TokenOr):
+            for i in block.token_groups:
+                yield from get_first_root(i, seen)
+        else:
+            yield from get_first_root(block.token_groups[0], seen)
+
+            
+    def _group_block_stream(block:'TokenGroup') -> typing.Iterator:
+        for i in itertools.product(*[get_token_stream(j) for j in block.token_groups]):
+            for j in range(0, (l1:=len(i)) - 1):
+                if l1 == 2 or j < l1-2:
+                    if i[j+1].raw_token_name not in full_grammar:
+                        yield (i[j].raw_token_name, i[j+1].raw_token_name)
+                    else:
+                        for k in get_first_root(i[j+1]):
+                            yield (i[j].raw_token_name, k.raw_token_name)
+
+    def _generate_goto(grammar_op:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> typing.Iterator:
+        if isinstance(grammar_op, TokenMain.TokenGroup):
+            if len(grammar_op.token_groups) > 1:
+                yield from _group_block_stream(grammar_op)
+        elif isinstance(grammar_op, TokenMain.TokenOr):
+            for i in grammar_op.token_groups:
+                yield from _generate_goto(i)
+                
+
+    _r_result = collections.defaultdict(set)
+    for _, b in grammar:
+        for j, k in _generate_goto(b):
+            _r_result[j].add(k)
+
+    return _r_result
+    
+    
+
+
+#goto = generate_goto()
+
 
 if __name__ == '__main__':
-    print(goto)
+    print(grammar)
