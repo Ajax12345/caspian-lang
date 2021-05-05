@@ -1,5 +1,2 @@
-class A inherits B, C, D
-    fun constructor(val)   
-        this.stuff = val
-
-    
+for i in x~[1, f(), 3]
+    print(i)

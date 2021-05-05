@@ -36,7 +36,8 @@ tokens = [
     (Token.Colon, re.compile(r'^:')),
     (Token.Dot, re.compile(r'^\.')),
     (Token.Pound, re.compile(r'^#')),
-    (Token.At, re.compile(r'^@'))
+    (Token.At, re.compile(r'^@')),
+    (Token.CurlyQ, re.compile(r'^~'))
 ]
 
 grammar = [
@@ -70,8 +71,7 @@ grammar = [
     (Token.OpVal.rd, Token.Operator&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
-    (Token.SignatureEq, Token.Expr&Token.Eq&Token.Expr
-                    |Token.Expr&Token.Eq&Token.Expr),
+    (Token.AssignExpr.rd, Token.Expr&Token.CurlyQ&Token.Expr),
     (Token.CommaList, (Token.Expr&Token.Comma&Token.Expr
                     |Token.Expr&Token.Comma&Token.CommaList
                     |Token.CommaList&Token.Comma&Token.Expr
@@ -176,7 +176,7 @@ grammar = [
                     |Token.ChainCall
                     |Token.Getattr
                     |Token.Getitem
-                    |Token.SignatureEq
+                    |Token.AssignExpr.rd
                     |Token.KeyValue
                     |Token.ArrayUnpack
                     |Token.MapUnpack
@@ -341,4 +341,4 @@ def generate_goto() -> dict:
 
 if __name__ == '__main__':
     goto = generate_goto()
-    print(goto['Eq'])
+    print(goto['CommaList'])

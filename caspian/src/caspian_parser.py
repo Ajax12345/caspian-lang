@@ -415,7 +415,7 @@ if __name__ == '__main__':
             print('+'*20)
             if status['status']:
                 print('resulting ast', ast)
-                #ast.tokenized_statements = ast.tokenized_statements[:1]
+                ast.tokenized_statements = ast.tokenized_statements[-1:]
                 display_ast(ast)
             else:
                 print(ast.gen_error)
