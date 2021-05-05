@@ -60,8 +60,7 @@ grammar = [
                     |Token.And
                     |(Token.Not&Token.Eq)._('not_equals')
                     |Token.Label.match('and')._('bool_and')
-                    |Token.Label.match('or')._('bool_or')
-                    |Token.In),
+                    |Token.Label.match('or')._('bool_or')),
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash)),
     (Token.NegativeVal.rd, Token.Minus&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
@@ -109,9 +108,9 @@ grammar = [
     (Token.Static,   Token.Label.match('static')),
     (Token.YieldFrom,   Token.Yield&Token.Label.match('from')),
     (Token.Async,   Token.Label.match('async')),
-    (Token.AsyncFor,  Token.Async&Token.For),
     (Token.Await,   Token.Label.match('await')),
-    (Token.ForExpr, (Token.AsyncFor|Token.For)&(Token.Expr|Token.CommaList)&Token.In&Token.Expr),
+    (Token.ForExpr, Token.For&(Token.Expr|Token.CommaList)&Token.In&Token.Expr),
+    (Token.AsyncForExpr, Token.Async&Token.ForExpr),
     (Token.ForBlockInline, Token.ForExpr&Token.ForExpr
                            |Token.ForExpr&Token.ForBlockInline),
     (Token.ParenGroup, Token.OParen&(Token.Expr|Token.CommaList)&Token.CParen),
@@ -150,6 +149,11 @@ grammar = [
                                          'suppress', 
                                          'then')),
     (Token.AwaitStmn, Token.Await&Token.Expr.neg_lookahead(Token.OParen)),
+    (Token.ArrayComp, (Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket).ml),
+    (Token.ArrayCompCond, (Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket).ml),
+    (Token.MapComp, (Token.OBrace&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBrace).ml),
+    (Token.MapCompCond, (Token.OBrace&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBrace).ml),
+    (Token.InlineCond, Token.Expr&Token.If&Token.Expr&Token.Else&Token.Expr),
     (Token.Expr,    Token.ValueLabel
                     |Token.Operation
                     |Token.Integer
@@ -169,12 +173,12 @@ grammar = [
                     |Token.KeyValue
                     |Token.ArrayUnpack
                     |Token.MapUnpack
-                    |(Token.Expr&Token.If&Token.Expr&Token.Else&Token.Expr)._('inline_conditional')
+                    |Token.InlineCond
                     |Token.AwaitStmn
-                    |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket)._('array_comp').ml
-                    |(Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket)._('array_comp_conditional').ml
-                    |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.CBrace)._('map_comp').ml
-                    |(Token.OBrace&Token.KeyValue&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBrace)._('map_comp_conditional').ml
+                    |Token.ArrayComp
+                    |Token.ArrayCompCond
+                    |Token.MapComp
+                    |Token.MapCompCond
                     |Token.LambdaFun
                     |Token.LambdaFunMulti),
 

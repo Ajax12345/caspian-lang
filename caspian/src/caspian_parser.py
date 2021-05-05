@@ -423,6 +423,8 @@ if __name__ == '__main__':
     #running parser errors
     #---------------------
     #test(a, d=1)
+    #x[100] = james.joe => does not detect assign
+    #NOTE: might have to drop SignatureEq
     #[[[2, "James", 3.23], null], [true, -32]]
     #val:int[weak=true] = 10, but val:int[weak=t] = 10 works
     #order_of_op = (1+2)*3
@@ -440,11 +442,6 @@ if __name__ == '__main__':
     then status, e
         print(status, e)
     '''
-    '''
-    for i in iterable
-        do_something
-    '''
-    #[i for i in iterable if something]
     #---------------------
     
     '''
