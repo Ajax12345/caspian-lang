@@ -1,3 +1,1 @@
-class Node
-    fun constructor(val):null
-        this.head = val
+[[a, ..b], c], ..d = [[[1, 2, 3, 4], 5], 5, 6]

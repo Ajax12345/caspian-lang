@@ -45,6 +45,7 @@ grammar = [
     (Token.As,      Token.Label.match('as')),
     (Token.Null.rd,    Token.Label.match('null')),
     (Token.In, Token.Label.match('in')),
+    (Token.Primative, Token.Label.match('primative')),
     (Token.Operator, Token.Plus
                     |Token.Minus
                     |Token.Star
@@ -81,7 +82,7 @@ grammar = [
                     |Token.Pound&Token.Map),
     (Token.ArrayUnpack, Token.Dot&Token.Dot&Token.Expr),
     (Token.MapUnpack, Token.Dot&Token.Dot&Token.Dot&Token.Expr),
-    (Token.Primative.rd, Token.Label.match('primative')&Token.Colon&Token.Colon&Token.Label),
+    (Token.PrimativeSignature.rd, Token.Primative&Token.Colon&Token.Colon&Token.Expr),
     (Token.ChainCall, (Token.Expr&Token.Pipe&Token.RArrow&Token.Expr
                     |Token.Expr&Token.Pipe&Token.RArrow&Token.ChainCall).ml),
     (Token.Getattr, Token.Expr&Token.Dot&Token.Expr),
@@ -159,7 +160,7 @@ grammar = [
                     |Token.Array
                     |Token.Map
                     |Token.ParenGroup
-                    |Token.Primative
+                    |Token.PrimativeSignature
                     |Token.FunSignature
                     |Token.ChainCall
                     |Token.Getattr
