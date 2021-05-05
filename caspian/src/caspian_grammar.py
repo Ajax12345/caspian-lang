@@ -46,19 +46,24 @@ grammar = [
     (Token.Null.rd,    Token.Label.match('null')),
     (Token.In, Token.Label.match('in')),
     (Token.Primative, Token.Label.match('primative')),
+    (Token.Equals.rd, Token.Eq&Token.Eq),
+    (Token.Le.rd, Token.LArrow&Token.Eq),
+    (Token.Ge.rd, Token.RArrow&Token.Eq),
+    (Token.Ge.rd, Token.RArrow&Token.Eq),
+    (Token.Ne.rd, Token.Not&Token.Eq),
     (Token.Operator, Token.Plus
                     |Token.Minus
                     |Token.Star
                     |Token.Mod
                     |Token.Slash
-                    |(Token.Eq&Token.Eq)._('equals')
-                    |(Token.LArrow&Token.Eq)._('le')
-                    |(Token.RArrow&Token.Eq)._('ge')
+                    |Token.Equals
+                    |Token.Le
+                    |Token.Ge
                     |Token.LArrow
                     |Token.RArrow
                     |Token.Or
                     |Token.And
-                    |(Token.Not&Token.Eq)._('not_equals')
+                    |Token.Ne
                     |Token.Label.match('and')._('bool_and')
                     |Token.Label.match('or')._('bool_or')),
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash)),
@@ -235,7 +240,7 @@ grammar = [
     (Token.Decorator, (Token.At&Token.Expr&Token.FunctionBlock)
                     |(Token.At&Token.Expr&Token.AsyncFunctionBlock)
                     |(Token.At&Token.Expr&Token.Decorator)),
-    (Token.ClassStub, Token.Class&Token.ValueLabel),
+    (Token.ClassStub, Token.Class&Token.Expr),
     (Token.ClassInherit, Token.ClassStub&Token.Inherits&(Token.Expr|Token.CommaList)),
     (Token.ClassBlock, (Token.ClassInherit|Token.ClassStub)&BlockTokenGroup),
     
@@ -336,4 +341,4 @@ def generate_goto() -> dict:
 
 if __name__ == '__main__':
     goto = generate_goto()
-    print(goto['CommaList'])
+    print(goto['Eq'])

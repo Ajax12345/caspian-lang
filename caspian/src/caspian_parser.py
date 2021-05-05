@@ -415,7 +415,7 @@ if __name__ == '__main__':
             print('+'*20)
             if status['status']:
                 print('resulting ast', ast)
-                ast.tokenized_statements = ast.tokenized_statements[:1]
+                #ast.tokenized_statements = ast.tokenized_statements[:1]
                 display_ast(ast)
             else:
                 print(ast.gen_error)
@@ -425,8 +425,7 @@ if __name__ == '__main__':
     #test(a, d=1)
     #x[100] = james.joe => does not detect assign
     #NOTE: might have to drop SignatureEq
-    #[[[2, "James", 3.23], null], [true, -32]]
-    #order_of_op = (1+2)*3
+    #order_of_op = (1+2)*3 ^same issue as above
     #import file1 or file2
     '''
     switch something

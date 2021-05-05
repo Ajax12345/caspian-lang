@@ -1,1 +1,5 @@
-{'james':a}, ...b = {'james':21, 'joe':18, 'lilly':15}
+class A inherits B, C, D
+    fun constructor(val)   
+        this.stuff = val
+
+    

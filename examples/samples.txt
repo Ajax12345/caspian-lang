@@ -423,3 +423,12 @@ result1 = asyncio.run(main)
 //imagine, want to run get_random ten times, but only in 3 seconds total, and get back all get_results
 result = asyncio.parallel(..[get_random for _ in range(10)])
 
+
+//syntax proposals
+//assignment expression
+for i in x~[1, 2, 3]
+    print(i)
+
+print(x) //x => [1, 2, 3]
+
+//might want to change SignatureEq to ~
