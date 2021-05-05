@@ -423,13 +423,6 @@ if __name__ == '__main__':
     #running parser errors
     #---------------------
     '''
-    switch something
-        case 10
-            something
-        default
-            do_something
-    '''
-    '''
     suppress
         raise Exception
     then status, e

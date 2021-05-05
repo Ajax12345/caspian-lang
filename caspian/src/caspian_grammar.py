@@ -215,9 +215,9 @@ grammar = [
                     |(Token.Control&Token.ElifBlock)
                     |(Token.Control&Token.Else&BlockTokenGroup)),
     (Token.CaseBlock, (Token.Case&Token.Expr&BlockTokenGroup)
-                    |(Token.CaseBlock&Token.CaseBlock)),
-    (Token.SwitchCase, (Token.Switch&Token.Expr&BlockTokenGroup&Token.CaseBlock)
-                    |(Token.SwitchCase&Token.Default&BlockTokenGroup)),
+                    |(Token.CaseBlock&Token.CaseBlock)
+                    |(Token.CaseBlock&Token.Default&BlockTokenGroup)),
+    (Token.SwitchCase, Token.Switch&Token.Expr&BlockTokenGroup),
     (Token.SuppressBlock, ((Token.Suppress&(Token.Expr|Token.CommaList))._('suppress_params')|Token.Suppress)&BlockTokenGroup
                     |(Token.SuppressBlock&((Token.Then&(Token.Expr|Token.CommaList))._('then_block')|Token.Then)&BlockTokenGroup)),
     (Token.ForLoop, Token.ForExpr&BlockTokenGroup),
@@ -342,4 +342,4 @@ def generate_goto() -> dict:
 
 if __name__ == '__main__':
     goto = generate_goto()
-    print(goto['While'])
+    print(goto['Case'])

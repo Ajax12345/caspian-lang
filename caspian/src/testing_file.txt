@@ -1,2 +1,4 @@
-while condition
-    do_something()
+suppress
+    raise Exception
+then status, e
+    print(status, e)
