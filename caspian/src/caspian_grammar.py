@@ -62,7 +62,7 @@ grammar = [
                     |Token.Label.match('and')._('bool_and')
                     |Token.Label.match('or')._('bool_or')),
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash)),
-    (Token.NegativeVal.rd, Token.Minus&Token.Expr),
+    (Token.OpVal.rd, Token.Operator&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
     (Token.SignatureEq, Token.Expr&Token.Eq&Token.Expr
@@ -161,7 +161,7 @@ grammar = [
                     |Token.String
                     |Token.Bool
                     |Token.Null
-                    |Token.NegativeVal
+                    |Token.OpVal
                     |Token.ImmutableContainer
                     |Token.Array
                     |Token.Map

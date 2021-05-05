@@ -1,2 +1,1 @@
-if x == 1
-    f()
+{'james':a}, ...b = {'james':21, 'joe':18, 'lilly':15}
