@@ -65,8 +65,8 @@ grammar = [
     (Token.NegativeVal.rd, Token.Minus&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
-    (Token.SignatureEq, Token.ValueLabel&Token.Eq&Token.Expr
-                    |Token.KeyValue&Token.Eq&Token.Expr),
+    (Token.SignatureEq, Token.Expr&Token.Eq&Token.Expr
+                    |Token.Expr&Token.Eq&Token.Expr),
     (Token.CommaList, (Token.Expr&Token.Comma&Token.Expr
                     |Token.Expr&Token.Comma&Token.CommaList
                     |Token.CommaList&Token.Comma&Token.Expr
@@ -323,13 +323,10 @@ def generate_goto() -> dict:
             for k in _r_result[j.raw_token_name]:
                 _r_result[a].add(k)
 
-    
-
-
     return _r_result
     
     
 
 if __name__ == '__main__':
     goto = generate_goto()
-    print(goto['Await'])
+    print(goto['CommaList'])

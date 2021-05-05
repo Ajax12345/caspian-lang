@@ -419,6 +419,33 @@ if __name__ == '__main__':
                 display_ast(ast)
             else:
                 print(ast.gen_error)
+
+    #running parser errors
+    #---------------------
+    #test(a, d=1)
+    #[[[2, "James", 3.23], null], [true, -32]]
+    #val:int[weak=true] = 10, but val:int[weak=t] = 10 works
+    #order_of_op = (1+2)*3
+    #import file1 or file2
+    '''
+    switch something
+        case 10
+            something
+        default
+            do_something
+    '''
+    '''
+    suppress
+        raise Exception
+    then status, e
+        print(status, e)
+    '''
+    '''
+    for i in iterable
+        do_something
+    '''
+    #[i for i in iterable if something]
+    #---------------------
     
     '''
     Token = caspian_grammar.Token
