@@ -1,2 +1,1 @@
-suppress e1, e2
-    raise Exception
+j = [a, b, f(), await c(), k.j[1] + 1]

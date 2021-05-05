@@ -202,10 +202,13 @@ grammar = [
                     |Token.CommaList)),
     (Token.Import,  Token.Label.match('import')&Token.Expr
                     |(Token.Import&Token.As&Token.Label)._('import_as')),
+    (Token.YieldStmn, Token.Yield&Token.Expr
+                    |Token.YieldFrom&Token.Expr),
     (Token.Stmn,    (Token.Label.match('raise')&Token.Expr.eof)._('raise')
                     |(Token.Label.match('continue').eof)._('continue')
                     |(Token.Label.match('break').eof)._('break')
                     |Token.Import
+                    |Token.YieldStmn
                     |(Token.Return&Token.Expr)._('return_stmn')),
     (Token.IfCond, Token.If&Token.Expr),
     (Token.ElifCond, Token.Elif&Token.Expr),
