@@ -159,6 +159,8 @@ grammar = [
                     |Token.Integer
                     |Token.Float
                     |Token.String
+                    |Token.Bool
+                    |Token.Null
                     |Token.NegativeVal
                     |Token.ImmutableContainer
                     |Token.Array

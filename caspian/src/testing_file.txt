@@ -1,1 +1,2 @@
-val:int[weak=true] = 10
+if x == 1
+    f()
