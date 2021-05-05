@@ -415,18 +415,13 @@ if __name__ == '__main__':
             print('+'*20)
             if status['status']:
                 print('resulting ast', ast)
-                ast.tokenized_statements = ast.tokenized_statements[-1:]
+                #ast.tokenized_statements = ast.tokenized_statements[-1:]
                 display_ast(ast)
             else:
                 print(ast.gen_error)
 
     #running parser errors
     #---------------------
-    #test(a, d=1)
-    #x[100] = james.joe => does not detect assign
-    #NOTE: might have to drop SignatureEq
-    #order_of_op = (1+2)*3 ^same issue as above
-    #import file1 or file2
     '''
     switch something
         case 10

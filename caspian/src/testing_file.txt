@@ -1,2 +1,2 @@
-for i in x~[1, f(), 3]
-    print(i)
+while condition
+    do_something()

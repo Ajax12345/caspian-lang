@@ -221,8 +221,9 @@ grammar = [
     (Token.SuppressBlock, ((Token.Suppress&(Token.Expr|Token.CommaList))._('suppress_params')|Token.Suppress)&BlockTokenGroup
                     |(Token.SuppressBlock&((Token.Then&(Token.Expr|Token.CommaList))._('then_block')|Token.Then)&BlockTokenGroup)),
     (Token.ForLoop, Token.ForExpr&BlockTokenGroup),
-    (Token.WhileLoop, (((Token.While&Token.Expr)|Token.While)&BlockTokenGroup)
-                    |(Token.Do&BlockTokenGroup&((Token.While&Token.Expr)|Token.While))),
+    (Token.WhileSignature, Token.While&Token.Expr),
+    (Token.WhileLoop, ((Token.WhileSignature|Token.While)&BlockTokenGroup)
+                    |(Token.Do&BlockTokenGroup&(Token.WhileSignature|Token.While))),
     (Token.FunctionStub, (Token.Fun&Token.FunSignature)
                     |(Token.FunctionStub&Token.Colon&Token.Expr)),
     (Token.FunctionBlock, Token.FunctionStub&BlockTokenGroup),
@@ -341,4 +342,4 @@ def generate_goto() -> dict:
 
 if __name__ == '__main__':
     goto = generate_goto()
-    print(goto['CommaList'])
+    print(goto['While'])
