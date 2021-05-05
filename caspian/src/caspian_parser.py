@@ -422,12 +422,6 @@ if __name__ == '__main__':
 
     #running parser errors
     #---------------------
-    '''
-    suppress
-        raise Exception
-    then status, e
-        print(status, e)
-    '''
     #---------------------
     
     '''

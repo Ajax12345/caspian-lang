@@ -218,8 +218,11 @@ grammar = [
                     |(Token.CaseBlock&Token.CaseBlock)
                     |(Token.CaseBlock&Token.Default&BlockTokenGroup)),
     (Token.SwitchCase, Token.Switch&Token.Expr&BlockTokenGroup),
-    (Token.SuppressBlock, ((Token.Suppress&(Token.Expr|Token.CommaList))._('suppress_params')|Token.Suppress)&BlockTokenGroup
-                    |(Token.SuppressBlock&((Token.Then&(Token.Expr|Token.CommaList))._('then_block')|Token.Then)&BlockTokenGroup)),
+    (Token.SuppressSignature, Token.Suppress&Token.Expr
+                    |Token.Suppress&Token.CommaList),
+    (Token.ThenSignature, Token.Then&Token.CommaList),
+     (Token.SuppressBlock, (Token.SuppressSignature|Token.Suppress)&BlockTokenGroup
+                    |(Token.SuppressBlock&(Token.ThenSignature|Token.Then)&BlockTokenGroup)),
     (Token.ForLoop, Token.ForExpr&BlockTokenGroup),
     (Token.WhileSignature, Token.While&Token.Expr),
     (Token.WhileLoop, ((Token.WhileSignature|Token.While)&BlockTokenGroup)

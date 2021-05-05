@@ -1,4 +1,2 @@
-suppress
+suppress e1, e2
     raise Exception
-then status, e
-    print(status, e)
