@@ -1,8 +1,1 @@
-class Node
-    fun constructor(val):null
-        this.head = val
-
-    fun primative::iterator()
-        yield 10
-        yield 20
-        yield 30
+c = 5+4 * 1

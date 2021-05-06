@@ -179,9 +179,6 @@ for _ in x
 //map
 {a:b for i in iterable if something}
 
-//while loop comprehensions
-//lambda function with no params, must return map with keys 'response' and 'variables'
-[():map[str, Union[Any, map]]({'response':x + 1, 'variables':{'x':x + 1}}) while x != 3]
 
 //functions
 

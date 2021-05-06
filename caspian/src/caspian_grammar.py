@@ -67,7 +67,7 @@ grammar = [
                     |Token.Ne
                     |Token.Label.match('and')._('bool_and')
                     |Token.Label.match('or')._('bool_or')),
-    (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash)),
+    (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash|Token.OParen|Token.Dot|Token.OBracket)),
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
     (Token.AssignExpr.rd, Token.Expr&Token.CurlyQ&Token.Expr),
@@ -152,7 +152,7 @@ grammar = [
                                          'from', 
                                          'suppress', 
                                          'then')),
-    (Token.AwaitStmn, Token.Await&Token.Expr.neg_lookahead(Token.OParen)),
+    (Token.AwaitStmn, Token.Await&Token.Expr.neg_lookahead(Token.OParen|Token.Dot|Token.OBracket)),
     (Token.ArrayComp, (Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket).ml),
     (Token.ArrayCompCond, (Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket).ml),
     (Token.MapComp, (Token.OBrace&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBrace).ml),
@@ -346,4 +346,4 @@ def generate_goto() -> dict:
 
 if __name__ == '__main__':
     goto = generate_goto()
-    print(goto['Case'])
+    print(goto['Getattr'])
