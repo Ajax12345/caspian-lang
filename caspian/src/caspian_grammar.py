@@ -68,7 +68,6 @@ grammar = [
                     |Token.Label.match('and')._('bool_and')
                     |Token.Label.match('or')._('bool_or')),
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash)),
-    (Token.OpVal.rd, Token.Operator&Token.Expr),
     (Token.Comment,   Token.Slash&Token.Slash),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
     (Token.AssignExpr.rd, Token.Expr&Token.CurlyQ&Token.Expr),
@@ -87,8 +86,8 @@ grammar = [
     (Token.ArrayUnpack, Token.Dot&Token.Dot&Token.Expr),
     (Token.MapUnpack, Token.Dot&Token.Dot&Token.Dot&Token.Expr),
     (Token.PrimativeSignature.rd, Token.Primative&Token.Colon&Token.Colon&Token.Expr),
-    (Token.ChainCall, (Token.Expr&Token.Pipe&Token.RArrow&Token.Expr
-                    |Token.Expr&Token.Pipe&Token.RArrow&Token.ChainCall).ml),
+    (Token.ChainCall, (Token.Expr&Token.Or&Token.RArrow&Token.Expr
+                    |Token.Expr&Token.Or&Token.RArrow&Token.ChainCall).ml),
     (Token.Getattr, Token.Expr&Token.Dot&Token.Expr),
     (Token.Getitem, Token.Expr&Token.OBracket&Token.CBracket
                     |Token.Expr&Token.OBracket&Token.Expr&Token.CBracket
@@ -166,7 +165,6 @@ grammar = [
                     |Token.String
                     |Token.Bool
                     |Token.Null
-                    |Token.OpVal
                     |Token.ImmutableContainer
                     |Token.Array
                     |Token.Map

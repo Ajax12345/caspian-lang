@@ -1,1 +1,8 @@
-j = [a, b, f(), await c(), k.j[1] + 1]
+class Node
+    fun constructor(val):null
+        this.head = val
+
+    fun primative::iterator()
+        yield 10
+        yield 20
+        yield 30

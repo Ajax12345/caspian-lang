@@ -422,6 +422,18 @@ if __name__ == '__main__':
 
     #running parser errors
     #---------------------
+    #for issue below: add flag which will search in token pointer history
+    #c = 5+4 * 1
+    '''
+    class Node
+        fun constructor(val):null
+            this.head = val
+    
+        fun primative::iterator()
+            yield 10
+            yield 20
+            yield 30
+    '''
     #---------------------
     
     '''
