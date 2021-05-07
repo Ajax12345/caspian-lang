@@ -212,8 +212,7 @@ fun test()
 
 x = "James" |> get_length |> compute_factorial
 
-x1 = "james"
-    |> get_length
+x1 = "james" |> get_length
     |> compute_factorial
     |> new_fact(1, 2, _, 3) // result from compute_factorial passed to new_fact at the position of the throwaway variable
     |> final_result(1, 2) //result from new_fact passed to final_result after "2"
@@ -425,5 +424,3 @@ for i in x~[1, 2, 3]
     print(i)
 
 print(x) //x => [1, 2, 3]
-
-//might want to change SignatureEq to ~

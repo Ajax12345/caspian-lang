@@ -60,14 +60,18 @@ class Parser:
                 
         return t_lines.remove_whitespace()
 
+    def strip_comments(self, _line:str) -> str:
+        return re.sub('//[\w\W]+', '', _line)
 
     def parse(self, str_content:str) -> typing.Tuple[dict, typing.Union[caspian_errors.ErrorPacket, typing.List[TokenizedLine]]]:
         tokenized_lines = []
-        for i, line in enumerate(filter(None, str_content.split('\n'))):
-            if line:
+        for i, _line in enumerate(filter(None, str_content.split('\n'))):
+            if (line:=self.strip_comments(_line)):
                 if isinstance((p_r:=self.parse_line(i, line)), caspian_errors.ErrorPacket):
                     return {'status':False}, p_r
-                tokenized_lines.append(p_r)
+                
+                if p_r.token_line:
+                    tokenized_lines.append(p_r)
 
         return {'status':True}, tokenized_lines
 
@@ -428,6 +432,7 @@ if __name__ == '__main__':
     #TODO:
     #---------------------
     #add comments
+    #proper formatting of errors in ast creation (be able to get first token that causes issue)
     #---------------------
     
     '''

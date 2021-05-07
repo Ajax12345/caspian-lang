@@ -70,7 +70,6 @@ grammar = [
                     |Token.Label.match('and')._('bool_and')
                     |Token.Label.match('or')._('bool_or')),
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash|Token.OParen|Token.Dot|Token.OBracket)),
-    (Token.Comment,   Token.Slash&Token.Slash),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
     (Token.AssignExpr.rd, Token.Expr&Token.CurlyQ&Token.Expr),
     (Token.CommaList, (Token.Expr&Token.Comma&Token.Expr
