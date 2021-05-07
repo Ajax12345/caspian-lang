@@ -82,7 +82,11 @@ grammar = [
                     |Token.OBrace&Token.Expr&Token.CBrace
                     |Token.OBrace&Token.CommaList&Token.CBrace).ml),
     (Token.ImmutableContainer.rd, Token.Pound&Token.Array
-                    |Token.Pound&Token.Map),
+                    |Token.Pound&Token.Map
+                    |Token.Pound&Token.ArrayComp
+                    |Token.Pound&Token.ArrayCompCond
+                    |Token.Pound&Token.MapComp
+                    |Token.Pound&Token.MapCompCond),
     (Token.ArrayUnpack, Token.Dot&Token.Dot&Token.Expr),
     (Token.MapUnpack, Token.Dot&Token.Dot&Token.Dot&Token.Expr),
     (Token.PrimativeSignature.rd, Token.Primative&Token.Colon&Token.Colon&Token.Expr),
