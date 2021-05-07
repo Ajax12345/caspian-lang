@@ -252,6 +252,7 @@ grammar = [
     (Token.ClassStub, Token.Class&Token.Expr),
     (Token.ClassInherit, Token.ClassStub&Token.Inherits&(Token.Expr|Token.CommaList)),
     (Token.ClassBlock, (Token.ClassInherit|Token.ClassStub)&BlockTokenGroup),
+    (Token.AbstractClassBlock, Token.Abstract&Token.ClassBlock),
     
 ]
 
