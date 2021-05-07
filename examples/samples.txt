@@ -259,7 +259,7 @@ class Node
     fun test_method():int
         return this.head + 1
     
-    static fun new_node(val):class
+    static fun new_node(val):Typeclass
         return Node(val)
   
     //iterator magic method
@@ -277,14 +277,14 @@ class Node
         return val
 
     fun primative::type_check(type_obj:Type)
-        if type_obj.class != this.__class__
+        if type_obj.__class__ != this.__class__
             return false
         
         return type_obj.type_vals[0] == int
 
     //all objects will inherit this primative
     static fun primative::type_check(type_obj:Type)
-        return type_obj.class == this.__class__
+        return type_obj.__class__ == this.__class__
 
     static abstract fun test()
         return 10

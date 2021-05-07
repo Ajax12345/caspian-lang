@@ -1,12 +1,1 @@
-switch something
-    case 10
-        something
-    case [a, b, c]
-        something_else
-    case [a, ..b]
-        another_thing
-    case {'a':a, 'b':c}
-        new_thing
-        break
-    default
-        do_something
+#[i for b in j for i in b if true]

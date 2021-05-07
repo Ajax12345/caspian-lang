@@ -52,6 +52,7 @@ grammar = [
     (Token.Ge.rd, Token.RArrow&Token.Eq),
     (Token.Ge.rd, Token.RArrow&Token.Eq),
     (Token.Ne.rd, Token.Not&Token.Eq),
+    (Token.ChainOp.rd, Token.Or&Token.RArrow),
     (Token.Operator, Token.Plus
                     |Token.Minus
                     |Token.Star
@@ -65,6 +66,7 @@ grammar = [
                     |Token.Or
                     |Token.And
                     |Token.Ne
+                    |Token.ChainOp
                     |Token.Label.match('and')._('bool_and')
                     |Token.Label.match('or')._('bool_or')),
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash|Token.OParen|Token.Dot|Token.OBracket)),
@@ -90,8 +92,6 @@ grammar = [
     (Token.ArrayUnpack, Token.Dot&Token.Dot&Token.Expr),
     (Token.MapUnpack, Token.Dot&Token.Dot&Token.Dot&Token.Expr),
     (Token.PrimativeSignature.rd, Token.Primative&Token.Colon&Token.Colon&Token.Expr),
-    (Token.ChainCall, (Token.Expr&Token.Or&Token.RArrow&Token.Expr
-                    |Token.Expr&Token.Or&Token.RArrow&Token.ChainCall).ml),
     (Token.Getattr, Token.Expr&Token.Dot&Token.Expr),
     (Token.Getitem, Token.Expr&Token.OBracket&Token.CBracket
                     |Token.Expr&Token.OBracket&Token.Expr&Token.CBracket
@@ -175,7 +175,6 @@ grammar = [
                     |Token.ParenGroup
                     |Token.PrimativeSignature
                     |Token.FunSignature
-                    |Token.ChainCall
                     |Token.Getattr
                     |Token.Getitem
                     |Token.AssignExpr.rd
