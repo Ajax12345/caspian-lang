@@ -1,6 +1,1 @@
-//syntax proposals
-//assignment expression
-for i in x~[1, 2, 3]
-    print(i)
-
-print(x) //x => [1, 2, 3]
+v = 3*3

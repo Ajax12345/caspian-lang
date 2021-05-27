@@ -3,7 +3,7 @@ import caspian_errors, caspian_grammar
 import re, copy
 
 goto = caspian_grammar.generate_goto()
-print(goto)
+#print(goto)
 class TokenizedLine:
     def __init__(self) -> None:
         self.token_line = collections.deque()
@@ -44,7 +44,7 @@ class Parser:
             for t_p, _pattern in caspian_grammar.tokens:
                 if (m:=_pattern.match(_line)) is not None:
                     _f = True
-                    t_lines.add_token((full_token:=t_p(_line_num, _char_count, (m_val:=m.group()))))
+                    t_lines.add_token((full_token:=t_p(_line_num+1, _char_count, (m_val:=m.group()))))
                     if full_token != caspian_grammar.Token.Space:
                         if not seen_non_space and t_lines.whitespace_count%4:
                             return caspian_errors.ErrorPacket(_line_num, _char_count, caspian_errors.InvalidIndentation, self.stack, caspian_errors.ErrorPacket.char_error_marker(_char_count, _o_line, caspian_errors.InvalidIndentation))
@@ -63,17 +63,18 @@ class Parser:
     def strip_comments(self, _line:str) -> str:
         return re.sub('//[\w\W]+', '', _line)
 
-    def parse(self, str_content:str) -> typing.Tuple[dict, typing.Union[caspian_errors.ErrorPacket, typing.List[TokenizedLine]]]:
-        tokenized_lines = []
+    def parse(self, str_content:str) -> typing.Tuple[dict, typing.Union[dict, None], typing.Union[caspian_errors.ErrorPacket, typing.List[TokenizedLine]]]:
+        tokenized_lines, full_lines = [], {}
         for i, _line in enumerate(filter(None, str_content.split('\n'))):
+            full_lines[i+1] = _line
             if (line:=self.strip_comments(_line)):
                 if isinstance((p_r:=self.parse_line(i, line)), caspian_errors.ErrorPacket):
-                    return {'status':False}, p_r
+                    return {'status':False}, None, p_r
                 
                 if p_r.token_line:
                     tokenized_lines.append(p_r)
 
-        return {'status':True}, tokenized_lines
+        return {'status':True}, full_lines, tokenized_lines
 
     
     def __exit__(self, *_) -> None:
@@ -228,8 +229,9 @@ class SeenLRQueue(SeenTokenQueue):
         return f'<{", ".join(map(str, self.seen_tokens))}>'
 
 class ASTGen:
-    def __init__(self) -> None:
+    def __init__(self, input_lines:dict = {}) -> None:
         self.stack = None
+        self.input_lines = input_lines
 
     def __enter__(self) -> 'ASTGen':
         return self
@@ -264,15 +266,22 @@ class ASTGen:
             
             if not to_r:
                 yield n_lr
-                    
-    def get_token_bases(self, *args) -> typing.Iterator:
-        for i in args:
-            if isinstance(i, caspian_grammar.TokenMain.TokenRoot) and i.pointer_next is None:
-                yield i
-            elif (v:=getattr(i, 'ast_blocks', [])):
-                yield from self.get_token_bases(*v)
-            elif (v:=getattr(i, 'pointer_next', None)) is not None:
-                yield from self.get_token_bases(v)
+
+    def leftmost_root(self, token:typing.Union['TokenRoot', 'TokenGroup']) -> caspian_grammar.TokenMain.TokenRoot:
+        if isinstance(token, caspian_grammar.TokenMain.TokenGroup):
+            return self.leftmost_root(token.ast_blocks[0])
+        
+        if token.pointer_next is None:
+            return token
+
+        return self.leftmost_root(token.pointer_next)
+
+    def first_invalid_token(self, token_lr_queue:typing.List[caspian_grammar.TokenMain.TokenRoot]) -> typing.Union[None, caspian_grammar.TokenMain.TokenRoot]:
+        for i in range(len(token_lr_queue)-1):
+            if token_lr_queue[i+1].raw_token_name not in goto.get(token_lr_queue[i].raw_token_name, set()):
+                return self.leftmost_root(token_lr_queue[i+1])
+
+        return self.leftmost_root(token_lr_queue[-1])
 
     def to_ast_stream(self, _row_blocks:StreamQueue) -> typing.Union[typing.Tuple[dict, caspian_errors.ErrorPacket], LRQueue]:
         full_stack, line_stack, running_l_stream = ReduceQueue(), ReduceQueue(), LRQueue()
@@ -296,9 +305,11 @@ class ASTGen:
                     continue
 
                 if line_stack.queue_status():
-                    token_base = next(self.get_token_bases(*[i for j in line_stack.streams for i in j]))
+                    print('error line stack stream', line_stack.streams[0])
+                    token_base = self.first_invalid_token(list(line_stack.streams[0]))
+                    print('returned token base', token_base)
                     l_num, char_num = token_base.line_num, token_base.char_num
-                    return {'status':False}, caspian_errors.ErrorPacket(l_num, char_num, caspian_errors.InvalidSyntax, self.stack, caspian_errors.ErrorPacket.char_error_marker(char_num, l_num, caspian_errors.InvalidSyntax))
+                    return {'status':False}, caspian_errors.ErrorPacket(l_num, char_num, caspian_errors.InvalidSyntax, self.stack, caspian_errors.ErrorPacket.char_error_marker(char_num, self.input_lines.get(l_num, ''), caspian_errors.InvalidSyntax))
                 
                 if not full_stack:
                     return {'status':True}, []
@@ -411,10 +422,11 @@ if __name__ == '__main__':
         plt.show()
 
     with open('testing_file.txt') as f, Parser() as p, ASTGen() as astgen:
-        status, _r_obj = p.parse(f.read())
+        status, lines, _r_obj = p.parse(f.read())
         if not status['status']:
             print(_r_obj.gen_error)
         else:
+            astgen.input_lines = lines
             status, ast = astgen.create_ast(_r_obj)
             print('+'*20)
             if status['status']:
@@ -424,15 +436,19 @@ if __name__ == '__main__':
             else:
                 print(ast.gen_error)
 
-    #running parser errors
     #---------------------
+    #TO WATCH:
     #need to entirely filter out blank lines
     #unexpected indents are causing issues
     #---------------------
     #TODO:
     #---------------------
     #add comments
-    #proper formatting of errors in ast creation (be able to get first token that causes issue)
+    #compute the total length of both queue (match, running, etc) and check against total length of grammar obj
+    #check that potential reduce token type (t1) and lookahead are valid BEFORE match and reduce
+    #add finally/else statements for suppress
+    #add pass statement to grammar
+    #remove depreciated head_chain attribute
     #---------------------
     
     '''
