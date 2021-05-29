@@ -1,1 +1,6 @@
-j = [4, 5, ..[3, 4], {a:b for a, b in k.items()}, r()+1]
+suppress
+    raise Exception
+else
+    pass
+finally
+    pass

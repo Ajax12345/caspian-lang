@@ -117,6 +117,7 @@ grammar = [
     (Token.Async,   Token.Label.match('async')),
     (Token.Await,   Token.Label.match('await')),
     (Token.Pass,   Token.Label.match('pass')),
+    (Token.Finally,   Token.Label.match('finally')),
     (Token.ForExpr, Token.For&(Token.Expr|Token.CommaList)&Token.In&Token.Expr),
     (Token.AsyncForExpr, Token.Async&Token.ForExpr),
     (Token.ForBlockInline, Token.ForExpr&Token.ForExpr
@@ -156,7 +157,8 @@ grammar = [
                                          'from', 
                                          'suppress', 
                                          'then',
-                                         'pass')),
+                                         'pass',
+                                         'finally')),
     (Token.AwaitStmn, Token.Await&Token.Expr.neg_lookahead(Token.OParen|Token.Dot|Token.OBracket)),
     (Token.ArrayComp, (Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket).ml),
     (Token.ArrayCompCond, (Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket).ml),
@@ -229,7 +231,9 @@ grammar = [
                     |Token.Suppress&Token.CommaList),
     (Token.ThenSignature, Token.Then&Token.CommaList),
      (Token.SuppressBlock, (Token.SuppressSignature|Token.Suppress)&BlockTokenGroup
-                    |(Token.SuppressBlock&(Token.ThenSignature|Token.Then)&BlockTokenGroup)),
+                    |(Token.SuppressBlock&(Token.ThenSignature|Token.Then)&BlockTokenGroup)
+                    |(Token.SuppressBlock&Token.Finally&BlockTokenGroup)
+                    |(Token.SuppressBlock&Token.Else&BlockTokenGroup)),
     (Token.ForLoop, Token.ForExpr&BlockTokenGroup),
     (Token.WhileSignature, Token.While&Token.Expr),
     (Token.WhileLoop, ((Token.WhileSignature|Token.While)&BlockTokenGroup)
