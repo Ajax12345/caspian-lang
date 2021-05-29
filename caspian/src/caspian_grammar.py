@@ -116,6 +116,7 @@ grammar = [
     (Token.YieldFrom,   Token.Yield&Token.Label.match('from')),
     (Token.Async,   Token.Label.match('async')),
     (Token.Await,   Token.Label.match('await')),
+    (Token.Pass,   Token.Label.match('pass')),
     (Token.ForExpr, Token.For&(Token.Expr|Token.CommaList)&Token.In&Token.Expr),
     (Token.AsyncForExpr, Token.Async&Token.ForExpr),
     (Token.ForBlockInline, Token.ForExpr&Token.ForExpr
@@ -154,7 +155,8 @@ grammar = [
                                          'import', 
                                          'from', 
                                          'suppress', 
-                                         'then')),
+                                         'then',
+                                         'pass')),
     (Token.AwaitStmn, Token.Await&Token.Expr.neg_lookahead(Token.OParen|Token.Dot|Token.OBracket)),
     (Token.ArrayComp, (Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBracket).ml),
     (Token.ArrayCompCond, (Token.OBracket&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBracket).ml),
@@ -204,12 +206,14 @@ grammar = [
                     |(Token.Import&Token.As&Token.Label)._('import_as')),
     (Token.YieldStmn, Token.Yield&Token.Expr
                     |Token.YieldFrom&Token.Expr),
+    (Token.PassStmn, Token.Pass),
     (Token.Stmn,    (Token.Label.match('raise')&Token.Expr.eof)._('raise')
                     |(Token.Label.match('continue').eof)._('continue')
                     |(Token.Label.match('break').eof)._('break')
                     |Token.Import
                     |Token.YieldStmn
-                    |(Token.Return&Token.Expr)._('return_stmn')),
+                    |(Token.Return&Token.Expr)._('return_stmn')
+                    |Token.PassStmn),
     (Token.IfCond, Token.If&Token.Expr),
     (Token.ElifCond, Token.Elif&Token.Expr),
     (Token.ElifBlock, (Token.ElifCond&BlockTokenGroup)

@@ -301,7 +301,7 @@ class Node
         yield 30
     
     //getitem magic method
-    fun primative::getattr(val)
+    fun primative::getitem(val)
         return val
 
     //getattr magic method
@@ -363,6 +363,12 @@ class B
         `something`
 
 b = B() // no error raised, test is weak (from the addition of the "*")
+
+//private variables?
+class J
+    fun constructor():null
+        this.val[private~true] = 'james'
+    
 
 //should all objects inherit from an Object class?
 
