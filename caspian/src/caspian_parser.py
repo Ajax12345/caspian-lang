@@ -446,7 +446,6 @@ if __name__ == '__main__':
     #compute the total length of both queue (match, running, etc) and check against total length of grammar obj
     #check that potential reduce token type (t1) and lookahead are valid BEFORE match and reduce
     #add finally/else statements for suppress
-    #remove depreciated head_chain attribute
     #---------------------
     
     '''

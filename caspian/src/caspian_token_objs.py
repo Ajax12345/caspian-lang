@@ -79,7 +79,6 @@ class TokenMain:
             self.matched_str = matched_str
             self.line_num, self.char_num = line_num, char_num
             self.pointer_next, self.eof_flag = None, eof_flag
-            self.head_chain = []
             self.reduce_flag = reduce_flag
             self.reduce_flag1 = reduce_flag1
 
@@ -194,7 +193,6 @@ class TokenMain:
             self.token_group_name = None
             self._neg_lookahead, self._lookahead = None, None
             self.token_search_ml = False
-            self.head_chain = collections.deque()
         
         def t_add_front(self, _t:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             self.token_groups.appendleft(_t)
@@ -236,11 +234,8 @@ class TokenMain:
         def set_token_head(self, _head:'TokenRoot') -> 'TokenGroup':
             _c = self.__class__()
             _c.__dict__ = {a:b for a, b in self.__dict__.items()}
-            #_c.head_chain = collections.deque([TokenGroupAbout.form_token_about(_c), *_c.head_chain]) #possibly unecessary
-            #_c.token_head = _head #possibly unecessary
             _h = _head.copy()
             _h.pointer_next = _c
-            #return _c
             return _h
 
         def attach_block_results(self, _block:list) -> 'TokenGroup':
@@ -284,9 +279,9 @@ class TokenMain:
 
         def __repr__(self) -> str:
             if not hasattr(self, 'ast_blocks'):
-                return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, heads = [{", ".join(map(str, self.head_chain))}], tokens={[*self.token_groups]})'
+                return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, tokens={[*self.token_groups]})'
             
-            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, heads = [{", ".join(map(str, self.head_chain))}], ast_blocks={self.ast_blocks})'
+            return f'{self.__class__.__name__}(head={self.token_head}, group_name={self.token_group_name}, ml={self.token_search_ml}, ast_blocks={self.ast_blocks})'
         
 
     class TokenOr(csp_types.caspian_types.TokenOr):
