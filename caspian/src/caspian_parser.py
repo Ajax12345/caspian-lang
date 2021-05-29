@@ -240,7 +240,6 @@ class ASTGen:
         r_queue, seen = collections.deque(), SeenLRQueue()
         for i in stack:
             r_queue.append(i.to_match_queue())
-            seen.add(i)
 
         while r_queue:
             n_lr = LRQueue(*(n_mq:=r_queue.popleft()))
@@ -248,13 +247,13 @@ class ASTGen:
             to_r = False
             for t1, t_m_obj in caspian_grammar.grammar:
                 tr_match_queue, tr, _status = t_m_obj.is_match(n_mq.copy(), l_queue = running_l_stream)
-                if _status and (new_lr:=n_lr.copy().shift_reduce(tr.set_token_head(t1), tr_match_queue.op_count)) not in seen:
+                if _status:
+                    new_lr = n_lr.copy().shift_reduce(tr.set_token_head(t1), tr_match_queue.op_count)
                     f_goto = (rs_p:=running_l_stream.peek()) is None or rs_p.raw_token_name in goto.get(new_lr.peek_back().raw_token_name, set())
                     if f_goto or any(i.reduce_flag for i in new_lr):
                         to_r = True
                         r_queue.append(new_lr.to_match_queue())
-                        seen.add(new_lr)
-            
+
             if not to_r:
                 yield n_lr
 
@@ -286,8 +285,8 @@ class ASTGen:
                         if not line_stack:
                             full_stack.add_tokens(nl_obj)
                             full_stack_reduced_results = list(self.reduce_tokens(full_stack, running_l_stream = running_l_stream))
-                            print('full stack reduced results', full_stack_reduced_results)
-                            print('line stack status new', line_stack, line_stack.queue_status())
+                            #print('full stack reduced results', full_stack_reduced_results)
+                            #print('line stack status new', line_stack, line_stack.queue_status())
                             full_stack.set_stack(full_stack_reduced_results)
                         else:
                             running_l_stream.add_token(nl_obj)
@@ -296,9 +295,9 @@ class ASTGen:
                     continue
 
                 if line_stack.queue_status():
-                    print('error line stack stream', line_stack.streams[0])
+                    #print('error line stack stream', line_stack.streams[0])
                     token_base = self.first_invalid_token(list(line_stack.streams[0]))
-                    print('returned token base', token_base)
+                    #print('returned token base', token_base)
                     l_num, char_num = token_base.line_num, token_base.char_num
                     return {'status':False}, caspian_errors.ErrorPacket(l_num, char_num, caspian_errors.InvalidSyntax, self.stack, caspian_errors.ErrorPacket.char_error_marker(char_num, self.input_lines.get(l_num, ''), caspian_errors.InvalidSyntax))
                 
@@ -308,21 +307,21 @@ class ASTGen:
                 m_len = min([len(i) for i in full_stack.streams])
                 return {'status':True}, [i for i in full_stack if len(i) == m_len]
 
-            print('running_l_stream', running_l_stream)
+            #print('running_l_stream', running_l_stream)
             line_stack.add_tokens(running_l_stream.shift())
-            print('line_stack below')
-            print(line_stack)
+            #print('line_stack below')
+            #print(line_stack)
             reduced_results = list(self.reduce_tokens(line_stack, running_l_stream = running_l_stream, multiline = ml_state))
-            print('reduced results in here', reduced_results)
+            #print('reduced results in here', reduced_results)
             if not running_l_stream and (single_reduced:=[i[0] for i in reduced_results if len(i) == 1]):
                 full_stack.add_tokens(*single_reduced)
                 full_stack_reduced_results = list(self.reduce_tokens(full_stack, running_l_stream = running_l_stream))
-                print('full stack reduced results 2', full_stack_reduced_results)
+                #print('full stack reduced results 2', full_stack_reduced_results)
                 full_stack.set_stack(full_stack_reduced_results)
                 reduced_results = []
 
             line_stack.set_stack(reduced_results)
-            print('-'*20)
+            #print('-'*20)
                 
     def parse_group_block(self, _block:caspian_grammar.BlockTokenGroup) -> typing.Iterator:
         full_blocked_result, running_block = [], []
