@@ -1,6 +1,1 @@
-suppress
-    raise Exception
-else
-    pass
-finally
-    pass
+j = 10

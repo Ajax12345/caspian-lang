@@ -244,15 +244,6 @@ class ASTGen:
 
         while r_queue:
             n_lr = LRQueue(*(n_mq:=r_queue.popleft()))
-            '''
-            f_goto = (rs_p:=running_l_stream.peek()) is None or rs_p.raw_token_name in goto.get(n_lr.peek_back().raw_token_name, set())
-            f_rd, f_rd1 = False, False
-            for i in n_lr:
-                f_rd = i.reduce_flag or f_rd
-                f_rd1 = i.reduce_flag1 or f_rd1
-            '''
-            if any(getattr(i, 'reduce_flag1', False) for i in n_lr):
-                yield n_lr
 
             to_r = False
             for t1, t_m_obj in caspian_grammar.grammar:
@@ -370,9 +361,7 @@ class ASTGen:
                     return status, sub_block
 
                 block_queue.append(sub_block)
-            
-            #break #REMOVE THIS LATER
-        
+                    
         return {'status':True}, block_head
     
     def __exit__(self, *_) -> None:
@@ -445,6 +434,7 @@ if __name__ == '__main__':
     #---------------------
     #compute the total length of both queue (match, running, etc) and check against total length of grammar obj
     #check that potential reduce token type (t1) and lookahead are valid BEFORE match and reduce
+    #remove `seen` functionality in shift reduce
     #---------------------
     
     '''

@@ -76,7 +76,7 @@ grammar = [
                     |Token.Expr&Token.Comma&Token.CommaList
                     |Token.CommaList&Token.Comma&Token.Expr
                     |Token.CommaList&Token.Comma&Token.CommaList).ml),
-    (Token.Array.rd1,   (Token.OBracket&Token.CBracket
+    (Token.Array,   (Token.OBracket&Token.CBracket
                     |Token.OBracket&Token.Expr&Token.CBracket
                     |Token.OBracket&Token.CommaList&Token.CBracket).ml),
     (Token.Map,     (Token.OBrace&Token.CBrace
@@ -125,7 +125,7 @@ grammar = [
     (Token.ParenGroup, Token.OParen&(Token.Expr|Token.CommaList)&Token.CParen),
     (Token.FunSignature, (Token.Expr&Token.ParenGroup)._('fun_call')
                           |(Token.Expr&Token.OParen&Token.CParen)._('fun_call')),
-    (Token.ValueLabel.rd1, Token.Label.nonmatch('true', 
+    (Token.ValueLabel, Token.Label.nonmatch('true', 
                                          'false', 
                                          'null',
                                          'and',
@@ -193,14 +193,8 @@ grammar = [
                     |Token.LambdaFun
                     |Token.LambdaFunMulti),
 
-    (Token.Assign, (Token.ValueLabel
-                    |Token.Expr
-                    |Token.Array
-                    |Token.Map
-                    |Token.CommaList
-                    |Token.Getattr
-                    |Token.Getitem
-                    |Token.KeyValue)
+    (Token.Assign, (Token.Expr
+                    |Token.CommaList)
                     &Token.Eq
                     &(Token.Expr
                     |Token.CommaList)),
