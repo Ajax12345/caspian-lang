@@ -243,14 +243,12 @@ class ASTGen:
 
         while r_queue:
             n_lr = LRQueue(*(n_mq:=r_queue.popleft()))
-
             to_r = False
             for t1, t_m_obj in caspian_grammar.grammar:
-                tr_match_queue, tr, _status = t_m_obj.is_match(n_mq.copy(), l_queue = running_l_stream)
-                if _status:
-                    new_lr = n_lr.copy().shift_reduce(tr.set_token_head(t1), tr_match_queue.op_count)
-                    f_goto = (rs_p:=running_l_stream.peek()) is None or rs_p.raw_token_name in goto.get(new_lr.peek_back().raw_token_name, set())
-                    if f_goto or any(i.reduce_flag for i in new_lr):
+                if ((rs_p:=running_l_stream.peek()) is None or rs_p.raw_token_name in goto.get(t1.raw_token_name, set())) or any(i.reduce_flag for i in [*n_lr, t1]):
+                    tr_match_queue, tr, _status = t_m_obj.is_match(n_mq.copy(), l_queue = running_l_stream)
+                    if _status:
+                        new_lr = n_lr.copy().shift_reduce(tr.set_token_head(t1), tr_match_queue.op_count)
                         to_r = True
                         r_queue.append(new_lr.to_match_queue())
 
@@ -431,9 +429,6 @@ if __name__ == '__main__':
     #---------------------
     #TODO:
     #---------------------
-    #compute the total length of both queue (match, running, etc) and check against total length of grammar obj
-    #check that potential reduce token type (t1) and lookahead are valid BEFORE match and reduce
-    #remove `seen` functionality in shift reduce
     #---------------------
     
     '''

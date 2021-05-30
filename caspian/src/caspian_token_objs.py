@@ -193,13 +193,16 @@ class TokenMain:
             self.token_group_name = None
             self._neg_lookahead, self._lookahead = None, None
             self.token_search_ml = False
+            self.group_len = sum(getattr(i, 'group_len', 1) for i in tokens)
         
         def t_add_front(self, _t:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             self.token_groups.appendleft(_t)
+            self.group_len += getattr(_t, 'group_len', 1)
             return self
 
         def t_add_back(self, _t:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenGroup':
             self.token_groups.append(_t)
+            self.group_len += getattr(_t, 'group_len', 1)
             return self
 
         def _(self, _label:str) -> 'TokenGroup':
@@ -259,8 +262,11 @@ class TokenMain:
             if self._lookahead is not None:
                 _, _, s = self._lookahead.is_match(l_queue.to_match_queue(reverse=True))
                 if not s:
-                    return token_arr, None, False 
+                    return token_arr, None, False
 
+            if len(token_arr) < self.group_len: 
+                return token_arr, None, False
+                
             block_t_results = collections.deque()
             for i in list(self.token_groups)[::-1]:
                 t_arr, t_packet, m_status = i.is_match(token_arr.copy(), multiline = multiline, l_queue = l_queue)
