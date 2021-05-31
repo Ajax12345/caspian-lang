@@ -250,6 +250,10 @@ grammar = [
                     |(Token.KeyValue&BlockTokenGroup)),
     (Token.Decorator, (Token.At&Token.Expr&Token.FunctionBlock)
                     |(Token.At&Token.Expr&Token.AsyncFunctionBlock)
+                    |(Token.At&Token.Expr&Token.AbstractFunctionBlock)
+                    |(Token.At&Token.Expr&Token.AsyncAbstractFunctionBlock)
+                    |(Token.At&Token.Expr&Token.ClassBlock)
+                    |(Token.At&Token.Expr&Token.AbstractClassBlock)
                     |(Token.At&Token.Expr&Token.Decorator)),
     (Token.ClassStub, Token.Class&Token.Expr),
     (Token.ClassInherit, Token.ClassStub&Token.Inherits&(Token.Expr|Token.CommaList)),
@@ -354,3 +358,8 @@ def generate_goto() -> dict:
 if __name__ == '__main__':
     goto = generate_goto()
     print(goto['Getattr'])
+    '''
+    import time
+    print(int(''.join(str(time.time()).split('.'))))
+    print(int(''.join(str(time.time()).split('.'))))
+    '''
