@@ -191,9 +191,7 @@ grammar = [
                     |Token.ArrayComp
                     |Token.ArrayCompCond
                     |Token.MapComp
-                    |Token.MapCompCond
-                    |Token.LambdaFun
-                    |Token.LambdaFunMulti),
+                    |Token.MapCompCond),
 
     (Token.Assign, (Token.Expr
                     |Token.CommaList)
@@ -244,10 +242,6 @@ grammar = [
     (Token.StaticAsyncFunctionBlock, Token.Static&Token.AsyncFunctionBlock),
     (Token.StaticAbstractFunctionBlock, Token.Static&Token.AbstractFunctionBlock),
     (Token.StaticAsyncAbstractFunctionBlock, Token.Static&Token.AsyncAbstractFunctionBlock),
-    (Token.LambdaFun.rd, (Token.ParenGroup&Token.ParenGroup)
-                    |(Token.KeyValue&Token.ParenGroup)),
-    (Token.LambdaFunMulti.rd, (Token.ParenGroup&BlockTokenGroup)
-                    |(Token.KeyValue&BlockTokenGroup)),
     (Token.Decorator, (Token.At&Token.Expr&Token.FunctionBlock)
                     |(Token.At&Token.Expr&Token.AsyncFunctionBlock)
                     |(Token.At&Token.Expr&Token.AbstractFunctionBlock)

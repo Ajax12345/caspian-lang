@@ -1,3 +1,4 @@
-@test
-fun constructor():null
-    return
+fun test()
+    yield 10
+    yield 20
+    yield await asfd

@@ -345,8 +345,8 @@ class ASTGen:
             yield {'status':False}, _s_obj
             return
 
-        print('='*20)
-        print('final ast obj', _s_obj)
+        #print('='*20)
+        #print('final ast obj', _s_obj)
         _block.tokenized_statements = _s_obj
 
     def create_ast(self, token_lines:typing.List[TokenizedLine]) -> caspian_grammar.BlockTokenGroup:
@@ -429,7 +429,9 @@ if __name__ == '__main__':
     #---------------------
     #TODO:
     #---------------------
-    #add class decorator to grammar
+    #add boolean negation to grammar i.e !flag
+    #add (+, -, *, /)= operator AND var(++, --)
+    #add (a, b, c) => a + b + c | a => a+1 for new lambda syntax
     #---------------------
     
     '''

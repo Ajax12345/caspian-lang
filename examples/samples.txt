@@ -16,7 +16,7 @@ iterator
 Type
 
 Union by itself will take anything, Union[type1, type2] will only take type1 or type2
-
+//advanced typing formats like Union should be imported
 //operators
 <
 >
@@ -253,22 +253,6 @@ x1 = "james" |> get_length
 
 
 
-//lambdas
-
-(a:int, b:int, c:int):int(a+b+c) //callable object
-f = (a:int, b:int, c:int):int(a+b+c)
-(a:int, b:int, c:int):int(a+b+c)(1, 2, 3)
-
-//multiline lambdas
-((a, b, c):int[weak~true]
-    x = a + b + c
-    while true  
-        x = x + 1
-        if x%3
-            break
-    return x)(1, 2, 3)
-
-
 //generators
 
 fun my_gen()
@@ -396,11 +380,6 @@ and
 or
 
 //for any object o, attaching a primative can be accomplished via o[primative::prim_func]:
-o[primative::iterator] = ():iterator
-                            yield 10
-                            yield 20
-                            yield 30
-
 fun iter_add()
     for i in range(10)
         yield i
@@ -454,8 +433,15 @@ async fun main()
 //asyncio.run blocks the rest of the program from running until main has been run
 result1 = asyncio.run(main)
 //imagine, want to run get_random ten times, but only in 3 seconds total, and get back all get_results
-result = asyncio.parallel(..[get_random for _ in range(10)])
+result = asyncio.parallel(..[get_random() for _ in range(10)])
+//to get around the blocking, a form of asyncio.create_task is needed
+async fun do_in_parallel()
+    await asyncio.sleep(3)
+    return something
 
+async fun main()
+    asyncio.create_task(do_in_parallel()) //this gets submitted to the task queue
+    await asyncio.sleep(5)
 
 //syntax proposals
 //assignment expression
@@ -463,3 +449,41 @@ for i in x~[1, 2, 3]
     print(i)
 
 print(x) //x => [1, 2, 3]
+
+//const, private [NOT RIGHT NOW]
+x:int[private~true] = 10
+x:int[const~true] = 10 //cannot be reassigned to a different integer
+y:List[int][private~true] = [1, 2, 3]
+//can do const/private with methods
+class J 
+    fun get_name[private~true]() //need to add neg lookahead for this to work
+        return this.toString()
+
+    fun primative::toString()
+        return "Hi, I am James
+
+J().get_name() //raises a private attribute(name?) error
+
+//add string formatting
+//new lambda syntax:
+// x => x + 1
+//(x, y, z) => x * y + z
+//((x, y, z) => x * y + z)(..[1, 2, 3])
+//inline declarative for-loop:
+//for x in range(10) for y in range(x)
+//    console.log(x + y)
+
+//generators need gen.next() method:
+fun test()
+    yield 10
+    yield 20
+    yield 30
+
+g = test()
+print(g.next()) // => 10
+//perhaps
+next(g) // => 20 ???
+//disassemble an object?
+dis(obj)
+//{'names':{'attr1':232, 'fun1':<fun at 232323231>}}
+//convert paran group in an expression to an immutable array?
