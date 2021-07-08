@@ -50,8 +50,8 @@ grammar = [
     (Token.Equals.rd, Token.Eq&Token.Eq),
     (Token.Le.rd, Token.LArrow&Token.Eq),
     (Token.Ge.rd, Token.RArrow&Token.Eq),
-    (Token.Ge.rd, Token.RArrow&Token.Eq),
     (Token.Ne.rd, Token.Not&Token.Eq),
+    (Token.Lambda.rd, Token.Eq&Token.RArrow),
     (Token.ChainOp.rd, Token.Or&Token.RArrow),
     (Token.Operator, Token.Plus
                     |Token.Minus
@@ -66,6 +66,7 @@ grammar = [
                     |Token.Or
                     |Token.And
                     |Token.Ne
+                    |Token.Lambda
                     |Token.ChainOp
                     |Token.Label.match('and')._('bool_and')
                     |Token.Label.match('or')._('bool_or')),

@@ -429,8 +429,7 @@ if __name__ == '__main__':
     #---------------------
     #TODO:
     #---------------------
-    #add (+, -, *, /)= operator AND var(++, --)
-    #add (a, b, c) => a + b + c | a => a+1 for new lambda syntax
+    #add (+, -, *, /)= operator AND var(++, --) (not just now)
     #---------------------
     
     '''
