@@ -429,7 +429,6 @@ if __name__ == '__main__':
     #---------------------
     #TODO:
     #---------------------
-    #add boolean negation to grammar i.e !flag
     #add (+, -, *, /)= operator AND var(++, --)
     #add (a, b, c) => a + b + c | a => a+1 for new lambda syntax
     #---------------------

@@ -167,6 +167,7 @@ grammar = [
     (Token.MapComp, (Token.OBrace&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.CBrace).ml),
     (Token.MapCompCond, (Token.OBrace&Token.Expr&(Token.ForExpr|Token.ForBlockInline)&Token.IfCond&Token.CBrace).ml),
     (Token.InlineCond, Token.Expr&Token.If&Token.Expr&Token.Else&Token.Expr),
+    (Token.NegExpr, (Token.Not&Token.Expr).neg_lookahead(Token.Star|Token.Slash|Token.OParen|Token.Dot|Token.OBracket)),
     (Token.Expr,    Token.ValueLabel
                     |Token.Operation
                     |Token.Integer
@@ -191,7 +192,8 @@ grammar = [
                     |Token.ArrayComp
                     |Token.ArrayCompCond
                     |Token.MapComp
-                    |Token.MapCompCond),
+                    |Token.MapCompCond
+                    |Token.NegExpr),
 
     (Token.Assign, (Token.Expr
                     |Token.CommaList)
@@ -351,7 +353,7 @@ def generate_goto() -> dict:
 
 if __name__ == '__main__':
     goto = generate_goto()
-    print(goto['Getattr'])
+    print(goto['RArrow'])
     '''
     import time
     print(int(''.join(str(time.time()).split('.'))))
