@@ -11,9 +11,7 @@ Map
 function
 lambda
 class
-Union
 iterator
-Type
 
 Union by itself will take anything, Union[type1, type2] will only take type1 or type2
 //advanced typing formats like Union should be imported
@@ -342,27 +340,19 @@ class A
 
 a = A() //raises Abstract error, because test was not overridden
 
-class B
-    abstract* fun test()
-        `something`
-
-b = B() // no error raised, test is weak (from the addition of the "*")
-
 //private variables?
 class J
     fun constructor():null
         this.val[private~true] = 'james'
     
 
-//should all objects inherit from an Object class?
+//should all objects inherit from an Object class? (yes)
 
 //primatives
 getitem //supports multiple getitem paramters o[1, 2, 3], o[1, 2, 3:4]
 setitem //supports multiple getitem paramters o[1, 2, 3] = 10
 getattr
 setattr
-get
-set
 eq
 ne
 lt
@@ -374,7 +364,6 @@ sub
 mul
 div
 iterator
-next
 type_check
 and
 or
