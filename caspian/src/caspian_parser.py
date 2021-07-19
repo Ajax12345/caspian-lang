@@ -1,9 +1,9 @@
 import typing, collections, itertools
 import caspian_errors, caspian_grammar
-import re, copy
+import re, copy, state_objects
 
 goto = caspian_grammar.generate_goto()
-#print(goto)
+
 class TokenizedLine:
     def __init__(self) -> None:
         self.token_line = collections.deque()
