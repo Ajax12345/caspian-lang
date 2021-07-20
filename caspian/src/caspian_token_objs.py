@@ -1,5 +1,5 @@
 import typing, collections, csp_types.caspian_types
-import copy
+import copy, internal_errors
 
 __all__ = ('TokenMain',)
 
@@ -30,6 +30,10 @@ class TokenMain:
         @property
         def raw_token_name(self) -> str:
             return self.__class__.__name__
+
+        @property
+        def state_exec_name(self) -> str:
+            return self.raw_token_name
         
         def __iter__(self) -> typing.Iterator:
             yield from self.body_lines
@@ -145,6 +149,10 @@ class TokenMain:
         @property
         def raw_token_name(self) -> str:
             return self.name
+
+        @property
+        def state_exec_name(self) -> str:
+            return self.raw_token_name
             
         def __eq__(self, _token:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> bool:
             if self.name != _token.raw_token_name:
@@ -228,6 +236,13 @@ class TokenMain:
         def __or__(self, _t_or:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenOr':
             return TokenMain.TokenOr(self, _t_or)
 
+        @property
+        def state_exec_name(self) -> str:
+            if self.token_group_name is not None:
+                return self.token_group_name
+
+            raise internal_errors.StateExecNameMissing(f"No identifying string for {self.token_groups}")
+            
         def __eq__(self, _token:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> bool:
             if self.token_head is None:
                 return False
@@ -317,6 +332,14 @@ class TokenMain:
         @property
         def raw_token_name(self) -> str:
             return self.token_head.raw_token_name
+
+        @property
+        def state_exec_name(self) -> str:
+            if self.token_group_name is not None:
+                return self.token_group_name
+
+            raise internal_errors.StateExecNameMissing(f"No identifying string for {self.token_groups}")
+            
 
         def t_add_front(self, _t:typing.List[typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']]) -> 'TokenOr':
             self.token_groups.appendleft(_t)

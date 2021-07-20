@@ -3,3 +3,9 @@ class InvalidSource(Exception):
 
 class MissingStackHeap(Exception):
     pass
+
+class LRQueueLengthError(Exception):
+    pass
+
+class StateExecNameMissing(Exception):
+    pass
