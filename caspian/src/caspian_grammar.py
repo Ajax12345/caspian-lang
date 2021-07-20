@@ -68,8 +68,8 @@ grammar = [
                     |Token.Ne
                     |Token.Lambda
                     |Token.ChainOp
-                    |Token.Label.match('and')._('bool_and')
-                    |Token.Label.match('or')._('bool_or')),
+                    |Token.Label.match('and')._('BoolAnd')
+                    |Token.Label.match('or')._('BoolOr')),
     (Token.Operation, (Token.Expr&Token.Operator&Token.Expr).neg_lookahead(Token.Star|Token.Slash|Token.OParen|Token.Dot|Token.OBracket)),
     (Token.KeyValue, Token.Expr&Token.Colon&Token.Expr),
     (Token.AssignExpr.rd, Token.Expr&Token.CurlyQ&Token.Expr),
@@ -125,8 +125,8 @@ grammar = [
     (Token.ForBlockInline, Token.ForExpr&Token.ForExpr
                            |Token.ForExpr&Token.ForBlockInline),
     (Token.ParenGroup, Token.OParen&(Token.Expr|Token.CommaList)&Token.CParen),
-    (Token.FunSignature, (Token.Expr&Token.ParenGroup)._('fun_call')
-                          |(Token.Expr&Token.OParen&Token.CParen)._('fun_call')),
+    (Token.FunSignature, (Token.Expr&Token.ParenGroup)._('FunCall')
+                          |(Token.Expr&Token.OParen&Token.CParen)._('FunCall')),
     (Token.ValueLabel, Token.Label.nonmatch('true', 
                                          'false', 
                                          'null',
@@ -202,16 +202,16 @@ grammar = [
                     &(Token.Expr
                     |Token.CommaList)),
     (Token.ImportStmn,  Token.Import&Token.Expr
-                    |(Token.ImportStmn&Token.As&Token.Expr)._('import_as')),
+                    |(Token.ImportStmn&Token.As&Token.Expr)._('ImportAs')),
     (Token.YieldStmn, Token.Yield&Token.Expr
                     |Token.YieldFrom&Token.Expr),
     (Token.PassStmn, Token.Pass),
-    (Token.Stmn,    (Token.Label.match('raise')&Token.Expr.eof)._('raise')
-                    |(Token.Label.match('continue').eof)._('continue')
-                    |(Token.Label.match('break').eof)._('break')
+    (Token.Stmn,    (Token.Label.match('raise')&Token.Expr.eof)._('Raise')
+                    |(Token.Label.match('continue').eof)._('Continue')
+                    |(Token.Label.match('break').eof)._('Break')
                     |Token.ImportStmn
                     |Token.YieldStmn
-                    |(Token.Return&Token.Expr)._('return_stmn')
+                    |(Token.Return&Token.Expr)._('ReturnStmn')
                     |Token.PassStmn),
     (Token.IfCond, Token.If&Token.Expr),
     (Token.ElifCond, Token.Elif&Token.Expr),
