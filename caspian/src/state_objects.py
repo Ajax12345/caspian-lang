@@ -1,18 +1,28 @@
 import typing, sys, functools
+import warnings, internal_errors
 
-class StackLevel:
-    pass
+class Scopes:
+    class ScopeBase:
+        pass
+    
+    class MainBlock(ScopeBase):
+        pass
 
-class MainLevel(StackLevel):
-    def __str__(self) -> str:
-        return '<main>'
+    
 
-class FileLevel(StackLevel):
-    def __init__(self, _f_path:str) -> None:
-        self.f_path = _f_path
+class StackLevels:
+    class StackLevelBase:
+        pass
 
-    def __str__(self) -> str:
-        return self.f_path
+    class MainLevel(StackLevelBase):
+        def __str__(self) -> str:
+            return '<main>'
+
+    class FileLevel(StackLevelBase):
+        def __init__(self, _f_path:str) -> None:
+            self.f_path = _f_path
+        def __str__(self) -> str:
+            return self.f_path
 
 class ExecStatus:
     def __init__(self, **kwargs) -> None:
@@ -29,6 +39,9 @@ def log_errors(_f:typing.Callable) -> typing.Callable:
     @functools.wraps(_f)
     def error_logger(_self, *args, **kwargs) -> typing.Any:
         if isinstance((r:=_f(_self, *args, **kwargs)), ExecStatus) and r.error:
+            if not hasattr(_self, 'stack_heap'):
+                warnings.warn(f"'{_self}' has no associated 'stack_heap' attribute. This will become an error shortly")
+            
             print(r.error_packet.gen_error)
             sys.exit(0)
         return r

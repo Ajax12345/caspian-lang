@@ -1,11 +1,11 @@
 import typing, caspian_parser, state_objects
 import collections, itertools, re, os
-import internal_errors
+import internal_errors, compile_states
 
 class CallStack:
     def __init__(self, max_depth = 1000) -> None:
         self.max_depth, self.c_count = max_depth, 0
-        self.head = state_objects.MainLevel()
+        self.head = state_objects.StackLevels.MainLevel()
         self.stack = collections.deque()
 
 class MemHeap:
@@ -26,7 +26,7 @@ class CaspianCompile:
             if not os.path.isfile(resource):
                 raise internal_errors.InvalidSource(f"'{resource}' is not a file")
             
-            self.call_stack.head = state_objects.FileLevel(resource)
+            self.call_stack.head = state_objects.StackLevels.FileLevel(resource)
             with open(resource) as f:
                 resource = f.read()
 
@@ -35,6 +35,7 @@ class CaspianCompile:
             astgen.input_lines = lines
             ast = astgen.create_ast(_r_obj)
             print('resulting ast from compiler', ast)
+            _ = compile_states.Compiler.head_compile(self, ast)
 
     
     def __exit__(self, *_) -> None:
