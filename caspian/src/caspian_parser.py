@@ -30,13 +30,14 @@ class TokenizedLine:
         return f'<Tokenline: {", ".join(map(str, self.token_line))}; indent={self.whitespace_count}>'
 
 class Parser:
-    def __init__(self, *args, **kwargs) -> None:
-        self.stack = None
+    def __init__(self, stack_heap:typing.Union['CaspianCompile', None] = None) -> None:
+        self.stack_heap = stack_heap
         
     def __enter__(self) -> 'Parser':
         return self
     
-    def parse_line(self, _line_num:int, _line:str) -> typing.Union[caspian_errors.ErrorPacket, TokenizedLine]:
+    @state_objects.log_errors
+    def parse_line(self, _line_num:int, _line:str) -> typing.Union[state_objects.ExecStatus, TokenizedLine]:
         _o_line, t_lines = _line, TokenizedLine()
         _char_count, seen_non_space = 0, False
         while _line:
@@ -47,7 +48,7 @@ class Parser:
                     t_lines.add_token((full_token:=t_p(_line_num+1, _char_count, (m_val:=m.group()))))
                     if full_token != caspian_grammar.Token.Space:
                         if not seen_non_space and t_lines.whitespace_count%4:
-                            return caspian_errors.ErrorPacket(_line_num, _char_count, caspian_errors.InvalidIndentation, self.stack, caspian_errors.ErrorPacket.char_error_marker(_char_count, _o_line, caspian_errors.InvalidIndentation))
+                            return state_objects.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(_line_num, _char_count, caspian_errors.InvalidIndentation, caspian_errors.ErrorPacket.char_error_marker(_char_count, _o_line, caspian_errors.InvalidIndentation)))
                         seen_non_space = True
                     elif not seen_non_space:
                         t_lines.whitespace_count += 1
@@ -56,25 +57,22 @@ class Parser:
                     break
 
             if not _f:
-                return caspian_errors.ErrorPacket(_line_num, _char_count, caspian_errors.InvalidSyntax, self.stack, caspian_errors.ErrorPacket.char_error_marker(_char_count, _o_line, caspian_errors.InvalidSyntax))
+                return state_objects.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(_line_num, _char_count, caspian_errors.InvalidSyntax, caspian_errors.ErrorPacket.char_error_marker(_char_count, _o_line, caspian_errors.InvalidSyntax)))
                 
         return t_lines.remove_whitespace()
 
     def strip_comments(self, _line:str) -> str:
         return re.sub('//[\w\W]+', '', _line)
 
-    def parse(self, str_content:str) -> typing.Tuple[dict, typing.Union[dict, None], typing.Union[caspian_errors.ErrorPacket, typing.List[TokenizedLine]]]:
+    def parse(self, str_content:str) -> typing.Tuple[typing.Union[dict, None], typing.Union[caspian_errors.ErrorPacket, typing.List[TokenizedLine]]]:
         tokenized_lines, full_lines = [], {}
         for i, _line in enumerate(filter(None, str_content.split('\n'))):
             full_lines[i+1] = _line
             if (line:=self.strip_comments(_line)):
-                if isinstance((p_r:=self.parse_line(i, line)), caspian_errors.ErrorPacket):
-                    return {'status':False}, None, p_r
-                
-                if p_r.token_line:
+                if (p_r:=self.parse_line(i, line)).token_line:
                     tokenized_lines.append(p_r)
 
-        return {'status':True}, full_lines, tokenized_lines
+        return full_lines, tokenized_lines
 
     
     def __exit__(self, *_) -> None:
@@ -229,8 +227,8 @@ class SeenLRQueue(SeenTokenQueue):
         return f'<{", ".join(map(str, self.seen_tokens))}>'
 
 class ASTGen:
-    def __init__(self, input_lines:dict = {}) -> None:
-        self.stack = None
+    def __init__(self, stack_heap:typing.Union['CaspianCompile', None], input_lines:dict = {}) -> None:
+        self.stack_heap = stack_heap
         self.input_lines = input_lines
 
     def __enter__(self) -> 'ASTGen':
@@ -271,7 +269,8 @@ class ASTGen:
 
         return self.leftmost_root(token_lr_queue[-1])
 
-    def to_ast_stream(self, _row_blocks:StreamQueue) -> typing.Union[typing.Tuple[dict, caspian_errors.ErrorPacket], LRQueue]:
+    @state_objects.log_errors
+    def to_ast_stream(self, _row_blocks:StreamQueue) -> typing.Union[typing.Tuple[state_objects.ExecStatus], LRQueue]:
         full_stack, line_stack, running_l_stream = ReduceQueue(), ReduceQueue(), LRQueue()
         ml_state = False
         while True:
@@ -297,13 +296,13 @@ class ASTGen:
                     token_base = self.first_invalid_token(list(line_stack.streams[0]))
                     #print('returned token base', token_base)
                     l_num, char_num = token_base.line_num, token_base.char_num
-                    return {'status':False}, caspian_errors.ErrorPacket(l_num, char_num, caspian_errors.InvalidSyntax, self.stack, caspian_errors.ErrorPacket.char_error_marker(char_num, self.input_lines.get(l_num, ''), caspian_errors.InvalidSyntax))
+                    return state_objects.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(l_num, char_num, caspian_errors.InvalidSyntax, caspian_errors.ErrorPacket.char_error_marker(char_num, self.input_lines.get(l_num, ''), caspian_errors.InvalidSyntax)))
                 
                 if not full_stack:
-                    return {'status':True}, []
+                    return []
 
                 m_len = min([len(i) for i in full_stack.streams])
-                return {'status':True}, [i for i in full_stack if len(i) == m_len]
+                return [i for i in full_stack if len(i) == m_len]
 
             #print('running_l_stream', running_l_stream)
             line_stack.add_tokens(running_l_stream.shift())
@@ -328,23 +327,17 @@ class ASTGen:
                 running_block.append(line)
             else:
                 if running_block:
-                    yield {'status':True}, (new_block:=caspian_grammar.BlockTokenGroup.form_new_block(running_block))
+                    yield (new_block:=caspian_grammar.BlockTokenGroup.form_new_block(running_block))
                     full_blocked_result.append(new_block)
                     running_block = []
                 full_blocked_result.append(line)
 
         if running_block:
-            yield {'status':True}, (new_block:=caspian_grammar.BlockTokenGroup.form_new_block(running_block))
+            yield (new_block:=caspian_grammar.BlockTokenGroup.form_new_block(running_block))
             full_blocked_result.append(new_block)
             running_block = []
         
-        _status, _s_obj = self.to_ast_stream(StreamQueue.to_queue(full_blocked_result))
-        if not _status['status']:
-            print(_s_obj.gen_error)
-            #add error yielding here
-            yield {'status':False}, _s_obj
-            return
-
+        _s_obj = self.to_ast_stream(StreamQueue.to_queue(full_blocked_result))
         #print('='*20)
         #print('final ast obj', _s_obj)
         _block.tokenized_statements = _s_obj
@@ -353,13 +346,10 @@ class ASTGen:
         block_head = caspian_grammar.BlockTokenGroup(token_lines)
         block_queue = collections.deque([block_head])
         while block_queue:
-            for status, sub_block in self.parse_group_block(block_queue.popleft()):
-                if not status['status']:
-                    return status, sub_block
-
+            for sub_block in self.parse_group_block(block_queue.popleft()):
                 block_queue.append(sub_block)
                     
-        return {'status':True}, block_head
+        return block_head
     
     def __exit__(self, *_) -> None:
         pass
@@ -407,20 +397,12 @@ if __name__ == '__main__':
         nx.draw(ast_graph, pos, labels=labels, with_labels = True)
         plt.show()
 
-    with open('testing_file.txt') as f, Parser() as p, ASTGen() as astgen:
-        status, lines, _r_obj = p.parse(f.read())
-        if not status['status']:
-            print(_r_obj.gen_error)
-        else:
-            astgen.input_lines = lines
-            status, ast = astgen.create_ast(_r_obj)
-            print('+'*20)
-            if status['status']:
-                print('resulting ast', ast)
-                #ast.tokenized_statements = ast.tokenized_statements[-1:]
-                display_ast(ast)
-            else:
-                print(ast.gen_error)
+    with open('testing_file.txt') as f, Parser(None) as p, ASTGen(None) as astgen:
+        lines, _r_obj = p.parse(f.read())
+        astgen.input_lines = lines
+        ast = astgen.create_ast(_r_obj)
+        print('resulting ast', ast)
+        display_ast(ast)
 
     #---------------------
     #TO WATCH:
