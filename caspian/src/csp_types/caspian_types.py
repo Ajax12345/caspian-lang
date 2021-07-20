@@ -68,3 +68,9 @@ class TokenOr(abc.ABC):
     @abc.abstractmethod 
     def lookahead(self, _t_obj:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> 'TokenOr':
         '''set (positive) lookahead for token match'''
+
+
+class CompilerTypes(abc.ABC):
+    @abc.abstractmethod
+    def exec_BlockTokenGroup(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''takes in an @_ast set to a BlockTokenGroup and traverses _ast.tokenized_statements'''

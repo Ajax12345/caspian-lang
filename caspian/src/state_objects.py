@@ -1,14 +1,22 @@
 import typing, sys, functools
 import warnings, internal_errors
+import copy
 
 class Scopes:
     class ScopeBase:
-        pass
+        def __str__(self) -> str:
+            return f"<scope '{self.name}'>"
+
+        @property
+        def name(self) -> str:
+            return self.__class__.__name__
+
+        def __repr__(self) -> str:
+            return str(self)
     
     class MainBlock(ScopeBase):
         pass
 
-    
 
 class StackLevels:
     class StackLevelBase:
@@ -23,6 +31,22 @@ class StackLevels:
             self.f_path = _f_path
         def __str__(self) -> str:
             return self.f_path
+
+class VariableScope:
+    def __init__(self) -> None:
+        self.names = {}
+
+class VariableScopes:
+    def __init__(self, set_default:bool=True) -> None:
+        self.var_scope_paths:typing.List[VariableScope] = []
+        if set_default:
+            self.var_scope_paths.append(VariableScope())
+
+    def __len__(self) -> int:
+        return len(self.var_scope_paths)
+    
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({(_l:=len(self))} scope{"s" if _l != 1 else ""})'
 
 class ExecStatus:
     def __init__(self, **kwargs) -> None:
