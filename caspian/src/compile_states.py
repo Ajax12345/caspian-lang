@@ -12,7 +12,6 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
 
         return so.ExecStatus(exit_block = True, exit_stmn = so.BlockExits.Continue)        
 
-
     @so.log_errors
     def exec_Break(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
         if not isinstance(scope, (so.Scopes.WhileBlock, so.Scopes.ForBlock)):
@@ -30,11 +29,25 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
             if (l_len:=len(l_ast)) != 1:
                 raise internal_errors.LRQueueLengthError(f"found queue ({l_ast}) with length != 1 ({l_len})")
 
+            if not hasattr(self, f'exec_{l_ast[0].state_exec_name}'):
+                return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket((rm_term:=self.__class__.rightmost_nonterminal(l_ast[0])).line_num, rm_term.char_num, caspian_errors.InvalidSyntax, caspian_errors.ErrorPacket.char_error_marker(rm_term.char_num, self.stack_heap.lines.get(rm_term.line_num, ''), caspian_errors.InvalidSyntax)))
+            
             exec_response = getattr(self, f'exec_{l_ast[0].state_exec_name}')(l_ast[0], scope, scope_vars)
             if exec_response.exit_block:
                 return exec_response
 
         return so.ExecStatus(finished = True)
+
+    @classmethod
+    def rightmost_nonterminal(cls, _ast:typing.Union['TokenRoot', 'TokenGroup']) -> 'TokenRoot':
+        if hasattr(_ast, 'pointer_next'):
+            if _ast.pointer_next is None:
+                return _ast
+
+            return cls.rightmost_nonterminal(_ast.pointer_next)
+        
+        return cls.rightmost_nonterminal(_ast.ast_blocks[-1])
+        
 
     @classmethod
     def head_compile(cls, _stack_heap:'CaspianCompile', _ast:'BlockTokenGroup') -> None:
