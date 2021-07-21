@@ -2,6 +2,22 @@ import typing, sys, functools
 import warnings, internal_errors
 import copy
 
+class BlockExits:
+    class ExitStatus:
+        pass
+    
+    class Break(ExitStatus):
+        pass
+
+    class Continue(ExitStatus):
+        pass
+    
+    class Return(ExitStatus):
+        pass
+    
+    class Yield(ExitStatus):
+        pass
+
 class Scopes:
     class ScopeBase:
         def __str__(self) -> str:
@@ -16,6 +32,19 @@ class Scopes:
     
     class MainBlock(ScopeBase):
         pass
+
+    class WhileBlock(ScopeBase):
+        pass
+
+    class ForBlock(ScopeBase):
+        pass
+    
+    class FunctionBlock(ScopeBase):
+        pass
+
+    class YieldFunctionBlock(ScopeBase):
+        pass
+
 
 
 class StackLevels:

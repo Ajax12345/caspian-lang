@@ -1,2 +1,1 @@
-for {'a':a, 'b':[b, ..c]}, [[j, k], l] in iterable
-    pass
+continue

@@ -72,5 +72,17 @@ class TokenOr(abc.ABC):
 
 class CompilerTypes(abc.ABC):
     @abc.abstractmethod
+    def exec_Continue(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''executes a `continue` statement'''
+        
+    @abc.abstractmethod
+    def exec_Break(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''executes a `break` statement'''
+
+    @abc.abstractmethod
+    def exec_Stmn(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''takes in a Stmn @_ast and delegates to sub statement exec'''
+
+    @abc.abstractmethod
     def exec_BlockTokenGroup(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
         '''takes in an @_ast set to a BlockTokenGroup and traverses _ast.tokenized_statements'''

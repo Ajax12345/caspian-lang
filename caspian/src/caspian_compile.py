@@ -17,6 +17,7 @@ class CaspianCompile:
     def __init__(self) -> None:
         self.call_stack = CallStack()
         self.heap = MemHeap()
+        self.lines = None
 
     def __enter__(self) -> 'CaspianCompile':
         return self
@@ -35,6 +36,7 @@ class CaspianCompile:
             astgen.input_lines = lines
             ast = astgen.create_ast(_r_obj)
             print('resulting ast from compiler', ast)
+            self.lines = lines
             _ = compile_states.Compiler.head_compile(self, ast)
 
     
