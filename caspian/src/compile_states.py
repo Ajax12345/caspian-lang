@@ -6,6 +6,10 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
         self.stack_heap = stack_heap
 
     @so.log_errors
+    def exec_PassStmn(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return so.ExecStatus(pass_stmn = True)        
+
+    @so.log_errors
     def exec_Continue(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
         if not isinstance(scope, (so.Scopes.WhileBlock, so.Scopes.ForBlock)):
             return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(_ast.ast_blocks[0].line_num, _ast.ast_blocks[0].char_num, caspian_errors.InvalidSyntax, "'continue' must be inside loop"))
