@@ -72,6 +72,10 @@ class TokenOr(abc.ABC):
 
 class CompilerTypes(abc.ABC):
     @abc.abstractmethod
+    def exec_Expr(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''runs the contents of an expression block'''
+
+    @abc.abstractmethod
     def exec_PassStmn(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
         '''executes a `continue` statement'''
 

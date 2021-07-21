@@ -6,6 +6,10 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
         self.stack_heap = stack_heap
 
     @so.log_errors
+    def exec_Expr(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return getattr(self, f'exec_{_ast.pointer_next.state_exec_name}')(_ast.pointer_next, scope, scope_vars)
+
+    @so.log_errors
     def exec_PassStmn(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
         return so.ExecStatus(pass_stmn = True)        
 
