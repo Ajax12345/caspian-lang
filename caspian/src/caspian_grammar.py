@@ -227,7 +227,7 @@ grammar = [
     (Token.SuppressSignature, Token.Suppress&Token.Expr
                     |Token.Suppress&Token.CommaList),
     (Token.ThenSignature, Token.Then&Token.CommaList),
-     (Token.SuppressBlock, (Token.SuppressSignature|Token.Suppress)&BlockTokenGroup
+    (Token.SuppressBlock, (Token.SuppressSignature|Token.Suppress)&BlockTokenGroup
                     |(Token.SuppressBlock&(Token.ThenSignature|Token.Then)&BlockTokenGroup)
                     |(Token.SuppressBlock&Token.Finally&BlockTokenGroup)
                     |(Token.SuppressBlock&Token.Else&BlockTokenGroup)),
