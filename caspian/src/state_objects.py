@@ -1,6 +1,6 @@
 import typing, sys, functools
 import warnings, internal_errors
-import copy
+import copy, collections
 
 class BlockExits:
     class ExitStatus:
@@ -99,3 +99,15 @@ def log_errors(_f:typing.Callable) -> typing.Callable:
             sys.exit(0)
         return r
     return error_logger
+
+
+class CallStack:
+    def __init__(self, max_depth = 1000) -> None:
+        self.max_depth, self.c_count = max_depth, 0
+        self.head = StackLevels.MainLevel()
+        self.stack = collections.deque()
+
+class MemHeap:
+    def __init__(self) -> None:
+        self.ref_count = 0
+        self.mem_objects = {}

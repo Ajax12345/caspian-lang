@@ -33,8 +33,8 @@ class CaspianObjFactor:
         @list parents //stores the parent base classes
 
     '''
-    def __init__(self, _heap:typing.Union['MemHeap', None] = None) -> None:
-        self.heap = _heap
+    def __init__(self, _heap:typing.Union[state_objects.MemHeap, None] = None) -> None:
+        self.heap = _heap if _heap is not None else state_objects.MemHeap()
         self.name_bindings = {}
 
     @property
@@ -73,6 +73,6 @@ class CaspianObjFactor:
 
         return _static()
 
-    def __call__(self, _heap:'MemHeap') -> 'CaspianObjFactor':
+    def __call__(self, _heap:state_objects.MemHeap) -> 'CaspianObjFactor':
         self.heap = _heap
         return self
