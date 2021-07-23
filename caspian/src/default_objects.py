@@ -3,6 +3,10 @@ import state_objects as so
 
 o = object_factory.CaspianObjFactor()
 
+@o.primative.toString
+def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
+    return scope_vars['String'].instantiate(f"<{this._type} '{this.name}' at {this.id}>")
+
 @o.class_
 def Fun() -> True:
     @o.primative.toString

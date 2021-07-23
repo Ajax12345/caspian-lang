@@ -1,4 +1,4 @@
-import typing, so as so
+import typing, state_objects as so
 
 class CaspianObj:
     def __init__(self, **kwargs) -> None:
@@ -47,10 +47,13 @@ class CaspianObjFactor:
             heap = self.heap, 
             name_bindings = self.name_bindings,
             ref_count = 1,
-            _type='fun',
-            public={'__name__':self.name_bindings['String'].instantiate(_f.__name__), 
+            _type = 'function',
+            name = _f.__name__,
+            id = _id.id,
+            public = {'__name__':self.name_bindings['String'].instantiate(_f.__name__), 
                     '__type__':self.name_bindings['Fun']
                     '__id__':self.name_bindings['Integer'].instantiate(_id.id)},
+            private = {'toString':self.name_bindings['toString']}
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:

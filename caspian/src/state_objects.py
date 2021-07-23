@@ -130,8 +130,39 @@ class PyBaseObj:
     def __init__(self, _val:typing.Any, private=True) -> None:
         self.val, self.private = _val, private
 
+class HeapPromiseMethod:
+    def __init__(self, _method, _f:typing.Callable) -> None:
+        self.method, self.f = _method, _f
+    
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({self.method})'
+
+class HeapPromise:
+    def __init__(self, _obj_name:str) -> None:
+        self.obj_name = _obj_name
+        self.action_states = []
+
+    def __getattr__(self, _n:str) -> 'HeapPromise':
+        self.action_states.append(HeapPromiseMethod('getattr', lambda x:functools.partial(getattr, x, _n)))
+        return self
+
+    def __call__(self, *args, **kwargs) -> "HeapPromise":
+        self.action_states.append(HeapPromiseMethod('call', lambda x:functools.partial(x, *args, **kwargs)))
+        return self
+
+    def __repr__(self) -> str:
+        return f"<Promise for variable '{self.obj_name}', {self.action_states}>"
+
 class NameBindings:
     def __init__(self) -> None:
         self.bindings = {}
 
-    def __getitem__(self, )
+    def __getitem__(self, _name:str) -> typing.Union[ObjRefId, HeapPromise]:
+        if _name in self.bindings:
+            return self.bindings[_name]
+
+        return HeapPromise(_name)
+
+if __name__ == '__main__':
+    n = NameBindings()
+    print(n['james'].instantiate(3, 4, 5))
