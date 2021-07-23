@@ -107,7 +107,31 @@ class CallStack:
         self.head = StackLevels.MainLevel()
         self.stack = collections.deque()
 
+class ObjRefId:
+    def __init__(self, _id:int) -> None:
+        self.id = _id
+    
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({self.id})'
+
 class MemHeap:
     def __init__(self) -> None:
         self.ref_count = 0
         self.mem_objects = {}
+
+    def __setitem__(self, _id:ObjRefId, _obj:'CaspianObj') -> None:
+        self.mem_objects[_id] = _obj
+
+    def __next__(self) -> ObjRefId:
+        self.ref_count += 1
+        return ObjRefId(self.ref_count)
+
+class PyBaseObj:
+    def __init__(self, _val:typing.Any, private=True) -> None:
+        self.val, self.private = _val, private
+
+class NameBindings:
+    def __init__(self) -> None:
+        self.bindings = {}
+
+    def __getitem__(self, )

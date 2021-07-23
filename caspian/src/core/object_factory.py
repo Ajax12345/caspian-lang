@@ -1,4 +1,8 @@
-import typing, state_objects
+import typing, so as so
+
+class CaspianObj:
+    def __init__(self, **kwargs) -> None:
+        self.__dict__ = kwargs
 
 class CaspianObjFactor:
     '''
@@ -11,11 +15,11 @@ class CaspianObjFactor:
             @method toString
             @method getitem
             @method call //actually creates the instance of Obj
+            @method bool
 
     Obj inherits ObjParent:
         public:
-            @attr __name__
-            @attr __identity___ 
+            @attr __type___ 
             @attr __parent_count__
             @attr __id__
         primative:
@@ -33,18 +37,36 @@ class CaspianObjFactor:
         @list parents //stores the parent base classes
 
     '''
-    def __init__(self, _heap:typing.Union[state_objects.MemHeap, None] = None) -> None:
-        self.heap = _heap if _heap is not None else state_objects.MemHeap()
-        self.name_bindings = {}
+    def __init__(self, _heap:typing.Union[so.MemHeap, None] = None) -> None:
+        self.heap = _heap if _heap is not None else so.MemHeap()
+        self.name_bindings = so.NameBindings()
+
+    def create_fun_Py(self, _f:typing.Callable) -> so.ObjRefId:
+        _id = next(self.heap)
+        _obj = CaspianObj(
+            heap = self.heap, 
+            name_bindings = self.name_bindings,
+            ref_count = 1,
+            _type='fun',
+            public={'__name__':self.name_bindings['String'].instantiate(_f.__name__), 
+                    '__type__':self.name_bindings['Fun']
+                    '__id__':self.name_bindings['Integer'].instantiate(_id.id)},
+        )
+        self.heap[_id] = _obj
+        if _f.__annotations__['return']:
+            self.name_bindings[_f.__name__] = _id
+
+        return _id
 
     @property
     def fun(self) -> typing.Callable:
+        _self = self
         class _fun:
             def generator(self, _f:typing.Callable) -> typing.Callable:
                 return _f
 
             def __call__(self, _f:typing.Callable) -> typing.Callable:
-                return _f
+                return self.create_fun_Py(_f)
 
         return _fun()
         
@@ -52,7 +74,9 @@ class CaspianObjFactor:
     def primative(self) -> typing.Callable:
         class _primative:
             def getitem(self, _f:typing.Callable) -> typing.Callable:
+                return _f
 
+            def toString(self, _f:typing.Callable) -> typing.Callable:
                 return _f
 
         return _primative()
@@ -73,6 +97,6 @@ class CaspianObjFactor:
 
         return _static()
 
-    def __call__(self, _heap:state_objects.MemHeap) -> 'CaspianObjFactor':
+    def __call__(self, _heap:so.MemHeap) -> 'CaspianObjFactor':
         self.heap = _heap
         return self
