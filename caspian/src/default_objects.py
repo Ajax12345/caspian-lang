@@ -67,5 +67,18 @@ def Primative() -> True:
 
     return toString
 
+@o.class_
+def NullType() -> True:
+    @o.primative.toString
+    def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate("<type NoneType>")
+
+    return toString
+
+
+@o.null
+def null() -> True:
+    pass
+
 if __name__ == '__main__':
     pass
