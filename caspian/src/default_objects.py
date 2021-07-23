@@ -7,6 +7,11 @@ o = object_factory.CaspianObjFactor()
 def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
     return scope_vars['String'].instantiate(f"<{this._type} '{this.name}' at {this.id}>")
 
+@o.primative.Call
+def Call(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, *args, **kwargs) -> True:
+    pass
+
+
 @o.primative.Bool
 def Bool(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
     return scope_vars['Bool'].instantiate(True)
@@ -52,6 +57,15 @@ def String() -> True:
         return this
 
     return constructor, toString, Bool
+
+
+@o.class_
+def Primative() -> True:
+    @o.primative.toString
+    def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate("<type Primative>")
+
+    return toString
 
 if __name__ == '__main__':
     pass

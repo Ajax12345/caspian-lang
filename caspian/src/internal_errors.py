@@ -9,3 +9,6 @@ class LRQueueLengthError(Exception):
 
 class StateExecNameMissing(Exception):
     pass
+
+class InvalidPrimativeName(Exception):
+    pass

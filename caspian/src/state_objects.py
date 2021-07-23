@@ -167,6 +167,13 @@ class NameBindings:
 
         return HeapPromise(_name)
 
+class ExecSource:
+    class Py:
+        pass
+
+    class Caspian:
+        pass
+
 if __name__ == '__main__':
     n = NameBindings()
     print(n['james'].instantiate(3, 4, 5))
