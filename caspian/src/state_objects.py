@@ -154,12 +154,16 @@ class HeapPromise:
         return f"<Promise for variable '{self.obj_name}', {self.action_states}>"
 
 class NameBindings:
-    def __init__(self) -> None:
-        self.bindings = {}
+    def __init__(self, _heap:typing.Union[None, MemHeap] = None) -> None:
+        self.bindings, self.heap = {}, _heap
 
-    def __getitem__(self, _name:str) -> typing.Union[ObjRefId, HeapPromise]:
+    def __getitem__(self, _l:typing.Union[str, typing.Tuple[str, bool]]) -> typing.Union[ObjRefId, HeapPromise]:
+        _name, _flag = _l if isinstance(_l, tuple) else (_l, False)
         if _name in self.bindings:
-            return self.bindings[_name]
+            if not _flag:
+                return self.bindings[_name]
+            
+            return self.heap[self.bindings[_name]]
 
         return HeapPromise(_name)
 

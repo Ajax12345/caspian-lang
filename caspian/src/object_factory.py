@@ -39,7 +39,7 @@ class CaspianObjFactor:
     '''
     def __init__(self, _heap:typing.Union[so.MemHeap, None] = None) -> None:
         self.heap = _heap if _heap is not None else so.MemHeap()
-        self.name_bindings = so.NameBindings()
+        self.name_bindings = so.NameBindings(self.heap)
 
     def create_fun_Py(self, _f:typing.Callable) -> so.ObjRefId:
         _id = next(self.heap)
@@ -50,10 +50,12 @@ class CaspianObjFactor:
             _type = 'function',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.name_bindings['String'].instantiate(_f.__name__), 
+            public = {'__name__':self.name_bindings['String', True].instantiate(_f.__name__), 
                     '__type__':self.name_bindings['Fun']
-                    '__id__':self.name_bindings['Integer'].instantiate(_id.id)},
-            private = {'toString':self.name_bindings['toString']}
+                    '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
+            private = {'toString':self.name_bindings['toString'],
+                        'Bool':self.name_bindings['Bool'],
+                        'Call':self.name_bindings['Call']}
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
