@@ -1,6 +1,6 @@
 import typing, state_objects as so
 import internal_errors, collections
-import re
+import re, copy
 
 class CaspianClassBindings:
     def __init__(self, **kwargs) -> None:
@@ -13,13 +13,19 @@ class CaspianObj:
     def __init__(self, **kwargs) -> None:
         self.__dict__ = kwargs
 
+    def inc_ref(self) -> 'CaspianObj':
+        self.ref_count += 1
+        return self
+
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.name})'
 
 class CaspianObjCall(CaspianObj):
     def __call__(self, _source_f:typing.Callable) -> 'CaspianObjCall':
-        self.exec_source = {'type':so.ExecSource.Py(), 'payload':{'callable':_source_f}}
-        return self
+        _c = copy.deepcopy(self)
+        _c.exec_source = {'type':so.ExecSource.Py(), 'payload':{'callable':_source_f}}
+        _c.ref_count = 1
+        return _c
 
 class CaspianObjClass(CaspianObj):
     def instantiate(self, *args, **kwargs) -> so.ObjRefId:
@@ -91,10 +97,10 @@ class CaspianObjFactor:
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate(_f.__name__), 
-                    '__type__':self.name_bindings['Fun']
+                    '__type__':self.name_bindings['Fun'].inc_ref(),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self.name_bindings['toString'],
-                        'Bool':self.name_bindings['bool_'],
+            private = {'toString':self.name_bindings['toString'].inc_ref(),
+                        'Bool':self.name_bindings['bool_'].inc_ref(),
                         'Call':self.name_bindings['Call'](_f)}
         )
         self.heap[_id] = _obj
@@ -118,10 +124,10 @@ class CaspianObjFactor:
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate(name), 
-                    '__type__':self.name_bindings['Primative']
+                    '__type__':self.name_bindings['Primative'].inc_ref(),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self.name_bindings['toString'],
-                        'Bool':self.name_bindings['bool_'],
+            private = {'toString':self.name_bindings['toString'].inc_ref(),
+                        'Bool':self.name_bindings['bool_'].inc_ref(),
                         'Call':self.name_bindings['Call'](_f)}
         )
         self.heap[_id] = _obj
@@ -145,10 +151,10 @@ class CaspianObjFactor:
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate(name), 
-                    '__type__':self.name_bindings['Primative']
+                    '__type__':self.name_bindings['Primative'].inc_ref(),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self.name_bindings['toString'],
-                        'Bool':self.name_bindings['bool_'],
+            private = {'toString':self.name_bindings['toString'].inc_ref(),
+                        'Bool':self.name_bindings['bool_'].inc_ref(),
                         'Call':so.NameSelf}
         )
         self.heap[_id] = _obj(_f)
@@ -169,10 +175,10 @@ class CaspianObjFactor:
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate('null'), 
-                    '__type__':self.name_bindings['NullType']
+                    '__type__':self.name_bindings['NullType'].inc_ref(),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self.name_bindings['toStringName'],
-                        'Bool':self.name_bindings['bool__']}
+            private = {'toString':self.name_bindings['toStringName'].inc_ref(),
+                        'Bool':self.name_bindings['bool__'].inc_ref()}
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
@@ -195,13 +201,13 @@ class CaspianObjFactor:
                     '__type__':so.NameSelf,
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':_f()[0],
-                        'Bool':self.name_bindings['bool_']},
+                        'Bool':self.name_bindings['bool_'].inc_ref()},
             bindings = CaspianClassBindings(
                 public = {
 
                 },
-                private={'toString':self.name_bindings['toString'],
-                        'Bool':self.name_bindings['bool_']}
+                private={'toString':self.name_bindings['toString'].inc_ref(),
+                        'Bool':self.name_bindings['bool_'].inc_ref()}
             )
         )
         self.heap[_id] = _obj
@@ -229,16 +235,16 @@ class CaspianObjFactor:
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate('BaseClass'), 
-                    '__type__':self.name_bindings['BaseClass'],
+                    '__type__':self.name_bindings['BaseClass'].inc_ref(),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id),
                     **{i.name:i for i in attr_bindings[1][0]}},
-            private = {'toString':self.name_bindings['toString'],
-                        'Bool':self.name_bindings['bool_'],
+            private = {'toString':self.name_bindings['toString'].inc_ref(),
+                        'Bool':self.name_bindings['bool_'].inc_ref(),
                         **{self.create_primative_name(i.name):i for i in attr_bindings[1][1]}},
             bindings = CaspianClassBindings(
                 public = {i.name:i for i in attr_bindings[0][0]},
-                private={'toString':self.name_bindings['toString'],
-                        'Bool':self.name_bindings['bool_'],
+                private={'toString':self.name_bindings['toString'].inc_ref(),
+                        'Bool':self.name_bindings['bool_'].inc_ref(),
                         **{self.create_primative_name(i.name):i for i in attr_bindings[0][1]}}
             )
         )

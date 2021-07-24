@@ -145,6 +145,9 @@ class NameBindings:
     def __init__(self, _heap:typing.Union[None, MemHeap] = None) -> None:
         self.bindings, self.heap = {}, _heap
 
+    def __contains__(self, _name:str) -> bool:
+        return _name in self.bindings
+
     def __getitem__(self, _l:typing.Union[str, typing.Tuple[str, bool]]) -> typing.Union[ObjRefId, HeapPromise]:
         if isinstance(_l, HeapPromise):
             pass
