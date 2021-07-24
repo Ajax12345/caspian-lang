@@ -129,7 +129,7 @@ class CaspianObjFactor:
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':self.name_bindings['toString'],
                         'Bool':self.name_bindings['Bool'],
-                        'Call':self.name_bindings['Call'](_f)}
+                        'Call':so.NameSelf}
         )
         self.heap[_id] = _obj(_f)
         if _f.__annotations__['return']:

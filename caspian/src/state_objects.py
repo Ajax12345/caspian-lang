@@ -153,6 +153,9 @@ class HeapPromise:
     def __repr__(self) -> str:
         return f"<Promise for variable '{self.obj_name}', {self.action_states}>"
 
+class NameSelf:
+    pass
+
 class NameBindings:
     def __init__(self, _heap:typing.Union[None, MemHeap] = None) -> None:
         self.bindings, self.heap = {}, _heap
