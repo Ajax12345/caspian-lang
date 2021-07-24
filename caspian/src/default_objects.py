@@ -60,6 +60,38 @@ def String() -> True:
 
 
 @o.class_
+def Integer() -> True:
+    @o.fun
+    def constructor(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, _val:int) -> False:
+        this['_val'] = so.PyBaseObj(_val)
+
+    @o.primative.bool
+    def Bool(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['Bool'].instantiate(bool(this['_val'].val))
+
+    @o.primative.toString
+    def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate(str(this['_val']))
+
+    return constructor, toString, Bool
+
+@o.class_
+def Float() -> True:
+    @o.fun
+    def constructor(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, _val:float) -> False:
+        this['_val'] = so.PyBaseObj(_val)
+
+    @o.primative.bool
+    def Bool(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['Bool'].instantiate(bool(this['_val'].val))
+
+    @o.primative.toString
+    def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate(str(this['_val']))
+
+    return constructor, toString, Bool
+
+@o.class_
 def Primative() -> True:
     @o.primative.toString
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
