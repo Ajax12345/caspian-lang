@@ -59,7 +59,7 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
 
     @classmethod
     def head_compile(cls, _stack_heap:'CaspianCompile', _ast:'BlockTokenGroup') -> None:
-        c, var_scopes = cls(_stack_heap), so.VariableScopes()
+        c, var_scopes = cls(_stack_heap), so.VariableScopes(heap = _stack_heap.heap)
         _ = c.exec_BlockTokenGroup(_ast, so.Scopes.MainBlock(), var_scopes)
 
 

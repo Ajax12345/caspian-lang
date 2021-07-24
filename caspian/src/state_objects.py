@@ -61,21 +61,6 @@ class StackLevels:
         def __str__(self) -> str:
             return self.f_path
 
-class VariableScope:
-    def __init__(self) -> None:
-        self.names = {}
-
-class VariableScopes:
-    def __init__(self, set_default:bool=True) -> None:
-        self.var_scope_paths:typing.List[VariableScope] = []
-        if set_default:
-            self.var_scope_paths.append(VariableScope())
-
-    def __len__(self) -> int:
-        return len(self.var_scope_paths)
-    
-    def __repr__(self) -> str:
-        return f'{self.__class__.__name__}({(_l:=len(self))} scope{"s" if _l != 1 else ""})'
 
 class ExecStatus:
     def __init__(self, **kwargs) -> None:
@@ -161,6 +146,9 @@ class NameBindings:
         self.bindings, self.heap = {}, _heap
 
     def __getitem__(self, _l:typing.Union[str, typing.Tuple[str, bool]]) -> typing.Union[ObjRefId, HeapPromise]:
+        if isinstance(_l, HeapPromise):
+            pass
+
         _name, _flag = _l if isinstance(_l, tuple) else (_l, False)
         if _name in self.bindings:
             if not _flag:
@@ -169,6 +157,25 @@ class NameBindings:
             return self.heap[self.bindings[_name]]
 
         return HeapPromise(_name)
+
+class VariableScopes:
+    def __init__(self, heap:MemHeap = None, set_default:bool=True) -> None:
+        self.var_scope_paths:typing.List[NameBindings] = []
+        if set_default and heap is not None:
+            self.var_scope_paths.append(NameBindings(heap))
+
+    def __len__(self) -> int:
+        return len(self.var_scope_paths)
+
+    @classmethod
+    def provide_default(cls, names:NameBindings) -> 'VariableScopes':
+        _vs = cls()
+        _vs.var_scope_paths.append(names)
+        return _vs
+    
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({(_l:=len(self))} scope{"s" if _l != 1 else ""})'
+
 
 class ExecSource:
     class Py:

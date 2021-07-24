@@ -22,15 +22,16 @@ class CaspianObjCall(CaspianObj):
         return self
 
 class CaspianObjClass(CaspianObj):
-    pass
+    def instantiate(self, *args, **kwargs) -> so.ObjRefId:
+        pass
 
 class _primative:
     def __init__(self, _factory:'CaspianObjFactor', _type:typing.Union[str, None]=None) -> None:
         self.factory = _factory
         self._type = _type
 
-    def getitem(self, _f:typing.Callable) -> typing.Callable:
-        return _f
+    def Getitem(self, _f:typing.Callable) -> typing.Callable:
+        return self.factory.create_primative_Py(_f, name='Getitem', _type=self._type)
 
     def toString(self, _f:typing.Callable) -> typing.Callable:
         return self.factory.create_primative_Py(_f, name='toString', _type=self._type)
