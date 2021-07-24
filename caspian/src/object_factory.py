@@ -78,7 +78,7 @@ class CaspianObjFactor:
                     '__type__':self.name_bindings['Fun']
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':self.name_bindings['toString'],
-                        'Bool':self.name_bindings['Bool'],
+                        'Bool':self.name_bindings['bool_'],
                         'Call':self.name_bindings['Call'](_f)}
         )
         self.heap[_id] = _obj
@@ -103,7 +103,7 @@ class CaspianObjFactor:
                     '__type__':self.name_bindings['Primative']
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':self.name_bindings['toString'],
-                        'Bool':self.name_bindings['Bool'],
+                        'Bool':self.name_bindings['bool_'],
                         'Call':self.name_bindings['Call'](_f)}
         )
         self.heap[_id] = _obj
@@ -128,7 +128,7 @@ class CaspianObjFactor:
                     '__type__':self.name_bindings['Primative']
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':self.name_bindings['toString'],
-                        'Bool':self.name_bindings['Bool'],
+                        'Bool':self.name_bindings['bool_'],
                         'Call':so.NameSelf}
         )
         self.heap[_id] = _obj(_f)
@@ -150,7 +150,7 @@ class CaspianObjFactor:
                     '__type__':self.name_bindings['NullType']
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':self.name_bindings['toString'],
-                        'Bool':self.name_bindings['Bool_']}
+                        'Bool':self.name_bindings['bool__']}
         )
         self.heap[_id] = _obj(_f)
         if _f.__annotations__['return']:

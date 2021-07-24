@@ -13,12 +13,12 @@ def Call(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, *args,
 
 
 @o.primative.Bool
-def Bool(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
+def bool_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
     return scope_vars['Bool'].instantiate(True)
 
 
 @o.primative.Bool
-def Bool_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
+def bool__(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
     return scope_vars['Bool'].instantiate(False)
 
 @o.class_
@@ -75,10 +75,11 @@ def NullType() -> True:
 
     return toString
 
-
 @o.null
 def null() -> True:
     pass
+
+
 
 if __name__ == '__main__':
     pass
