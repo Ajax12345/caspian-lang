@@ -7,10 +7,13 @@ o = object_factory.CaspianObjFactor()
 def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
     return scope_vars['String'].instantiate(f"<{this._type} '{this.name}' at {this.id}>")
 
+@o.primative.toString
+def toStringName(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
+    return this['__name__']
+
 @o.primative.Call
 def Call(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, *args, **kwargs) -> True:
     pass
-
 
 @o.primative.Bool
 def bool_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
@@ -21,11 +24,21 @@ def bool_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> Tr
 def bool__(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
     return scope_vars['Bool'].instantiate(False)
 
+@o.base_class
+def BaseClass() -> True:
+    @o.static.primative.toString
+    def toString_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate('<type "BaseClass">')
+    
+    return toString_
+
 @o.class_
 def Fun() -> True:
-    @o.primative.toString
-    def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
-        return scope_vars['String'].instantiate('<type "function">')
+    @o.static.primative.toString
+    def toString_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate('<type "Function">')
+
+    return toString_
 
 @o.class_
 def Bool() -> True:
@@ -40,6 +53,12 @@ def Bool() -> True:
     @o.primative.toString
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['String'].instantiate(str(this['_val'].val).lower())
+
+    @o.static.primative.toString
+    def toString_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate('<type "Bool">')
+
+    return constructor, Bool, toString, toString_
 
     
 @o.class_
@@ -56,7 +75,11 @@ def String() -> True:
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return this
 
-    return constructor, toString, Bool
+    @o.static.primative.toString
+    def toString_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate('<type "String">')
+
+    return constructor, toString, toString_, Bool
 
 
 @o.class_
@@ -73,7 +96,11 @@ def Integer() -> True:
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['String'].instantiate(str(this['_val']))
 
-    return constructor, toString, Bool
+    @o.static.primative.toString
+    def toString_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate('<type "Integer">')
+
+    return constructor, toString, Bool, toString_
 
 @o.class_
 def Float() -> True:
@@ -89,11 +116,15 @@ def Float() -> True:
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['String'].instantiate(str(this['_val']))
 
-    return constructor, toString, Bool
+    @o.static.primative.toString
+    def toString_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate('<type "Float">')
+
+    return constructor, toString, Bool, toString_
 
 @o.class_
 def Primative() -> True:
-    @o.primative.toString
+    @o.static.primative.toString
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['String'].instantiate("<type Primative>")
 
@@ -101,7 +132,7 @@ def Primative() -> True:
 
 @o.class_
 def NullType() -> True:
-    @o.primative.toString
+    @o.static.primative.toString
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['String'].instantiate("<type NoneType>")
 

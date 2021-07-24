@@ -1,15 +1,28 @@
 import typing, state_objects as so
-import internal_errors
+import internal_errors, collections
+import re
+
+class CaspianClassBindings:
+    def __init__(self, **kwargs) -> None:
+        self.__dict__ = kwargs
+
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__}>'
 
 class CaspianObj:
     def __init__(self, **kwargs) -> None:
         self.__dict__ = kwargs
 
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({self.name})'
 
 class CaspianObjCall(CaspianObj):
     def __call__(self, _source_f:typing.Callable) -> 'CaspianObjCall':
         self.exec_source = {'type':so.ExecSource.Py(), 'payload':{'callable':_source_f}}
         return self
+
+class CaspianObjClass(CaspianObj):
+    pass
 
 class _primative:
     def __init__(self, _factory:'CaspianObjFactor', _type:typing.Union[str, None]=None) -> None:
@@ -71,6 +84,8 @@ class CaspianObjFactor:
             heap = self.heap, 
             name_bindings = self.name_bindings,
             ref_count = 1,
+            is_primative = False,
+            o_type = _type,
             _type = f'{"" if _type is None else _type+" "}function',
             name = _f.__name__,
             id = _id.id,
@@ -96,6 +111,8 @@ class CaspianObjFactor:
             heap = self.heap, 
             name_bindings = self.name_bindings,
             ref_count = 1,
+            is_primative = True,
+            o_type = _type,
             _type = f'{"" if _type is None else _type+" "}primative::{name}',
             name = _f.__name__,
             id = _id.id,
@@ -120,6 +137,8 @@ class CaspianObjFactor:
         _obj = CaspianObjCall(
             heap = self.heap, 
             name_bindings = self.name_bindings,
+            is_primative = True,
+            o_type = _type,
             ref_count = 1,
             _type = f'{"" if _type is None else _type+" "}primative::{name}',
             name = _f.__name__,
@@ -143,21 +162,93 @@ class CaspianObjFactor:
             heap = self.heap, 
             name_bindings = self.name_bindings,
             ref_count = 1,
+            is_primative = False,
+            o_type = None,
             _type = 'null',
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate('null'), 
                     '__type__':self.name_bindings['NullType']
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self.name_bindings['toString'],
+            private = {'toString':self.name_bindings['toStringName'],
                         'Bool':self.name_bindings['bool__']}
         )
-        self.heap[_id] = _obj(_f)
+        self.heap[_id] = _obj
+        if _f.__annotations__['return']:
+            self.name_bindings[_f.__name__] = _id
+
+        return _id
+    
+    def create_base_class_Py(self, _f:typing.Callable) -> so.ObjRefId:
+        _id = next(self.heap)
+        _obj = CaspianObjClass(
+            heap = self.heap, 
+            name_bindings = self.name_bindings,
+            ref_count = 1,
+            is_primative = False,
+            o_type = None,
+            _type = 'BaseClass',
+            name = _f.__name__,
+            id = _id.id,
+            public = {'__name__':self.name_bindings['String', True].instantiate('BaseClass'), 
+                    '__type__':so.NameSelf,
+                    '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
+            private = {'toString':_f()[0],
+                        'Bool':self.name_bindings['bool_']},
+            bindings = CaspianClassBindings(
+                public = {
+
+                },
+                private={'toString':self.name_bindings['toString'],
+                        'Bool':self.name_bindings['bool_']}
+            )
+        )
+        self.heap[_id] = _obj
         if _f.__annotations__['return']:
             self.name_bindings[_f.__name__] = _id
 
         return _id
 
+    def create_class_Py(self, _f:typing.Callable) -> so.ObjRefId:
+        attr_bindings = collections.defaultdict(dict)
+        for i in _f():
+            if (_obj:=self.heap[i]).is_primative in attr_bindings[_obj.o_type.lower() == 'static']:
+                attr_bindings[_obj.o_type.lower() == 'static'][_obj.is_primative].append(_obj)
+            else:
+                attr_bindings[_obj.o_type.lower() == 'static'][_obj.is_primative] = [_obj]
+        
+        _id = next(self.heap)
+        _obj = CaspianObjClass(
+            heap = self.heap, 
+            name_bindings = self.name_bindings,
+            ref_count = 1,
+            is_primative = False,
+            o_type = None,
+            _type = 'Class',
+            name = _f.__name__,
+            id = _id.id,
+            public = {'__name__':self.name_bindings['String', True].instantiate('BaseClass'), 
+                    '__type__':self.name_bindings['BaseClass'],
+                    '__id__':self.name_bindings['Integer', True].instantiate(_id.id),
+                    **{i.name:i for i in attr_bindings[1][0]}},
+            private = {'toString':self.name_bindings['toString'],
+                        'Bool':self.name_bindings['bool_'],
+                        **{self.create_primative_name(i.name):i for i in attr_bindings[1][1]}},
+            bindings = CaspianClassBindings(
+                public = {i.name:i for i in attr_bindings[0][0]},
+                private={'toString':self.name_bindings['toString'],
+                        'Bool':self.name_bindings['bool_'],
+                        **{self.create_primative_name(i.name):i for i in attr_bindings[0][1]}}
+            )
+        )
+        self.heap[_id] = _obj
+        if _f.__annotations__['return']:
+            self.name_bindings[_f.__name__] = _id
+
+        return _id
+
+    def create_primative_name(self, _name:str) -> str:
+        return re.sub('_+$', '', _name)
 
     @property
     def fun(self) -> typing.Callable:
@@ -175,8 +266,11 @@ class CaspianObjFactor:
     def primative(self) -> typing.Callable:
         return _primative(self)
 
+    def base_class(self, _f:typing.Callable) -> typing.Callable:
+        return self.create_base_class_Py(_f)
+
     def class_(self, _f:typing.Callable) -> typing.Callable:
-        return _f
+        return self.create_class_Py(_f)
 
     def static(self, _f:typing.Callable) -> typing.Callable:
         _self = self
