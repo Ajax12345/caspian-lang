@@ -1,7 +1,7 @@
 import typing, object_factory
 import state_objects as so
 
-o = object_factory.CaspianObjFactor()
+o = object_factory.CaspianObjFactory()
 
 @o.primative.toString
 def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
@@ -11,6 +11,10 @@ def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) ->
 def toStringName(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
     return this['__name__']
 
+@o.primative.Call
+def InstantiateClassCall(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, *args, **kwargs) -> True:
+    return this.instantiate(*args, **kwargs)
+ 
 @o.primative.Call
 def Call(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, *args, **kwargs) -> True:
     pass
