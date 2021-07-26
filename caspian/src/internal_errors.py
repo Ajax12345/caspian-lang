@@ -12,3 +12,6 @@ class StateExecNameMissing(Exception):
 
 class InvalidPrimativeName(Exception):
     pass
+
+class MissingBindingName(Exception):
+    pass

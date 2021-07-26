@@ -128,11 +128,11 @@ class HeapPromise:
         self.action_states = []
 
     def __getattr__(self, _n:str) -> 'HeapPromise':
-        self.action_states.append(HeapPromiseMethod('getattr', lambda x:functools.partial(getattr, x, _n)))
+        self.action_states.append(HeapPromiseMethod('getattr', lambda x:getattr(x, _n)))
         return self
 
     def __call__(self, *args, **kwargs) -> "HeapPromise":
-        self.action_states.append(HeapPromiseMethod('call', lambda x:functools.partial(x, *args, **kwargs)))
+        self.action_states.append(HeapPromiseMethod('call', lambda x:x(*args, **kwargs)))
         return self
 
     def __repr__(self) -> str:
@@ -145,14 +145,21 @@ class NameBindings:
     def __init__(self, _heap:typing.Union[None, MemHeap] = None) -> None:
         self.bindings, self.heap = {}, _heap
 
-    def __contains__(self, _name:str) -> bool:
-        return _name in self.bindings
+    def __contains__(self, _name:typing.Union[str, HeapPromise]) -> bool:
+        return getattr(_name, 'obj_name', _name) in self.bindings
+        
 
     def __getitem__(self, _l:typing.Union[str, typing.Tuple[str, bool]]) -> typing.Union[ObjRefId, HeapPromise]:
-        if isinstance(_l, HeapPromise):
-            pass
-
         _name, _flag = _l if isinstance(_l, tuple) else (_l, False)
+        if isinstance(_name, HeapPromise):
+            if _name.obj_name not in self.bindings:
+                raise internal_errors.MissingBindingName(f"missing HeapPromise('{_name.obj_name}' from bindings")
+            _s_obj = self.bindings[_name.obj_name]
+            for i in _name.action_states:
+                _s_obj = i(_s_obj)
+                
+            return _s_obj
+
         if _name in self.bindings:
             if not _flag:
                 return self.bindings[_name]
@@ -176,6 +183,13 @@ class VariableScopes:
         _vs.var_scope_paths.append(names)
         return _vs
     
+    def __getitem__(self, _name:str) -> typing.Union[bool, 'CaspianObj']:
+        for i in self.var_scope_paths[::-1]:
+            if _name in i:
+                return i[_name, True]
+        
+        return False
+
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({(_l:=len(self))} scope{"s" if _l != 1 else ""})'
 
