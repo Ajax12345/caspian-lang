@@ -34,7 +34,7 @@ def BaseClass() -> True:
     def toString_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['String'].instantiate('<type "BaseClass">')
     
-    return toString_
+    return toString_,
 
 @o.class_
 def Fun() -> True:
@@ -42,7 +42,7 @@ def Fun() -> True:
     def toString_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['String'].instantiate('<type "Function">')
 
-    return toString_
+    return toString_,
 
 @o.class_
 def Bool() -> True:
@@ -50,7 +50,7 @@ def Bool() -> True:
     def constructor(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, _bool:bool) -> False:
         this['_val'] = so.PyBaseObj(_bool)
 
-    @o.primative.bool
+    @o.primative.Bool
     def Bool(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return this
     
@@ -71,7 +71,7 @@ def String() -> True:
     def constructor(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, _str:str) -> False:
         this['_val'] = so.PyBaseObj(_str)
 
-    @o.primative.bool
+    @o.primative.Bool
     def Bool(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['Bool'].instantiate(bool(this['_val'].val))
 
@@ -92,7 +92,7 @@ def Integer() -> True:
     def constructor(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, _val:int) -> False:
         this['_val'] = so.PyBaseObj(_val)
 
-    @o.primative.bool
+    @o.primative.Bool
     def Bool(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['Bool'].instantiate(bool(this['_val'].val))
 
@@ -112,7 +112,7 @@ def Float() -> True:
     def constructor(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, _val:float) -> False:
         this['_val'] = so.PyBaseObj(_val)
 
-    @o.primative.bool
+    @o.primative.Bool
     def Bool(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['Bool'].instantiate(bool(this['_val'].val))
 
@@ -132,7 +132,7 @@ def Primative() -> True:
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['String'].instantiate("<type Primative>")
 
-    return toString
+    return toString,
 
 @o.class_
 def NullType() -> True:
@@ -140,7 +140,7 @@ def NullType() -> True:
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
         return scope_vars['String'].instantiate("<type NoneType>")
 
-    return toString
+    return toString,
 
 @o.null
 def null() -> True:
@@ -149,4 +149,4 @@ def null() -> True:
 
 
 if __name__ == '__main__':
-    pass
+    print(null)

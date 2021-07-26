@@ -116,8 +116,12 @@ class CallStack:
         self.remove_function_frame(_f_name)
 
 class ObjRefId:
-    def __init__(self, _id:int) -> None:
-        self.id = _id
+    def __init__(self, _mem_heap:'MemHeap', _id:int) -> None:
+        self.id, self.mem_heap = _id, _mem_heap
+
+    def inc_ref(self) -> 'ObjRefId':
+        _ = self.mem_heap[self].inc_ref()
+        return self
     
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.id})'
@@ -130,9 +134,12 @@ class MemHeap:
     def __setitem__(self, _id:ObjRefId, _obj:'CaspianObj') -> None:
         self.mem_objects[_id] = _obj
 
+    def __getitem__(self, _id:ObjRefId) -> 'CaspianObj':
+        return self.mem_objects[_id]
+
     def __next__(self) -> ObjRefId:
         self.ref_count += 1
-        return ObjRefId(self.ref_count)
+        return ObjRefId(self, self.ref_count)
 
 class PyBaseObj:
     def __init__(self, _val:typing.Any, private=True) -> None:
@@ -171,7 +178,6 @@ class NameBindings:
     def __contains__(self, _name:typing.Union[str, HeapPromise]) -> bool:
         return getattr(_name, 'obj_name', _name) in self.bindings
         
-
     def __getitem__(self, _l:typing.Union[str, typing.Tuple[str, bool]]) -> typing.Union[ObjRefId, HeapPromise]:
         _name, _flag = _l if isinstance(_l, tuple) else (_l, False)
         if isinstance(_name, HeapPromise):
@@ -190,6 +196,9 @@ class NameBindings:
             return self.heap[self.bindings[_name]]
 
         return HeapPromise(_name)
+
+    def __setitem__(self, _name:str, _id:ObjRefId) -> None:
+        self.bindings[_name] = _id
 
 class VariableScopes:
     def __init__(self, heap:MemHeap = None, set_default:bool=True) -> None:
