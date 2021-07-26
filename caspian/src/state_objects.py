@@ -1,6 +1,6 @@
 import typing, sys, functools
 import warnings, internal_errors
-import copy, collections
+import copy, collections, contextlib
 
 class BlockExits:
     class ExitStatus:
@@ -51,11 +51,15 @@ class StackLevels:
     class StackLevelBase:
         pass
 
-    class MainLevel(StackLevelBase):
+    class MainFrame(StackLevelBase):
         def __str__(self) -> str:
             return '<main>'
 
-    class FileLevel(StackLevelBase):
+    class FunctionFrame(StackLevelBase):
+        def __init__(self, _f_name:str) -> None:
+            self.f_name = _f_name
+
+    class FileFrame(StackLevelBase):
         def __init__(self, _f_path:str) -> None:
             self.f_path = _f_path
         def __str__(self) -> str:
@@ -89,8 +93,27 @@ def log_errors(_f:typing.Callable) -> typing.Callable:
 class CallStack:
     def __init__(self, max_depth = 1000) -> None:
         self.max_depth, self.c_count = max_depth, 0
-        self.head = StackLevels.MainLevel()
+        self.head = StackLevels.MainFrame()
         self.stack = collections.deque()
+
+    @log_errors
+    def add_function_frame(self, f_name:str) -> typing.Union[None, ExecStatus]:
+        self.c_count += 1
+        if self.c_count > self.max_depth:
+            return ExecStatus(error=True)
+
+        self.stack.append(StackLevels.FunctionFrame(f_name))
+    
+    @log_errors
+    def remove_function_frame(self, f_name:str) -> None:
+        self.c_count -= 1
+        _ = self.stack.pop()
+
+    @contextlib.contextmanager
+    def __call__(self, _f_name:str) -> None:
+        self.add_function_frame(_f_name)
+        yield
+        self.remove_function_frame(_f_name)
 
 class ObjRefId:
     def __init__(self, _id:int) -> None:
@@ -157,7 +180,7 @@ class NameBindings:
             _s_obj = self.bindings[_name.obj_name]
             for i in _name.action_states:
                 _s_obj = i(_s_obj)
-                
+
             return _s_obj
 
         if _name in self.bindings:

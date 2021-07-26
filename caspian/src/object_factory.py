@@ -28,7 +28,9 @@ class CaspianObjCall(CaspianObj):
         return _c
 
 class CaspianObjClassInstance(CaspianObj):
-    pass
+    def __setitem__(self, _name:str, _id:so.ObjRefId) -> None:
+        _ = self.heap[_id].inc_ref()
+        self.public[_name] = _id
 
 class CaspianObjClass(CaspianObj):
     def instantiate(self, *args, **kwargs) -> so.ObjRefId:
@@ -49,8 +51,15 @@ class CaspianObjClass(CaspianObj):
                     **self.bindings.public},
             private = self.bindings.private
         )
+        #exec_source = {'type':so.ExecSource.Py(), 'payload':{'callable':_source_f}}
         if 'constructor' in self.bindings.public:
-            pass
+            if isinstance((_call:=self.heap[self.bindings.public['constructor']]['Call']), so.HeapPromise):
+                _call = self.name_bindings[_call]
+            else:
+                _call = self.heap[_call]
+
+            with self.call_stack('constructor'):
+                _call.exec_source['payload']['callable'](_obj, None, self.name_bindings)
 
         return _id
 

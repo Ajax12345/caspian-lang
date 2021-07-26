@@ -16,7 +16,7 @@ class CaspianCompile:
             if not os.path.isfile(resource):
                 raise internal_errors.InvalidSource(f"'{resource}' is not a file")
             
-            self.call_stack.head = state_objects.StackLevels.FileLevel(resource)
+            self.call_stack.head = state_objects.StackLevels.FileFrame(resource)
             with open(resource) as f:
                 resource = f.read()
 
