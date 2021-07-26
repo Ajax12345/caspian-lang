@@ -35,6 +35,7 @@ class CaspianObjClass(CaspianObj):
         _id = next(self.heap)
         _obj = CaspianObjClassInstance(
             heap = self.heap, 
+            call_stack = self.call_stack,
             name_bindings = self.name_bindings,
             ref_count = 1,
             is_primative = False,
@@ -49,6 +50,7 @@ class CaspianObjClass(CaspianObj):
             private = self.bindings.private
         )
         if 'constructor' in self.bindings.public:
+            pass
 
         return _id
 
@@ -138,6 +140,7 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = CaspianObj(
             heap = self.heap, 
+            call_stack = self.call_stack,
             name_bindings = self.name_bindings,
             ref_count = 1,
             is_primative = True,
@@ -165,6 +168,7 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = CaspianObjCall(
             heap = self.heap, 
+            call_stack = self.call_stack,
             name_bindings = self.name_bindings,
             is_primative = True,
             o_type = _type,
@@ -189,6 +193,7 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = Caspian(
             heap = self.heap, 
+            call_stack = self.call_stack,
             name_bindings = self.name_bindings,
             ref_count = 1,
             is_primative = False,
@@ -212,6 +217,7 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = CaspianObjClass(
             heap = self.heap, 
+            call_stack = self.call_stack,
             name_bindings = self.name_bindings,
             ref_count = 1,
             is_primative = False,
@@ -250,6 +256,7 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = CaspianObjClass(
             heap = self.heap, 
+            call_stack = self.call_stack,
             name_bindings = self.name_bindings,
             ref_count = 1,
             is_primative = False,
