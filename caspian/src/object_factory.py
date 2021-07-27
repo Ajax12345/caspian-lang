@@ -29,11 +29,20 @@ class CaspianObjCall(CaspianObj):
             self.heap[_id] = _c
 
         return _c
-
+        
 class CaspianObjClassInstance(CaspianObj):
-    def __setitem__(self, _name:str, _id:so.ObjRefId) -> None:
-        _ = self.heap[_id].inc_ref()
+    def __setitem__(self, _name:str, _id:typing.Union[so.ObjRefId, so.PyBaseObj]) -> None:
+        if isinstance(_id, so.ObjRefId):
+            _ = self.heap[_id].inc_ref()
+        print('in an assignment', type(_id))
         self.public[_name] = _id
+
+class InstantiatePromise:
+    def __init__(self, _name:str, *args) -> None:
+        self.name, self.args = _name, args
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({self.name} => {self.args})'
 
 class CaspianObjClass(CaspianObj):
     def instantiate(self, *args, **kwargs) -> so.ObjRefId:
@@ -50,9 +59,9 @@ class CaspianObjClass(CaspianObj):
             _type = 'Class Instance',
             name = self.name,
             id = _id.id,
-            public = {'__name__':so.HeapPromise('String').instantiate(self.name) if self.name == 'String' else self.name_bindings['String', True].instantiate(self.name), 
+            public = {'__name__':so.HeapPromise('String').instantiate(self.name), 
                     '__type__':self,
-                    '__id__':so.HeapPromise('Integer').instantiate(_id.id) if self.name == 'Integer' else self.name_bindings['Integer', True].instantiate(_id.id),
+                    '__id__':so.HeapPromise('Integer').instantiate(_id.id),
                     **self.bindings.public},
             private = self.bindings.private
         )
@@ -67,7 +76,7 @@ class CaspianObjClass(CaspianObj):
         
             with self.call_stack('constructor'):
                 _call.exec_source['payload']['callable'](_obj, None, self.name_bindings, *args, **kwargs)
-         
+        
         self.heap[_id] = _obj
         return _id
 

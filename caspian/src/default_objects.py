@@ -151,4 +151,5 @@ def null() -> True:
 
 
 if __name__ == '__main__':
-    print(null)
+    print('-'*20)
+    print({type(i).__name__ for i in o.heap.mem_objects.values()})
