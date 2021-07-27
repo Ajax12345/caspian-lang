@@ -156,4 +156,4 @@ def null() -> True:
 
 if __name__ == '__main__':
     print('-'*20)
-    print({type(i).__name__ for i in o.heap.mem_objects.values()})
+    print('result in here!!!', o.heap[o.heap[o.heap[String].instantiate('James')].private['toString']].__dict__)

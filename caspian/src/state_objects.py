@@ -141,6 +141,9 @@ class PyBaseObj:
     def __init__(self, _val:typing.Any, private=True) -> None:
         self.val, self.private = _val, private
 
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({self.val}, private={self.private})'
+
 class HeapPromiseMethod:
     def __init__(self, _method, _f:typing.Callable) -> None:
         self.method, self.f = _method, _f
