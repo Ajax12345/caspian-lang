@@ -21,7 +21,8 @@ class CaspianObj:
 
 class CaspianObjCall(CaspianObj):
     def __call__(self, _source_f:typing.Callable, new_obj:bool = True) -> 'CaspianObjCall':
-        _c = copy.deepcopy(self)
+        _c = self.__class__()
+        _c.__dict__ = {a:b for a, b in self.__dict__.items()}
         _c.exec_source = {'type':so.ExecSource.Py(), 'payload':{'callable':_source_f}}
         _c.ref_count = 1
         if new_obj:

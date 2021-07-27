@@ -129,11 +129,15 @@ def Float() -> True:
 
 @o.class_
 def Primative() -> True:
+    @o.fun
+    def constructor(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, _type:typing.Union[str, None] = None) -> False:
+        this['_val'] = so.PyBaseObj(_type)
+
     @o.static.primative.toString
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
-        return scope_vars['String'].instantiate("<type Primative>")
+        return scope_vars['String'].instantiate("<type Primative>" if this['_val'].val is None else f"primative::{this['_val'].val}")
 
-    return toString,
+    return constructor, toString
 
 @o.class_
 def NullType() -> True:
