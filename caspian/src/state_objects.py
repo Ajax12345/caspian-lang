@@ -116,12 +116,8 @@ class CallStack:
         self.remove_function_frame(_f_name)
 
 class ObjRefId:
-    def __init__(self, _mem_heap:'MemHeap', _id:int) -> None:
-        self.id, self.mem_heap = _id, _mem_heap
-
-    def inc_ref(self) -> 'ObjRefId':
-        _ = self.mem_heap[self].inc_ref()
-        return self
+    def __init__(self, _id:int) -> None:
+        self.id = _id
     
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.id})'
@@ -139,7 +135,7 @@ class MemHeap:
 
     def __next__(self) -> ObjRefId:
         self.ref_count += 1
-        return ObjRefId(self, self.ref_count)
+        return ObjRefId(self.ref_count)
 
 class PyBaseObj:
     def __init__(self, _val:typing.Any, private=True) -> None:

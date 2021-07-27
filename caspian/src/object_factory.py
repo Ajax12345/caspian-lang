@@ -20,7 +20,7 @@ class CaspianObj:
         return f'{self.__class__.__name__}({self.name})'
 
 class CaspianObjCall(CaspianObj):
-    def __call__(self, _source_f:typing.Callable, new_obj:bool = False) -> 'CaspianObjCall':
+    def __call__(self, _source_f:typing.Callable, new_obj:bool = True) -> 'CaspianObjCall':
         _c = copy.deepcopy(self)
         _c.exec_source = {'type':so.ExecSource.Py(), 'payload':{'callable':_source_f}}
         _c.ref_count = 1
@@ -37,7 +37,7 @@ class CaspianObjClassInstance(CaspianObj):
 
 class CaspianObjClass(CaspianObj):
     def instantiate(self, *args, **kwargs) -> so.ObjRefId:
-        print('public bindings in here', self.bindings.public)
+        print('public bindings in here', self.name)
         _id = next(self.heap)
         self.inc_ref()
         _obj = CaspianObjClassInstance(
@@ -61,11 +61,13 @@ class CaspianObjClass(CaspianObj):
                 _call = self.name_bindings[_call]
             else:
                 _call = self.heap[_call]
+                
 
             print('finalized call object', _call.__dict__)
+        
             with self.call_stack('constructor'):
                 _call.exec_source['payload']['callable'](_obj, None, self.name_bindings, *args, **kwargs)
-
+         
         self.heap[_id] = _obj
         return _id
 
@@ -133,6 +135,14 @@ class CaspianObjFactory:
         self.heap[_id] = _new_call
         return _id
 
+    def _(self, _obj:typing.Union[CaspianObj, so.HeapPromise]) -> typing.Union[CaspianObj, so.HeapPromise]:
+        if not isinstance(_obj, so.HeapPromise):
+            if isinstance(_obj, CaspianObj):
+                _obj.inc_ref()
+            elif isinstance(_obj, so.ObjRefId):
+                self.heap[_obj].inc_ref()
+        return _obj
+
     def create_fun_Py(self, _f:typing.Callable, name:typing.Union[str, None]=None, _type:typing.Union[str, None]=None) -> so.ObjRefId:
         _id = next(self.heap)
         _obj = CaspianObj(
@@ -145,15 +155,16 @@ class CaspianObjFactory:
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate(_f.__name__), 
-                    '__type__':self.name_bindings['Fun'].inc_ref(),
+                    '__type__':self._(self.name_bindings['Fun']),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self.name_bindings['toString'].inc_ref(),
-                        'Bool':self.name_bindings['bool_'].inc_ref(),
+            private = {'toString':self._(self.name_bindings['toString']),
+                        'Bool':self._(self.name_bindings['bool_']),
                         'Call':self.call_clone_handler(_f)}
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
             self.name_bindings[_f.__name__] = _id
+        print('primative object after creation (function)', _obj.__dict__)
 
         return _id
 
@@ -173,16 +184,16 @@ class CaspianObjFactory:
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate(name), 
-                    '__type__':self.name_bindings['Primative'].inc_ref(),
+                    '__type__':self._(self.name_bindings['Primative']),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self.name_bindings['toString'].inc_ref(),
-                        'Bool':self.name_bindings['bool_'].inc_ref(),
+            private = {'toString':self._(self.name_bindings['toString']),
+                        'Bool':self._(self.name_bindings['bool_']),
                         'Call':self.call_clone_handler(_f)}
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
             self.name_bindings[_f.__name__] = _id
-
+        #print('primative object after creation (primative)', _obj.__dict__)
         return _id
 
     def create_primative_Call_Py(self, _f:typing.Callable, name:typing.Union[str, None]=None, _type:typing.Union[str, None]=None) -> so.ObjRefId:
@@ -201,16 +212,16 @@ class CaspianObjFactory:
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate(name), 
-                    '__type__':self.name_bindings['Primative'].inc_ref(),
+                    '__type__':self._(self.name_bindings['Primative']),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self.name_bindings['toString'].inc_ref(),
-                        'Bool':self.name_bindings['bool_'].inc_ref(),
+            private = {'toString':self._(self.name_bindings['toString']),
+                        'Bool':self._(self.name_bindings['bool_']),
                         'Call':so.NameSelf}
         )
         self.heap[_id] = _obj(_f)
         if _f.__annotations__['return']:
             self.name_bindings[_f.__name__] = _id
-
+        print('primative object after creation (call)', _obj.__dict__)
         return _id
 
     def create_null_Py(self, _f:typing.Callable) -> so.ObjRefId:
@@ -226,15 +237,15 @@ class CaspianObjFactory:
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate('null'), 
-                    '__type__':self.name_bindings['NullType'].inc_ref(),
+                    '__type__':self._(self.name_bindings['NullType']),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self.name_bindings['toStringName'].inc_ref(),
-                        'Bool':self.name_bindings['bool__'].inc_ref()}
+            private = {'toString':self._(self.name_bindings['toStringName']),
+                        'Bool':self._(self.name_bindings['bool__'])}
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
             self.name_bindings[_f.__name__] = _id
-
+        #print('primative object after creation (null)', _obj.__dict__)
         return _id
     
     def create_base_class_Py(self, _f:typing.Callable) -> so.ObjRefId:
@@ -253,20 +264,20 @@ class CaspianObjFactory:
                     '__type__':so.NameSelf,
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':_f()[0],
-                        'Bool':self.name_bindings['bool_'].inc_ref(),
-                        'Call':self.name_bindings['InstantiateClassCall'].inc_ref()},
+                        'Bool':self._(self.name_bindings['bool_']),
+                        'Call':self._(self.name_bindings['InstantiateClassCall'])},
             bindings = CaspianClassBindings(
                 public = {
 
                 },
-                private={'toString':self.name_bindings['toString'].inc_ref(),
-                        'Bool':self.name_bindings['bool_'].inc_ref()}
+                private={'toString':self._(self.name_bindings['toString']),
+                        'Bool':self._(self.name_bindings['bool_'])}
             )
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
             self.name_bindings[_f.__name__] = _id
-
+        #print('primative object after creation (base class)', _obj.__dict__)
         return _id
 
     def create_class_Py(self, _f:typing.Callable) -> so.ObjRefId:
@@ -289,17 +300,17 @@ class CaspianObjFactory:
             name = _f.__name__,
             id = _id.id,
             public = {'__name__':self.name_bindings['String', True].instantiate('BaseClass'), 
-                    '__type__':self.name_bindings['BaseClass'].inc_ref(),
+                    '__type__':self._(self.name_bindings['BaseClass']),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id),
                     **{o.name:i for o, i in attr_bindings.get(1, {}).get(0, [])}},
-            private = {'toString':self.name_bindings['toString'].inc_ref(),
-                        'Bool':self.name_bindings['bool_'].inc_ref(),
-                        'Call':self.name_bindings['InstantiateClassCall'].inc_ref(),
+            private = {'toString':self._(self.name_bindings['toString']),
+                        'Bool':self._(self.name_bindings['bool_']),
+                        'Call':self._(self.name_bindings['InstantiateClassCall']),
                         **{self.create_primative_name(o.name):i for o, i in attr_bindings.get(1, {}).get(1, [])}},
             bindings = CaspianClassBindings(
                 public = {o.name:i for o, i in attr_bindings.get(0, {}).get(0, [])},
-                private={'toString':self.name_bindings['toString'].inc_ref(),
-                        'Bool':self.name_bindings['bool_'].inc_ref(),
+                private={'toString':self._(self.name_bindings['toString']),
+                        'Bool':self._(self.name_bindings['bool_']),
                         **{self.create_primative_name(o.name):i for o, i in attr_bindings.get(0, {}).get(1, [])}}
             )
         )
