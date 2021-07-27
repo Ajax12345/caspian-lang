@@ -140,20 +140,27 @@ def Primative() -> True:
     return constructor, toString
 
 @o.class_
-def NullType() -> True:
-    @o.static.primative.toString
+def null() -> True:
+    @o.primative.toString
     def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
-        return scope_vars['String'].instantiate("<type NoneType>")
+        return scope_vars['String'].instantiate("null")
+    
+    @o.primative.Bool
+    def bool__(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['Bool'].instantiate(False)
 
-    return toString,
+    @o.static.primative.toString
+    def toString_(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> False:
+        return scope_vars['String'].instantiate("<type NullType>")
 
+    return toString, bool__, toString_
 
+'''
 @o.null
 def null() -> True:
     pass
 
-
-
+'''
 if __name__ == '__main__':
     print('-'*20)
-    print('result in here!!!', o.heap[o.heap[o.heap[String].instantiate('James')].private['toString']].__dict__)
+    print('result in here!!!', o.heap[o.heap[o.heap[null].instantiate()].private['Bool']].__dict__)

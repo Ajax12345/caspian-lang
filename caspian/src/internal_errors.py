@@ -15,3 +15,6 @@ class InvalidPrimativeName(Exception):
 
 class MissingBindingName(Exception):
     pass
+
+class DepreciatedMethod(Exception):
+    pass

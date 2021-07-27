@@ -235,6 +235,7 @@ class CaspianObjFactory:
         return _id
 
     def create_null_Py(self, _f:typing.Callable) -> so.ObjRefId:
+        raise internal_errors.DepreciatedMethod('null method no longer supported')
         _id = next(self.heap)
         _obj = CaspianObj(
             heap = self.heap, 
@@ -372,6 +373,7 @@ class CaspianObjFactory:
         return _static()
 
     def null(self, _f:typing.Callable) -> typing.Callable:
+        raise internal_errors.DepreciatedMethod('null method no longer supported')
         return self.create_null_Py(_f)
 
     def __call__(self, stack_heap:'CaspianCompile') -> 'CaspianObjFactory':
