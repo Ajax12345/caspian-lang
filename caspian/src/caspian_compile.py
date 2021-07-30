@@ -1,11 +1,13 @@
 import typing, caspian_parser, state_objects
 import collections, itertools, re, os
 import internal_errors, compile_states
+import default_objects
 
 class CaspianCompile:
     def __init__(self) -> None:
-        self.call_stack = state_objects.CallStack()
-        self.heap = state_objects.MemHeap()
+        self.call_stack = default_objects.o.call_stack
+        self.heap = default_objects.o.heap
+        self.var_scopes = state_objects.VariableScopes.provide_default(default_objects.o.name_bindings)
         self.lines = None
 
     def __enter__(self) -> 'CaspianCompile':

@@ -1,6 +1,8 @@
 import typing, object_factory
 import state_objects as so
 
+__all__ = ('o',)
+
 o = object_factory.CaspianObjFactory()
 
 @o.primative.toString
@@ -163,4 +165,6 @@ def null() -> True:
 '''
 if __name__ == '__main__':
     print('-'*20)
-    print('result in here!!!', o.heap[o.heap[o.heap[null].instantiate()].private['Bool']].__dict__)
+    #print('result in here!!!', o.heap[o.heap[o.heap[null].instantiate()].private['Bool']].__dict__)
+    print(o.heap[Integer].instantiate(1))
+    print(o.heap.mem_objects.keys())

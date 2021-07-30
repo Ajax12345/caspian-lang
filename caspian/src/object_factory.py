@@ -35,7 +35,7 @@ class CaspianObjClassInstance(CaspianObj):
     def __setitem__(self, _name:str, _id:typing.Union[so.ObjRefId, so.PyBaseObj]) -> None:
         if isinstance(_id, so.ObjRefId):
             _ = self.heap[_id].inc_ref()
-        print('in an assignment', type(_id))
+        #print('in an assignment', type(_id))
         self.public[_name] = _id
 
 class InstantiatePromise:
@@ -47,7 +47,7 @@ class InstantiatePromise:
 
 class CaspianObjClass(CaspianObj):
     def instantiate(self, *args, **kwargs) -> so.ObjRefId:
-        print('public bindings in here', self.name)
+        #print('public bindings in here', self.name)
         _id = next(self.heap)
         self.inc_ref()
         _obj = CaspianObjClassInstance(
@@ -72,9 +72,7 @@ class CaspianObjClass(CaspianObj):
             else:
                 _call = self.heap[_call]
                 
-
-            print('finalized call object', _call.__dict__)
-        
+            #print('finalized call object', _call.__dict__)
             with self.call_stack('constructor'):
                 _call.exec_source['payload']['callable'](_obj, None, self.name_bindings, *args, **kwargs)
         
@@ -174,7 +172,7 @@ class CaspianObjFactory:
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
             self.name_bindings[_f.__name__] = _id
-        print('primative object after creation (function)', _obj.__dict__)
+        #print('primative object after creation (function)', _obj.__dict__)
 
         return _id
 
@@ -231,7 +229,7 @@ class CaspianObjFactory:
         self.heap[_id] = _obj(_f)
         if _f.__annotations__['return']:
             self.name_bindings[_f.__name__] = _id
-        print('primative object after creation (call)', _obj.__dict__)
+        #print('primative object after creation (call)', _obj.__dict__)
         return _id
 
     def create_null_Py(self, _f:typing.Callable) -> so.ObjRefId:

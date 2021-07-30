@@ -1,9 +1,14 @@
 import typing, state_objects as so, internal_errors
 import caspian_errors, csp_types.caspian_types
+import default_objects
 
 class Compiler(csp_types.caspian_types.CompilerTypes):
     def __init__(self, stack_heap:'CaspianCompile') -> None:
         self.stack_heap = stack_heap
+
+    @so.log_errors
+    def exec_Integer(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return so.ExecStatus(mem_pointer=scope_vars['Integer', True].instantiate(_ast.matched_str))
 
     @so.log_errors
     def exec_Expr(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
@@ -41,6 +46,7 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
                 return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket((rm_term:=self.__class__.rightmost_nonterminal(l_ast[0])).line_num, rm_term.char_num, caspian_errors.InvalidSyntax, caspian_errors.ErrorPacket.char_error_marker(rm_term.char_num, self.stack_heap.lines.get(rm_term.line_num, ''), caspian_errors.InvalidSyntax)))
             
             exec_response = getattr(self, f'exec_{l_ast[0].state_exec_name}')(l_ast[0], scope, scope_vars)
+            print('exec_response in block', exec_response)
             if exec_response.exit_block:
                 return exec_response
 
@@ -59,8 +65,8 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
 
     @classmethod
     def head_compile(cls, _stack_heap:'CaspianCompile', _ast:'BlockTokenGroup') -> None:
-        c, var_scopes = cls(_stack_heap), so.VariableScopes(heap = _stack_heap.heap)
-        _ = c.exec_BlockTokenGroup(_ast, so.Scopes.MainBlock(), var_scopes)
-
+        c = cls(_stack_heap)
+        status_result = c.exec_BlockTokenGroup(_ast, so.Scopes.MainBlock(), _stack_heap.var_scopes)
+        #print('returned ExecStatus after compile', status_result)
 
         

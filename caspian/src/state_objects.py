@@ -77,6 +77,9 @@ class ExecStatus:
     def __getattr__(self, _n:str) -> typing.Any:
         return self._status.get(_n)
 
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({", ".join(a+" = "+str(b) for a, b in self._status.items())})'
+
 def log_errors(_f:typing.Callable) -> typing.Callable:
     @functools.wraps(_f)
     def error_logger(_self, *args, **kwargs) -> typing.Any:
@@ -214,10 +217,11 @@ class VariableScopes:
         _vs.var_scope_paths.append(names)
         return _vs
     
-    def __getitem__(self, _name:str) -> typing.Union[bool, 'CaspianObj']:
+    def __getitem__(self, _l:typing.Union[str, typing.Tuple[str, bool]]) -> typing.Union[bool, 'CaspianObj']:
+        _name, _f = _l if isinstance(_l, tuple) else (_l, False)
         for i in self.var_scope_paths[::-1]:
             if _name in i:
-                return i[_name, True]
+                return i[_name, _f]
         
         return False
 
