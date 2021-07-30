@@ -157,12 +157,6 @@ def null() -> True:
 
     return toString, bool__, toString_
 
-'''
-@o.null
-def null() -> True:
-    pass
-
-'''
 if __name__ == '__main__':
     print('-'*20)
     #print('result in here!!!', o.heap[o.heap[o.heap[null].instantiate()].private['Bool']].__dict__)

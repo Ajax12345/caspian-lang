@@ -72,6 +72,22 @@ class TokenOr(abc.ABC):
 
 class CompilerTypes(abc.ABC):
     @abc.abstractmethod
+    def exec_String(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''instantiates an Py2Caspian String object and returns the memory pointer'''
+
+    @abc.abstractmethod
+    def exec_Null(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''instantiates an Py2Caspian Null object and returns the memory pointer'''
+
+    @abc.abstractmethod
+    def exec_Bool(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''instantiates an Py2Caspian Bool object and returns the memory pointer'''
+
+    @abc.abstractmethod
+    def exec_Float(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''instantiates an Py2Caspian Float object and returns the memory pointer'''
+
+    @abc.abstractmethod
     def exec_Integer(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
         '''instantiates an Py2Caspian Integer object and returns the memory pointer'''
 

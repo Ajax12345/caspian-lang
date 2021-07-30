@@ -7,6 +7,22 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
         self.stack_heap = stack_heap
 
     @so.log_errors
+    def exec_String(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return so.ExecStatus(mem_pointer=scope_vars['String', True].instantiate(_ast.matched_str[1:-1]))
+
+    @so.log_errors
+    def exec_Bool(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return so.ExecStatus(mem_pointer=scope_vars['Bool', True].instantiate(_ast.matched_str == 'true'))
+
+    @so.log_errors
+    def exec_Null(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return so.ExecStatus(mem_pointer=scope_vars['null', True].instantiate())
+
+    @so.log_errors
+    def exec_Float(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return so.ExecStatus(mem_pointer=scope_vars['Float', True].instantiate(_ast.matched_str))
+
+    @so.log_errors
     def exec_Integer(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
         return so.ExecStatus(mem_pointer=scope_vars['Integer', True].instantiate(_ast.matched_str))
 
