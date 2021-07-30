@@ -7,6 +7,13 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
         self.stack_heap = stack_heap
 
     @so.log_errors
+    def exec_PrimativeSignature(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        if (p:=_ast.pointer_next.ast_blocks[-1].pointer_next).state_exec_name != 'ValueLabel':
+            return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, 'Primative signature must be a label'))
+
+        return so.ExecStatus(mem_pointer=scope_vars['Primative', True].instantiate(p.pointer_next.matched_str))
+    
+    @so.log_errors
     def exec_String(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
         return so.ExecStatus(mem_pointer=scope_vars['String', True].instantiate(_ast.matched_str[1:-1]))
 
@@ -62,7 +69,8 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
                 return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket((rm_term:=self.__class__.rightmost_nonterminal(l_ast[0])).line_num, rm_term.char_num, caspian_errors.InvalidSyntax, caspian_errors.ErrorPacket.char_error_marker(rm_term.char_num, self.stack_heap.lines.get(rm_term.line_num, ''), caspian_errors.InvalidSyntax)))
             
             exec_response = getattr(self, f'exec_{l_ast[0].state_exec_name}')(l_ast[0], scope, scope_vars)
-            print('exec_response in block', exec_response)
+            #print('exec_response in block', self.stack_heap.heap[exec_response.mem_pointer].public)
+            print(exec_response)
             if exec_response.exit_block:
                 return exec_response
 

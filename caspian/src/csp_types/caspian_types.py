@@ -72,6 +72,10 @@ class TokenOr(abc.ABC):
 
 class CompilerTypes(abc.ABC):
     @abc.abstractmethod
+    def exec_PrimativeSignature(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''instantiates an Py2Caspian Primative object and returns the memory pointer'''
+
+    @abc.abstractmethod
     def exec_String(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
         '''instantiates an Py2Caspian String object and returns the memory pointer'''
 

@@ -160,5 +160,4 @@ def null() -> True:
 if __name__ == '__main__':
     print('-'*20)
     #print('result in here!!!', o.heap[o.heap[o.heap[null].instantiate()].private['Bool']].__dict__)
-    print(o.heap[Integer].instantiate(1))
-    print(o.heap.mem_objects.keys())
+    print(o.heap[o.heap[BaseClass].instantiate(1)])

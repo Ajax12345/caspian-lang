@@ -19,6 +19,10 @@ class InvalidIndentation(CaspianException):
     def __repr__(self) -> str:
         return str(self)
 
+class ValueError(CaspianException):
+    def __str__(self) -> str:
+        return f"Caspian Error:\n{self.__class__.__name__}: {self.details}"
+
 class ErrorPacket:
     def __init__(self, _line:int, _char:int, _error:typing.Union[InvalidSyntax, InvalidIndentation], details:typing.Optional=None) -> None:
         self.line, self.char, self.error = _line, _char, _error
