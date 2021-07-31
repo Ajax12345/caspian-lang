@@ -7,6 +7,13 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
         self.stack_heap = stack_heap
 
     @so.log_errors
+    def exec_ValueLabel(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        if (r:=scope_vars[_ast.pointer_next.matched_str]):
+            return so.ExecStatus(mem_pointer = r)
+
+        return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, f"'{_ast.pointer_next.matched_str}' is not defined"))
+
+    @so.log_errors
     def exec_PrimativeSignature(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
         if (p:=_ast.pointer_next.ast_blocks[-1].pointer_next).state_exec_name != 'ValueLabel':
             return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, 'Primative signature must be a label'))
