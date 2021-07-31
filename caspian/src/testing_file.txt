@@ -1,1 +1,2 @@
-val
+static abstract fun test()
+    return 100

@@ -1,10 +1,46 @@
 import typing, state_objects as so, internal_errors
 import caspian_errors, csp_types.caspian_types
-import default_objects
+import default_objects, collections
 
 class Compiler(csp_types.caspian_types.CompilerTypes):
     def __init__(self, stack_heap:'CaspianCompile') -> None:
         self.stack_heap = stack_heap
+
+    @so.log_errors
+    def exec_function_object(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes, _async:bool = False, _abstract:bool = False, _static:bool = False) -> so.ExecStatus:
+        pass
+
+    @so.log_errors
+    def exec_StaticAbstractFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return self.exec_function_object(_ast, scope, scope_vars, _abstract = True, _static = True)
+
+    @so.log_errors
+    def exec_StaticAsyncAbstractFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return self.exec_function_object(_ast, scope, scope_vars, _async = True, _abstract = True, _static = True)
+
+    @so.log_errors
+    def exec_StaticAsyncFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return self.exec_function_object(_ast, scope, scope_vars, _async = True, _static = True)
+
+    @so.log_errors
+    def exec_AsyncAbstractFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return self.exec_function_object(_ast, scope, scope_vars, _async = True, _abstract = True)
+
+    @so.log_errors
+    def exec_StaticFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return self.exec_function_object(_ast, scope, scope_vars, _static = True)
+
+    @so.log_errors
+    def exec_AbstractFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return self.exec_function_object(_ast, scope, scope_vars, _abstract = True)
+
+    @so.log_errors
+    def exec_AsyncFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return self.exec_function_object(_ast, scope, scope_vars, _async = True)
+
+    @so.log_errors
+    def exec_FunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
+        return self.exec_function_object(_ast, scope, scope_vars)
 
     @so.log_errors
     def exec_ValueLabel(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
@@ -90,6 +126,12 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
                 return _ast
 
             return cls.rightmost_nonterminal(_ast.pointer_next)
+        
+        if hasattr(_ast, 'tokenized_statements'):
+            return cls.rightmost_nonterminal(_ast.tokenized_statements[-1])
+
+        if hasattr(_ast, 'q_vals'):
+            return cls.rightmost_nonterminal(_ast.q_vals[-1])
         
         return cls.rightmost_nonterminal(_ast.ast_blocks[-1])
         

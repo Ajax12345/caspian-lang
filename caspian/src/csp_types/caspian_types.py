@@ -72,6 +72,38 @@ class TokenOr(abc.ABC):
 
 class CompilerTypes(abc.ABC):
     @abc.abstractmethod
+    def exec_StaticAbstractFunctionBlock(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''loads a static abstract function into memory'''
+
+    @abc.abstractmethod
+    def exec_StaticAsyncAbstractFunctionBlock(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''loads a static async abstract function into memory'''
+
+    @abc.abstractmethod
+    def exec_StaticAsyncFunctionBlock(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''loads a static async function into memory'''
+
+    @abc.abstractmethod
+    def exec_AsyncAbstractFunctionBlock(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''loads a async abstract function into memory'''
+
+    @abc.abstractmethod
+    def exec_StaticFunctionBlock(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''loads a static function into memory'''
+
+    @abc.abstractmethod
+    def exec_AbstractFunctionBlock(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''loads a abstract function into memory'''
+
+    @abc.abstractmethod
+    def exec_AsyncFunctionBlock(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''loads a async function into memory'''
+
+    @abc.abstractmethod
+    def exec_FunctionBlock(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
+        '''loads a function into memory'''
+
+    @abc.abstractmethod
     def exec_ValueLabel(self, _ast:'BlockTokenGroup', scope:'state_objects.Scopes', scope_vars:'state_objects.VariableScopes') -> 'state_objects.ExecStatus':
         '''runs a lookup in scope vars for a specific label name and if found, returns the memory pointer'''
 
