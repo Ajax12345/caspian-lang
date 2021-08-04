@@ -1,2 +1,2 @@
-static abstract fun test()
+fun primative::james(a, b, c):int
     return 100

@@ -8,7 +8,24 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
 
     @so.log_errors
     def exec_function_object(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes, _async:bool = False, _abstract:bool = False, _static:bool = False) -> so.ExecStatus:
-        pass
+        fun_block = _ast
+        if fun_block.state_exec_name != 'FunctionBlock':
+            while getattr((fun_block:=fun_block.ast_blocks[1] if hasattr(fun_block, 'ast_blocks') else fun_block.pointer_next), 'state_exec_name', None) != 'FunctionBlock':
+                pass
+        
+        fun_sig = fun_block
+        while (fs:=fun_sig.ast_blocks[0] if hasattr(fun_sig, 'ast_blocks') else fun_sig.pointer_next).state_exec_name in {None, 'FunctionStub'}:
+            fun_sig = fs
+
+        f_name_expr = fun_sig.ast_blocks[1].pointer_next.ast_blocks[0].pointer_next
+        
+        if not isinstance(scope, so.Scopes.ClassBlock):
+            if _static:
+                return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, 'static function must be contained in a class'))
+            
+            if f_name_expr.state_exec_name == 'PrimativeSignature':
+                return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, 'primative function must be contained in a class'))
+        
 
     @so.log_errors
     def exec_StaticAbstractFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:

@@ -38,6 +38,9 @@ class Scopes:
 
     class ForBlock(ScopeBase):
         pass
+
+    class ClassBlock(ScopeBase):
+        pass
     
     class FunctionBlock(ScopeBase):
         pass

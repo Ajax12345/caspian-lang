@@ -238,11 +238,8 @@ class TokenMain:
 
         @property
         def state_exec_name(self) -> str:
-            if self.token_group_name is not None:
-                return self.token_group_name
+            return self.token_group_name
 
-            raise internal_errors.StateExecNameMissing(f"No identifying string for {self.token_groups}")
-            
         def __eq__(self, _token:typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']) -> bool:
             if self.token_head is None:
                 return False
@@ -335,11 +332,7 @@ class TokenMain:
 
         @property
         def state_exec_name(self) -> str:
-            if self.token_group_name is not None:
-                return self.token_group_name
-
-            raise internal_errors.StateExecNameMissing(f"No identifying string for {self.token_groups}")
-            
+            return self.token_group_name
 
         def t_add_front(self, _t:typing.List[typing.Union['TokenRoot', 'TokenGroup', 'TokenOr']]) -> 'TokenOr':
             self.token_groups.appendleft(_t)
