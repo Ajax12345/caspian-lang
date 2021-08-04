@@ -6,6 +6,18 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
     def __init__(self, stack_heap:'CaspianCompile') -> None:
         self.stack_heap = stack_heap
 
+    def function_scope_statements(self, block:typing.Union['BlockTokenGroup', 'TokenRoot', 'TokenGroup']) -> typing.Iterator:
+        if (fl:=([*getattr(block, 'tokenized_statements', []), *getattr(block, 'ast_blocks', []), *getattr(block, 'q_vals', [])])):
+            for i in fl:
+                if getattr(i, 'state_exec_name', None) not in so.BlockScopeParents.all_block_scopes:
+                    yield from self.function_scope_statements(i)
+        if not fl:
+            if block.raw_token_name in ['Return', 'Await', 'Yield']:
+                yield block.raw_token_name
+            if block.pointer_next is not None:
+                yield from self.function_scope_statements(block.pointer_next)
+            
+
     @so.log_errors
     def exec_function_object(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes, _async:bool = False, _abstract:bool = False, _static:bool = False) -> so.ExecStatus:
         fun_block = _ast
@@ -18,14 +30,21 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
             fun_sig = fs
 
         f_name_expr = fun_sig.ast_blocks[1].pointer_next.ast_blocks[0].pointer_next
-        
+        '''
+        print('fun block after')
+        print(fun_block.pointer_next.ast_blocks[1])
+        print('fun sig after')
+        print(fun_sig)
+        '''
         if not isinstance(scope, so.Scopes.ClassBlock):
             if _static:
                 return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, 'static function must be contained in a class'))
             
             if f_name_expr.state_exec_name == 'PrimativeSignature':
                 return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, 'primative function must be contained in a class'))
-        
+
+        stmnt_counts = collections.Counter(self.function_scope_statements(fun_block.pointer_next.ast_blocks[1]))
+        print('stmnt_counts in here', stmnt_counts)
 
     @so.log_errors
     def exec_StaticAbstractFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:

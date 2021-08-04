@@ -48,7 +48,24 @@ class Scopes:
     class YieldFunctionBlock(ScopeBase):
         pass
 
+class BlockScopeParents:
+    functions = [
+        'Decorator',
+        'StaticAsyncAbstractFunctionBlock',
+        'StaticAbstractFunctionBlock',
+        'StaticAsyncFunctionBlock',
+        'StaticFunctionBlock',
+        'AsyncAbstractFunctionBlock',
+        'AbstractFunctionBlock',
+        'AsyncFunctionBlock',
+        'FunctionBlock',
 
+    ]
+    classes = [
+        'ClassBlock',
+        'AbstractClassBlock',
+    ]
+    all_block_scopes = functions + classes
 
 class StackLevels:
     class StackLevelBase:

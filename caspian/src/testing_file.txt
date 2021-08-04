@@ -1,2 +1,5 @@
-fun primative::james(a, b, c):int
-    return 100
+fun james(f)
+    class V
+        v = await f
+
+    return V
