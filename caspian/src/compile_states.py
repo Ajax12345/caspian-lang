@@ -30,12 +30,6 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
             fun_sig = fs
 
         f_name_expr = fun_sig.ast_blocks[1].pointer_next.ast_blocks[0].pointer_next
-        '''
-        print('fun block after')
-        print(fun_block.pointer_next.ast_blocks[1])
-        print('fun sig after')
-        print(fun_sig)
-        '''
         if not isinstance(scope, so.Scopes.ClassBlock):
             if _static:
                 return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, 'static function must be contained in a class'))
@@ -45,6 +39,12 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
 
         stmnt_counts = collections.Counter(self.function_scope_statements(fun_block.pointer_next.ast_blocks[1]))
         print('stmnt_counts in here', stmnt_counts)
+        if stmnt_counts.get('Yield') and stmnt_counts.get('Return'):
+            return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, "generator function cannot contain a 'return' statement"))
+
+        if stmnt_counts.get('Await') and not _async:
+            return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, "'await' statement must be inside an asyncronous function"))
+        
 
     @so.log_errors
     def exec_StaticAbstractFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
