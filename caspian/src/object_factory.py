@@ -38,6 +38,12 @@ class CaspianObjClassInstance(CaspianObj):
         #print('in an assignment', type(_id))
         self.public[_name] = _id
 
+    def __getitem__(self, _name:str) -> so.ObjRefId:
+        if _name not in self.public:
+            raise internal_errors.MissingBindingName(f"'{_name}' not found in public bindings of '{self.name}'")
+        
+        return self.public[_name]
+
 class InstantiatePromise:
     def __init__(self, _name:str, *args) -> None:
         self.name, self.args = _name, args
