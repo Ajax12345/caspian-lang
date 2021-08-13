@@ -15,7 +15,7 @@ def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) ->
 
 @o.primative.toString
 def toStringName(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
-    return this['__name__']
+    return this.public['__name__']
 
 @o.primative.Call
 def InstantiateClassCall(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, *args, **kwargs) -> True:
