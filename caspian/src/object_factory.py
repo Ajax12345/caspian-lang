@@ -90,6 +90,9 @@ class _primative:
     def toString(self, _f:typing.Callable) -> typing.Callable:
         return self.factory.create_primative_Py(_f, name='toString', _type=self._type)
 
+    def Eq(self, _f:typing.Callable) -> typing.Callable:
+        return self.factory.create_primative_Py(_f, name='Eq', _type=self._type)
+
     def Call(self, _f:typing.Callable) -> typing.Callable:
         return self.factory.create_primative_Call_Py(_f, name='Call', _type=self._type)
 
@@ -166,6 +169,7 @@ class CaspianObjFactory:
                     '__type__':self._(self.name_bindings['Fun']),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':self._(self.name_bindings['toString']),
+                        'Eq':self._(self.name_bindings['Eq']),
                         'Bool':self._(self.name_bindings['bool_']),
                         'Call':self.call_clone_handler(_f)}
         )
@@ -195,6 +199,7 @@ class CaspianObjFactory:
                     '__type__':self._(self.name_bindings['Primative']),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':self._(self.name_bindings['toString']),
+                        'Eq':self._(self.name_bindings['Eq']),
                         'Bool':self._(self.name_bindings['bool_']),
                         'Call':self.call_clone_handler(_f)}
         )
@@ -223,6 +228,7 @@ class CaspianObjFactory:
                     '__type__':self._(self.name_bindings['Primative']),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':self._(self.name_bindings['toString']),
+                        'Eq':self._(self.name_bindings['Eq']),
                         'Bool':self._(self.name_bindings['bool_']),
                         'Call':so.NameSelf}
         )
@@ -249,6 +255,7 @@ class CaspianObjFactory:
                     '__type__':self._(self.name_bindings['NullType']),
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':self._(self.name_bindings['toStringName']),
+                        'Eq':self._(self.name_bindings['Eq']),
                         'Bool':self._(self.name_bindings['bool__'])}
         )
         self.heap[_id] = _obj
@@ -273,6 +280,7 @@ class CaspianObjFactory:
                     '__type__':so.NameSelf,
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
             private = {'toString':_f()[0],
+                        'Eq':self._(self.name_bindings['Eq']),
                         'Bool':self._(self.name_bindings['bool_']),
                         'Call':self._(self.name_bindings['InstantiateClassCall'])},
             bindings = CaspianClassBindings(
@@ -280,6 +288,7 @@ class CaspianObjFactory:
 
                 },
                 private={'toString':self._(self.name_bindings['toString']),
+                        'Eq':self._(self.name_bindings['Eq']),
                         'Bool':self._(self.name_bindings['bool_'])}
             )
         )
@@ -313,12 +322,14 @@ class CaspianObjFactory:
                     '__id__':self.name_bindings['Integer', True].instantiate(_id.id),
                     **{o.name:i for o, i in attr_bindings.get(1, {}).get(0, [])}},
             private = {'toString':self._(self.name_bindings['toString']),
+                        'Eq':self._(self.name_bindings['Eq']),
                         'Bool':self._(self.name_bindings['bool_']),
                         'Call':self._(self.name_bindings['InstantiateClassCall']),
                         **{self.create_primative_name(o.name):i for o, i in attr_bindings.get(1, {}).get(1, [])}},
             bindings = CaspianClassBindings(
                 public = {o.name:i for o, i in attr_bindings.get(0, {}).get(0, [])},
                 private={'toString':self._(self.name_bindings['toString']),
+                        'Eq':self._(self.name_bindings['Eq']),
                         'Bool':self._(self.name_bindings['bool_']),
                         **{self.create_primative_name(o.name):i for o, i in attr_bindings.get(0, {}).get(1, [])}}
             )

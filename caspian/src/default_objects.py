@@ -5,6 +5,10 @@ __all__ = ('o',)
 
 o = object_factory.CaspianObjFactory()
 
+@o.primative.Eq
+def Eq(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes, comp_obj:'CaspianObj') -> True:
+    return scope_vars['Bool'].instantiate(this.id == comp_obj.id)
+
 @o.primative.toString
 def toString(this, stack_heap:'CaspianCompile', scope_vars:so.VariableScopes) -> True:
     return scope_vars['String'].instantiate(f"<{this._type} '{this.name}' at {this.id}>")
@@ -159,4 +163,4 @@ def null() -> True:
 if __name__ == '__main__':
     print('-'*20)
     #print('result in here!!!', o.heap[o.heap[o.heap[null].instantiate()].private['Bool']].__dict__)
-    print(o.heap[o.heap[BaseClass].instantiate(1)])
+    print(Eq)
