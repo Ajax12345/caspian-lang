@@ -67,7 +67,7 @@ class CaspianObjClass(CaspianObj):
             name = self.name,
             id = _id.id,
             public = {'__name__':so.HeapPromise('String').instantiate(self.name), 
-                    '__type__':so.ObjRefId(_id.id),
+                    '__type__':so.ObjRefId(self.id),
                     '__id__':so.HeapPromise('Integer').instantiate(_id.id),
                     **self.bindings.public},
             private = self.bindings.private
