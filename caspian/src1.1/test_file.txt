@@ -1,2 +1,2 @@
-fun test()
+fun primative::test()
     pass

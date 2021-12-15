@@ -66,10 +66,20 @@ class Parser:
 
         return c_ast.CommaSeparatedItems(items = items)
 
+    def parse_expr(self) -> c_ast.Expr:
+        pass
+
     def parse_fun(self, indent:'TOKEN.INDENT', **kwargs:dict) -> c_ast.Fun:
-        name = self.consume_if_true_or_exception(TOKEN.NAME)
+        primative = False
+        name = None
         settings, signature, return_type = None, None, None
         body = None
+        if self.consume_if_true(TOKEN.PRIMATIVE):
+            primative = True
+            self.consume_if_true_or_exception(TOKEN.COLON)
+            self.consume_if_true_or_exception(TOKEN.COLON)
+
+        name = self.consume_if_true_or_exception(TOKEN.NAME)
         if self.consume_if_true(TOKEN.O_BRACE):
             settings = self.parse_comma_separated_items(end=TOKEN.C_BRACE)
         
@@ -81,7 +91,8 @@ class Parser:
         self.consume_if_true_or_exception(TOKEN.EOL)
         body = self.body(TOKEN.INDENT(indent.value+4))
         self.release_token(TOKEN.EOL)
-        return c_ast.Fun(name=name.value, 
+        return c_ast.Fun(name=name.value,
+                        primative=primative, 
                         settings=settings, 
                         signature=signature, 
                         return_type=return_type, 
@@ -99,6 +110,7 @@ class Parser:
         if (t:=self.consume_if_true(TOKEN.FUN)) is not None:
             return self.parse_fun(indent)
 
+        return self.parse_expr()
 
     def body(self, indent=TOKEN.INDENT(0)) -> c_ast.Body:
         body = []

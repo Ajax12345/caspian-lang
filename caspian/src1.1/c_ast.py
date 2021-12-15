@@ -24,3 +24,6 @@ class Fun(Ast):
 
 class CommaSeparatedItems(Ast):
     pass
+
+class Expr(Ast):
+    pass
