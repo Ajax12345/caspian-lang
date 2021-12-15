@@ -92,7 +92,26 @@ class Tokenizer:
     def __init__(self, src:str, c_ctx=None) -> None:
         self.src, self.c_ctx = src, c_ctx
         self._stream = self.token_stream(src)
+        self.consumed_stream = collections.deque()
 
+    def peek(self) -> TOKEN:
+        if self.consumed_stream:
+            return self.consumed_stream[0]
+        
+        if (t:=next(self._stream, None)) is not None:
+            self.consumed_stream.append(t)
+            return self.consumed_stream[0]
+
+    def match(self, token:TOKEN) -> bool:
+        if self.consumed_stream:
+            if self.consumed_stream[0].matches(token):
+                return self.consumed_stream.popleft()
+        else:
+            if (t:=next(self._stream, None)) is not None:
+                if t.matches(token):
+                    return t
+                self.consumed_stream.append(t)
+        
     def token_stream(self, src:str) -> typing.Iterator:
         for i, a in enumerate(src.split('\n'),1):
             if (a:=re.sub('//[\w\W]+', '', a)):
@@ -115,4 +134,4 @@ class Tokenizer:
 if __name__ == '__main__':
     with open('test_file.txt') as f:
         t = Tokenizer(f.read())
-    print([i.value for i in t._stream])
+   

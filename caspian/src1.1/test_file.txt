@@ -1,2 +1,1 @@
-fun test({"a":a, "c":b, "b":{"d":d}}, stuff)
-    return a + b + d
+v = ""
