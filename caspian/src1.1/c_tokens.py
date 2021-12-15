@@ -1,9 +1,11 @@
 import typing
 
 class TOKEN:
-    def __init__(self, name:str) -> None:
+    def __init__(self, name:str, parent:'TOKEN'=None, value:typing.Union[int, str]=None, line:int = None, ch:int=None) -> None:
         self.name = name
-        self.parent = None
+        self.parent = parent
+        self.value = value
+        self.line, self.ch = line, ch
 
     def __getattr__(self, name:str) -> 'TOKEN':
         if self.parent is None:
@@ -13,12 +15,21 @@ class TOKEN:
         getattr(self.parent, name)
         return self
     
-    def __call__(self, token:'TOKEN') -> 'TOKEN':
-        if token.parent is None:
-            token.parent = self
-            return token
+    def match(self, token:'TOKEN', strict:bool=True) -> bool:
+        if self.name == token.name:
+            return True
+        
+        if not strict:
+            p = self.parent
+            while p is not None:
+                if p.name == token.name:
+                    return True
+                p = p.parent
 
-        return self(token.parent)
+        return False
+
+    def __call__(self, value:typing.Any, line:typing.Optional[int]=None, ch:typing.Optional[int]=None) -> 'TOKEN':
+        return TOKEN(self.name, value, line, ch)
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.name}, parent={self.parent})'

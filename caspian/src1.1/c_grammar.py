@@ -1,4 +1,5 @@
 import c_tokens, re
+import collections, typing
 
 __all__ = ('grammar', 'TOKEN')
 
@@ -84,7 +85,31 @@ grammar = [
     (TOKEN.C_BRACE, re.compile(r'\]\b')),
     (TOKEN.POUND, re.compile(r'#\b')),
     (TOKEN.CURLYQ, re.compile(r'~\b')),
+    (TOKEN.COMMA, re.compile(r',\b')),
 ]
+
+class Tokenizer:
+    def __init__(self, src:str, c_ctx=None) -> None:
+        self.src, self.c_ctx = src, c_ctx
+        self._stream = self.token_stream(src)
+
+    def token_stream(self, src:str) -> typing.Iterator:
+        for i, a in enumerate(filter(None, src.split('\n')),1):
+            ch_c, w_ind, s_w_ind = 0, 0, False
+            while a:
+                if (m:=next(((tk, re_m.group()) for tk, re_c in grammar if (re_m:=re_c.match(src)) is not None), None)) is None:
+                    raise Exception(f'At line {i}, near {ch_c}: Invalid syntax')
+                if not m[0].matches(TOKEN.WHITESPACE):
+                    if not s_w_ind:
+                        yield TOKEN.INDENT(w_ind, i, 0)
+                    w_ind, s_w_ind = 0, True
+                    yield m[0](m[1], i, ch_c)
+                elif not s_w_ind:
+                    w_ind += 1
+                a = a[(l:=len(m[1])):]
+                ch_c += l
+            yield TOKEN.EOL
+                
 
 if __name__ == '__main__':
     print(grammar)
