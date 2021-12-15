@@ -31,6 +31,12 @@ class TOKEN:
     def __call__(self, value:typing.Any, line:typing.Optional[int]=None, ch:typing.Optional[int]=None) -> 'TOKEN':
         return TOKEN(self.name, value, self.parent, line, ch)
 
+    def __eq__(self, token:'TOKEN') -> bool:
+        return self.name == token.name and self.value = token.value
+
+    def __bool__(self) -> bool:
+        return True
+
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.name}, parent={self.parent})'
 

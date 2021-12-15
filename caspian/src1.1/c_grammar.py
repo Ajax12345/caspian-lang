@@ -1,7 +1,7 @@
 import c_tokens, re
 import collections, typing
 
-__all__ = ('grammar', 'TOKEN')
+__all__ = ('grammar', 'TOKEN', 'Tokenizer')
 
 TOKEN = c_tokens.TOKEN_BASE()
 
@@ -94,13 +94,21 @@ class Tokenizer:
         self._stream = self.token_stream(src)
         self.consumed_stream = collections.deque()
 
-    def peek(self) -> TOKEN:
+    def peek(self) -> typing.Union[None, TOKEN]:
         if self.consumed_stream:
             return self.consumed_stream[0]
         
         if (t:=next(self._stream, None)) is not None:
             self.consumed_stream.append(t)
             return self.consumed_stream[0]
+        
+    def consume(self) -> typing.Union[None, 'TOKEN']:
+        if self.consumed_stream:
+            return self.consumed_stream.popleft()
+
+        if (t:=next(self._stream, None)) is not None:
+            return t
+        
 
     def match(self, token:TOKEN) -> bool:
         if self.consumed_stream:
@@ -134,4 +142,3 @@ class Tokenizer:
 if __name__ == '__main__':
     with open('test_file.txt') as f:
         t = Tokenizer(f.read())
-   
