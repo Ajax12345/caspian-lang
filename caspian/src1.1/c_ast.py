@@ -18,3 +18,9 @@ class Body(Ast):
 
 class Pass(Ast):
     pass
+
+class Fun(Ast):
+    pass
+
+class CommaSeparatedItems(Ast):
+    pass

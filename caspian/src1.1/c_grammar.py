@@ -93,6 +93,12 @@ class Tokenizer:
         self.src, self.c_ctx = src, c_ctx
         self._stream = self.token_stream(src)
         self.consumed_stream = collections.deque()
+    
+    def __iter__(self) -> typing.Iterator:
+        yield from self._stream
+
+    def release_token(self, token:TOKEN) -> None:
+        self.consumed_stream.appendleft(token)
 
     def peek(self) -> typing.Union[None, 'TOKEN']:
         if self.consumed_stream:

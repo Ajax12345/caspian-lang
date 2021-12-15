@@ -33,6 +33,15 @@ class Parser:
 
         raise Exception(f'Invalid Syntax (expecting {token})')
 
+    def check_if_true_or_exception(self, token:TOKEN) -> TOKEN:
+        if (t:=self.peek()) is not None and t.matches(token):
+            return t
+
+        raise Exception(f'Invalid Syntax (expecting {token})')
+
+    def release_token(self, token:TOKEN) -> None:
+        self.tokenizer.release_token(token)
+
     def consume_if_true(self, token:TOKEN) -> typing.Union['TOKEN', None]:
         if (t:=self.peek()) is not None and t.matches(token):
             return self.consume()
@@ -49,13 +58,46 @@ class Parser:
         
         return c_ast.Import(path=[i.value for i in path], alias=alias.value if alias is not None else None, line=path[0].line)
 
+    def parse_comma_separated_items(self, end:typing.Union[None, 'TOKEN']=None) -> c_ast.CommaSeparatedItems:
+        items = []
+        #TODO: add logic here
+        if end is not None:
+            self.consume_if_true_or_exception(end)
 
-    def statement(self) -> c_ast.Ast:
+        return c_ast.CommaSeparatedItems(items = items)
+
+    def parse_fun(self, indent:'TOKEN.INDENT', **kwargs:dict) -> c_ast.Fun:
+        name = self.consume_if_true_or_exception(TOKEN.NAME)
+        settings, signature, return_type = None, None, None
+        body = None
+        if self.consume_if_true(TOKEN.O_BRACE):
+            settings = self.parse_comma_separated_items(end=TOKEN.C_BRACE)
+        
+        self.consume_if_true_or_exception(TOKEN.O_PAREN)
+        signature = self.parse_comma_separated_items(end=TOKEN.C_PAREN)
+        if self.consume_if_true(TOKEN.COLON):
+            return_type = self.parse_expr()
+
+        self.consume_if_true_or_exception(TOKEN.EOL)
+        body = self.body(TOKEN.INDENT(indent.value+4))
+        self.release_token(TOKEN.EOL)
+        return c_ast.Fun(name=name.value, 
+                        settings=settings, 
+                        signature=signature, 
+                        return_type=return_type, 
+                        body=body, 
+                        **kwargs)
+
+
+    def statement(self, indent:'TOKEN.INDENT') -> c_ast.Ast:
         if (t:=self.consume_if_true(TOKEN.IMPORT)) is not None:
             return self.parse_import()
         
         if (t:=self.consume_if_true(TOKEN.PASS)) is not None:
             return c_ast.Pass(line=t.line)
+        
+        if (t:=self.consume_if_true(TOKEN.FUN)) is not None:
+            return self.parse_fun(indent)
 
 
     def body(self, indent=TOKEN.INDENT(0)) -> c_ast.Body:
@@ -68,7 +110,7 @@ class Parser:
             
             self.consume_if_true_or_exception(TOKEN.INDENT)
             while True:
-                body.append(self.statement())
+                body.append(self.statement(indent))
                 if self.consume_if_true(TOKEN.EOL) is not None:
                     break
                 self.consume_if_true_or_exception(TOKEN.SEMICOLON)
