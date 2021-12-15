@@ -94,7 +94,7 @@ class Tokenizer:
         self._stream = self.token_stream(src)
         self.consumed_stream = collections.deque()
 
-    def peek(self) -> typing.Union[None, TOKEN]:
+    def peek(self) -> typing.Union[None, 'TOKEN']:
         if self.consumed_stream:
             return self.consumed_stream[0]
         

@@ -32,7 +32,7 @@ class TOKEN:
         return TOKEN(self.name, value, self.parent, line, ch)
 
     def __eq__(self, token:'TOKEN') -> bool:
-        return self.name == token.name and self.value = token.value
+        return self.name == token.name and self.value == token.value
 
     def __bool__(self) -> bool:
         return True
