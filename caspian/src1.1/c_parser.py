@@ -18,6 +18,12 @@ class Parser:
         if m_fun(self.peek()):
             return self.consume()
 
+    def consume_if_custom_true_or_exception(self, m_fun:typing.Callable) -> typing.Union[None, 'TOKEN']:
+        if m_fun(self.peek()):
+            return self.consume()
+
+        raise Exception('Invalid Syntax')
+
     def consume_if_eq(self, token:TOKEN) -> typing.Union[None, 'TOKEN']:
         pass
     
@@ -30,6 +36,23 @@ class Parser:
     def consume_if_true(self, token:TOKEN) -> typing.Union['TOKEN', None]:
         if (t:=self.peek()) is not None and t.matches(token):
             return self.consume()
+
+    def parse_import(self) -> c_ast.Import:
+        path, alias = [], None
+        while True:
+            path.append(self.consume_if_true_or_exception(TOKEN.NAME))
+            if self.consume_if_true(TOKEN.DOT) is None:
+                break
+        
+        if self.consume_if_true(TOKEN.AS) is not None:
+            alias = self.consume_if_true_or_exception(TOKEN.NAME)
+        
+        return c_ast.Import(path=[i.value for i in path], alias=alias.value if alias is not None else None)
+
+
+    def statement(self) -> c_ast.Ast:
+        if (t:=self.consume_if_true(TOKEN.IMPORT)) is not None:
+            return self.parse_import()
 
 
     def body(self, indent=TOKEN.INDENT(0)) -> c_ast.Body:
