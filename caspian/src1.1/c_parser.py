@@ -47,12 +47,15 @@ class Parser:
         if self.consume_if_true(TOKEN.AS) is not None:
             alias = self.consume_if_true_or_exception(TOKEN.NAME)
         
-        return c_ast.Import(path=[i.value for i in path], alias=alias.value if alias is not None else None)
+        return c_ast.Import(path=[i.value for i in path], alias=alias.value if alias is not None else None, line=path[0].line)
 
 
     def statement(self) -> c_ast.Ast:
         if (t:=self.consume_if_true(TOKEN.IMPORT)) is not None:
             return self.parse_import()
+        
+        if (t:=self.consume_if_true(TOKEN.PASS)) is not None:
+            return c_ast.Pass(line=t.line)
 
 
     def body(self, indent=TOKEN.INDENT(0)) -> c_ast.Body:

@@ -15,3 +15,6 @@ class Import(Ast):
 
 class Body(Ast):
     pass
+
+class Pass(Ast):
+    pass
