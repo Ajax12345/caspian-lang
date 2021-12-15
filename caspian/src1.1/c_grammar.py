@@ -51,7 +51,7 @@ grammar = [
     (TOKEN.CONTINUE, re.compile(r'continue\b')),
     (TOKEN.NAME, re.compile(r'[a-zA-Z_](?:\w+)*\b')),
     (TOKEN.DOT, re.compile(r'\.\b')),
-    (TOKEN.COLON, re.compile(r'\:\b')),
+    (TOKEN.COLON, re.compile(r'\:')),
     (TOKEN.EQ.OP, re.compile(r'\=\=\b')),
     (TOKEN.NOT_EQ.OP, re.compile(r'\!\=\b')),
     (TOKEN.AMP.OP, re.compile(r'\&\b')),
@@ -73,19 +73,19 @@ grammar = [
     (TOKEN.DIV.OP, re.compile(r'/\b')),
     (TOKEN.MOD.OP, re.compile(r'%\b')),
     (TOKEN.ASSIGN.IMP_OP, re.compile(r'\=\b')),
-    (TOKEN.LT.OP, re.compile(r'\<\b')),
-    (TOKEN.GT.OP, re.compile(r'\>\b')),
-    (TOKEN.SEMICOLON, re.compile(r'\;\b')),
+    (TOKEN.LT.OP, re.compile(r'\<')),
+    (TOKEN.GT.OP, re.compile(r'\>')),
+    (TOKEN.SEMICOLON, re.compile(r'\;')),
     (TOKEN.IS.OP, re.compile(r'is\b')),
-    (TOKEN.O_PAREN, re.compile(r'\(\b')),
-    (TOKEN.C_PAREN, re.compile(r'\)\b')),
-    (TOKEN.O_BRACKET, re.compile(r'\{\b')),
-    (TOKEN.C_BRACKET, re.compile(r'\}\b')),
-    (TOKEN.O_BRACE, re.compile(r'\[\b')),
-    (TOKEN.C_BRACE, re.compile(r'\]\b')),
-    (TOKEN.POUND, re.compile(r'#\b')),
-    (TOKEN.CURLYQ, re.compile(r'~\b')),
-    (TOKEN.COMMA, re.compile(r',\b')),
+    (TOKEN.O_PAREN, re.compile(r'\(')),
+    (TOKEN.C_PAREN, re.compile(r'\)')),
+    (TOKEN.O_BRACKET, re.compile(r'\{')),
+    (TOKEN.C_BRACKET, re.compile(r'\}')),
+    (TOKEN.O_BRACE, re.compile(r'\[')),
+    (TOKEN.C_BRACE, re.compile(r'\]')),
+    (TOKEN.POUND, re.compile(r'#')),
+    (TOKEN.CURLYQ, re.compile(r'~')),
+    (TOKEN.COMMA, re.compile(r',')),
 ]
 
 class Tokenizer:
@@ -94,22 +94,26 @@ class Tokenizer:
         self._stream = self.token_stream(src)
 
     def token_stream(self, src:str) -> typing.Iterator:
-        for i, a in enumerate(filter(None, src.split('\n')),1):
-            ch_c, w_ind, s_w_ind = 0, 0, False
-            while a:
-                if (m:=next(((tk, re_m.group()) for tk, re_c in grammar if (re_m:=re_c.match(src)) is not None), None)) is None:
-                    raise Exception(f'At line {i}, near {ch_c}: Invalid syntax')
-                if not m[0].matches(TOKEN.WHITESPACE):
-                    if not s_w_ind:
-                        yield TOKEN.INDENT(w_ind, i, 0)
-                    w_ind, s_w_ind = 0, True
-                    yield m[0](m[1], i, ch_c)
-                elif not s_w_ind:
-                    w_ind += 1
-                a = a[(l:=len(m[1])):]
-                ch_c += l
-            yield TOKEN.EOL
+        for i, a in enumerate(src.split('\n'),1):
+            if (a:=re.sub('//[\w\W]+', '', a)):
+                ch_c, w_ind, s_w_ind = 0, 0, False
+                while a:
+                    if (m:=next(((tk, re_m.group()) for tk, re_c in grammar if (re_m:=re_c.match(a)) is not None), None)) is None:
+                        print(a)
+                        raise Exception(f'At line {i}, near {ch_c}: Invalid syntax')
+                    if not m[0].matches(TOKEN.WHITESPACE):
+                        if not s_w_ind:
+                            yield TOKEN.INDENT(w_ind, i, 0)
+                        w_ind, s_w_ind = 0, True
+                        yield m[0](m[1], i, ch_c)
+                    elif not s_w_ind:
+                        w_ind += 1
+                    a = a[(l:=len(m[1])):]
+                    ch_c += l
+                yield TOKEN.EOL
                 
 
 if __name__ == '__main__':
-    print(grammar)
+    with open('test_file.txt') as f:
+        t = Tokenizer(f.read())
+    print([i.value for i in t._stream])
