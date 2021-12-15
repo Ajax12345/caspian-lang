@@ -45,6 +45,7 @@ class Compiler(csp_types.caspian_types.CompilerTypes):
         if stmnt_counts.get('Await') and not _async:
             return so.ExecStatus(error=True, error_packet = caspian_errors.ErrorPacket(None, None, caspian_errors.ValueError, "'await' statement must be inside an asyncronous function"))
         
+        
 
     @so.log_errors
     def exec_StaticAbstractFunctionBlock(self, _ast:'TokenGroup', scope:so.Scopes, scope_vars:so.VariableScopes) -> so.ExecStatus:
