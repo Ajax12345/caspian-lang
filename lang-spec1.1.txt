@@ -63,10 +63,10 @@ arr = [1, 3, 4, await func()]
 //arrays and maps can be made immutable via the '#' character:
 arr = #[1, 2, 3, 4]
 //accessing works: arr[0]
-//but not setting: arr[1] = 10 => raises "Immutable Container Error"
+//but not setting: arr[1] = 10 // raises "Immutable Container Error"
 [1, 2, 3, #[1, 34, 3]]
 v = #{1:2, 3:42, "james":10}
-v['james'] = 1000 =>  "Immutable Container Error"
+v['james'] = 1000 //  "Immutable Container Error"
 
 //1.1 type checking (variable assignment)
 val = 10 //no type, can be reassigned to other types (val = "James")

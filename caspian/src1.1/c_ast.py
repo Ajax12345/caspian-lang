@@ -78,3 +78,6 @@ class AsyncAwait(Ast):
 
 class NotOp(Ast):
     pass
+
+class NegVal(Ast):
+    pass

@@ -129,6 +129,10 @@ class Parser:
 
             
             elif (t:=self.consume_if_custom_true(lambda x:x.name in operators)):
+                if t.matches(TOKEN.MINUS) and value is None:
+                    value = c_ast.NegVal(obj=self.parse_expr(indent, t_priority=5, stmnt = stmnt))
+                    continue
+                    
                 if t_priority is not None and priorities[t.name] < t_priority:
                     self.release_token(t)
                     return value
@@ -168,8 +172,6 @@ class Parser:
                     raise Exception('invalid syntax (got not with value not none)')
                 
                 value = c_ast.NotOp(obj = self.parse_expr(indent, t_priority=priorities[t.name], stmnt = stmnt))
-
-            
 
             else:
                 return value
