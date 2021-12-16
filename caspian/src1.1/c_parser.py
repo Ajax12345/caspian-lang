@@ -69,6 +69,10 @@ class Parser:
             items.append(i)
             if self.consume_if_true(TOKEN.COMMA) is None:
                 break
+            elif self.consume_if_true(TOKEN.EOL):
+                self.consume_if_true(TOKEN.INDENT)
+
+            self.consume_if_true(TOKEN.EOL)
         if end is not None:
             self.consume_if_true_or_exception(end)
         return c_ast.CommaSeparatedItems(items = items)
