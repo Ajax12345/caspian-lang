@@ -69,3 +69,6 @@ class KeyValue(Ast):
 
 class ImpOp(Ast):
     pass
+
+class InPlace(Ast):
+    pass

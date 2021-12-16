@@ -14,6 +14,12 @@ class Parser:
     def check_if_custom_true(self, m_fun:typing.Callable) -> typing.Union[None, 'TOKEN']:
         return m_fun(self.peek())
 
+    def check_if_custom_true_or_exception(self, m_fun:typing.Callable) -> typing.Union[None, 'TOKEN']:
+        if m_fun(self.peek()):
+            return True
+        
+        raise Exception('Syntax error')
+
     def check_if_true(self, token:'TOKEN') -> bool:
         return (t:=self.peek()) is not None and t.matches(token)
 
@@ -127,19 +133,29 @@ class Parser:
                     self.release_token(t)
                     return value
 
+                if (v:=self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt)) is None:
+                    raise Exception('syntax error')
+
                 if t.matches(TOKEN.IMP_OP): 
                     if t.matches(TOKEN.ASSIGN):
-                        return (c_ast.Assign if stmnt else c_ast.AssignParam)(obj = value, value = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
+                        return (c_ast.Assign if stmnt else c_ast.AssignParam)(obj = value, value = v)
                     
-                    return c_ast.ImpOp(obj=value, operator = t, value = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
+                    return c_ast.ImpOp(obj=value, operator = t, value = v)
 
-                value = c_ast.Operation(operand1=value, operator=t, operand2 = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
+                value = c_ast.Operation(operand1=value, operator=t, operand2 = v)
             
             elif (t:=self.consume_if_true(TOKEN.COLON)):
                 if value is None:
                     raise Exception('Syntax error, got colon without previous value')
 
                 value = c_ast.KeyValue(key=value, value=self.parse_expr(indent, t_priority = priorities[t.name], stmnt=stmnt))
+
+            elif (t:=self.consume_if_true(TOKEN.IMP)):
+                if value is None:
+                    raise Exception('Syntax error, got in-place op without value')
+                
+                self.check_if_custom_true_or_exception(lambda x:x.matches(TOKEN.EOL) or x.matches(TOKEN.SEMICOLON))
+                return c_ast.InPlace(obj=value, operator=t)
 
             else:
                 return value
