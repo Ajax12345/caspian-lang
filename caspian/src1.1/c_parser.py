@@ -104,14 +104,19 @@ class Parser:
 
             elif (t:=self.consume_if_true(TOKEN.VALUE)):
                 value = t
-                
+
             elif self.consume_if_true(TOKEN.DOT):
                 if value is None:
                     self.consume_if_true_or_exception(TOKEN.DOT)
                     unpack=c_ast.ArrayUnpack if not self.consume_if_true(TOKEN.DOT) else c_ast.MapUnpack
-                    value = unpack(container=self.parse_expr(indent, t_priority=priorities[TOKEN.DOT]))
+                    value = unpack(container=self.parse_expr(indent, t_priority=priorities[TOKEN.DOT], stmnt=stmnt))
                 value = c_ast.GetAttr(obj=value, attr=self.consume_if_true_or_exception(TOKEN.NAME))
 
+            elif (t:=self.consume_if_custom_true(lambda x:x in operators)):
+                if t_priority is not None and priorities[t] < t_priority:
+                    self.release_token(t)
+                    return value
+                value = c_ast.Operation(operand1=value, operator=t, operand2 = self.parse_expr(indent, t_priority=priorities[t], stmnt=stmnt))
 
         return value
             

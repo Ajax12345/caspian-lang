@@ -1,7 +1,7 @@
 import c_tokens, re
 import collections, typing
 
-__all__ = ('grammar', 'TOKEN', 'Tokenizer', 'priorities')
+__all__ = ('grammar', 'TOKEN', 'Tokenizer', 'priorities', 'operators')
 
 TOKEN = c_tokens.TOKEN_BASE()
 
@@ -108,6 +108,24 @@ priorities = {
     TOKEN.DOT: 0,
 
 }
+
+operators = [
+    TOKEN.AND,
+    TOKEN.OR,
+    TOKEN.EQ,
+    TOKEN.NOT_EQ,
+    TOKEN.AMP,
+    TOKEN.F_CHAIN,
+    TOKEN.PIPE,
+    TOKEN.GE,
+    TOKEN.LE,
+    TOKEN.LT,
+    TOKEN.GT,
+    TOKEN.MINUS,
+    TOKEN.STAR,
+    TOKEN.DIV,
+    TOKEN.ASSIGN,
+]
 
 class Tokenizer:
     def __init__(self, src:str, c_ctx=None) -> None:

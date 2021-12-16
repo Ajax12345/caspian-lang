@@ -1,1 +1,1 @@
-val.james()
+val.james()[]()
