@@ -69,7 +69,7 @@ class Parser:
 
         return c_ast.CommaSeparatedItems(items = items)
 
-    def parse_expr(self, indent:'TOKEN', stmnt:typing.Optional[bool] = False) -> c_ast.Expr:
+    def parse_expr(self, indent:'TOKEN', t_priority=None, stmnt:typing.Optional[bool] = False) -> c_ast.Expr:
         value = None
         while not self.check_if_true(TOKEN.EOL):
             if self.consume_if_true(TOKEN.O_PAREN):
@@ -79,20 +79,20 @@ class Parser:
                 else:
                     value = c_ast.Call(obj = value, signature = v)
 
-            if self.consume_if_true(TOKEN.O_BRACE):
+            elif self.consume_if_true(TOKEN.O_BRACE):
                 v = c_ast.BraceItems(items=self.parse_comma_separated_items(TOKEN.C_BRACE))
                 if value is None:
                     value = v
                 else:
                     value = c_ast.GetItem(obj = value, signature = v)
 
-            if self.consume_if_true(TOKEN.O_BRACKET):
+            elif self.consume_if_true(TOKEN.O_BRACKET):
                 if value is not None:
                     raise Exception('got bracket object with value already set')
 
                 value = c_ast.BracketItems(items=self.parse_comma_separated_items(TOKEN.C_BRACKET))
 
-            if self.consume_if_true(TOKEN.POUND):
+            elif self.consume_if_true(TOKEN.POUND):
                 if value is not None:
                     raise Exception('got pound object with value already set')
                 if self.consume_if_true(TOKEN.O_BRACE):
@@ -102,8 +102,16 @@ class Parser:
                 else:
                     raise Exception('Immutability syntax error')
 
-            if (t:=self.consume_if_true(TOKEN.VALUE)):
+            elif (t:=self.consume_if_true(TOKEN.VALUE)):
                 value = t
+                
+            elif self.consume_if_true(TOKEN.DOT):
+                if value is None:
+                    self.consume_if_true_or_exception(TOKEN.DOT)
+                    unpack=c_ast.ArrayUnpack if not self.consume_if_true(TOKEN.DOT) else c_ast.MapUnpack
+                    value = unpack(container=self.parse_expr(indent, t_priority=priorities[TOKEN.DOT]))
+                value = c_ast.GetAttr(obj=value, attr=self.consume_if_true_or_exception(TOKEN.NAME))
+
 
         return value
             

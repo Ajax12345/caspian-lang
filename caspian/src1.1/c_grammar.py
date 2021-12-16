@@ -1,7 +1,7 @@
 import c_tokens, re
 import collections, typing
 
-__all__ = ('grammar', 'TOKEN', 'Tokenizer')
+__all__ = ('grammar', 'TOKEN', 'Tokenizer', 'priorities')
 
 TOKEN = c_tokens.TOKEN_BASE()
 
@@ -17,7 +17,7 @@ grammar = [
     (TOKEN.NULL.VALUE, re.compile(r'null\b')),
     (TOKEN.AND.OP, re.compile(r'and\b')),
     (TOKEN.OR.OP, re.compile(r'or\b')),
-    (TOKEN.IN.OP, re.compile(r'or\b')),
+    (TOKEN.IN, re.compile(r'or\b')),
     (TOKEN.NOT, re.compile(r'not\b')),
     (TOKEN.AS, re.compile(r'as\b')),
     (TOKEN.FUN, re.compile(r'fun\b')),
@@ -87,6 +87,27 @@ grammar = [
     (TOKEN.CURLYQ, re.compile(r'~')),
     (TOKEN.COMMA, re.compile(r',')),
 ]
+priorities = {
+    TOKEN.AWAIT: 3,
+    TOKEN.NOT: 3,
+    TOKEN.AND: 1,
+    TOKEN.OR: 1,
+    TOKEN.EQ: 1,
+    TOKEN.NOT_EQ: 1,
+    TOKEN.AMP: 1,
+    TOKEN.F_CHAIN: 4,
+    TOKEN.PIPE: 1,
+    TOKEN.GE: 1,
+    TOKEN.LE: 1,
+    TOKEN.LT: 1,
+    TOKEN.GT: 1,
+    TOKEN.MINUS: 1,
+    TOKEN.STAR: 2,
+    TOKEN.DIV: 2,
+    TOKEN.ASSIGN: 0,
+    TOKEN.DOT: 0,
+
+}
 
 class Tokenizer:
     def __init__(self, src:str, c_ctx=None) -> None:
@@ -146,5 +167,8 @@ class Tokenizer:
                 
 
 if __name__ == '__main__':
+    '''
     with open('test_file.txt') as f:
         t = Tokenizer(f.read())
+    '''
+    print({TOKEN.BOOL:"james"}[TOKEN.BOOL])

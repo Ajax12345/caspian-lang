@@ -43,5 +43,14 @@ class Call(Ast):
 class ImmutableContainer(Ast):
     pass
 
+class MapUnpack(Ast):
+    pass
+
+class ArrayUnpack(Ast):
+    pass
+
+class GetAttr(Ast):
+    pass
+
 class Expr(Ast):
     pass

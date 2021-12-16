@@ -33,6 +33,9 @@ class TOKEN:
     def __eq__(self, token:'TOKEN') -> bool:
         return self.name == token.name and self.value == token.value
 
+    def __hash__(self) -> str:
+        return hash(self.name)
+
     def __bool__(self) -> bool:
         return True
 
