@@ -132,11 +132,11 @@ class Parser:
                 
                 value = c_ast.Operation(operand1=value, operator=t, operand2 = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
             
-            elif self.consume_if_true(TOKEN.COLON):
+            elif (t:=self.consume_if_true(TOKEN.COLON)):
                 if value is None:
                     raise Exception('Syntax error, got colon without previous value')
 
-                value = c_ast.KeyValue(key=value, value=self.parse_expr(indent, stmnt=stmnt))
+                value = c_ast.KeyValue(key=value, value=self.parse_expr(indent, t_priority = priorities[t.name], stmnt=stmnt))
 
             else:
                 return value

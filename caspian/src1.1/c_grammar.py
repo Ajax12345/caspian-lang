@@ -107,6 +107,7 @@ priorities = {a.name:b for a, b in {
     TOKEN.DIV: 2,
     TOKEN.ASSIGN: 0,
     TOKEN.DOT: 0,
+    TOKEN.COLON:1,
 
 }.items()}
 
