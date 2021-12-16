@@ -15,16 +15,15 @@ class TOKEN:
         getattr(self.parent, name)
         return self
     
-    def matches(self, token:'TOKEN', strict:bool=True) -> bool:
+    def matches(self, token:'TOKEN') -> bool:
         if self.name == token.name:
             return True
         
-        if not strict:
-            p = self.parent
-            while p is not None:
-                if p.name == token.name:
-                    return True
-                p = p.parent
+        p = self.parent
+        while p is not None:
+            if p.name == token.name:
+                return True
+            p = p.parent
 
         return False
 

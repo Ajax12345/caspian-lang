@@ -49,7 +49,7 @@ grammar = [
     (TOKEN.PASS, re.compile(r'pass\b')),
     (TOKEN.BREAK, re.compile(r'break\b')),
     (TOKEN.CONTINUE, re.compile(r'continue\b')),
-    (TOKEN.NAME, re.compile(r'[a-zA-Z_](?:\w+)*\b')),
+    (TOKEN.NAME.VALUE, re.compile(r'[a-zA-Z_](?:\w+)*\b')),
     (TOKEN.DOT, re.compile(r'\.')),
     (TOKEN.COLON, re.compile(r'\:')),
     (TOKEN.EQ.OP, re.compile(r'\=\=')),

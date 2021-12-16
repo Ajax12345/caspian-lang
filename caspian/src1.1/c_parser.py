@@ -14,6 +14,9 @@ class Parser:
     def check_if_custom_true(self, m_fun:typing.Callable) -> typing.Union[None, 'TOKEN']:
         return m_fun(self.peek())
 
+    def check_if_true(self, token:'TOKEN') -> bool:
+        return (t:=self.peek()) is not None and t.matches(token)
+
     def consume_if_custom_true(self, m_fun:typing.Callable) -> typing.Union[None, 'TOKEN']:
         if m_fun(self.peek()):
             return self.consume()
@@ -66,8 +69,44 @@ class Parser:
 
         return c_ast.CommaSeparatedItems(items = items)
 
-    def parse_expr(self) -> c_ast.Expr:
-        pass
+    def parse_expr(self, indent:'TOKEN', stmnt:typing.Optional[bool] = False) -> c_ast.Expr:
+        value = None
+        while not self.check_if_true(TOKEN.EOL):
+            if self.consume_if_true(TOKEN.O_PAREN):
+                v = c_ast.ParenItems(items=self.parse_comma_separated_items(TOKEN.C_PAREN))
+                if value is None:
+                    value = v
+                else:
+                    value = c_ast.Call(obj = value, signature = v)
+
+            if self.consume_if_true(TOKEN.O_BRACE):
+                v = c_ast.BraceItems(items=self.parse_comma_separated_items(TOKEN.C_BRACE))
+                if value is None:
+                    value = v
+                else:
+                    value = c_ast.GetItem(obj = value, signature = v)
+
+            if self.consume_if_true(TOKEN.O_BRACKET):
+                if value is not None:
+                    raise Exception('got bracket object with value already set')
+
+                value = c_ast.BracketItems(items=self.parse_comma_separated_items(TOKEN.C_BRACKET))
+
+            if self.consume_if_true(TOKEN.POUND):
+                if value is not None:
+                    raise Exception('got pound object with value already set')
+                if self.consume_if_true(TOKEN.O_BRACE):
+                    value = c_ast.ImmutableContainer(container=self.parse_comma_separated_items(TOKEN.C_BRACE))
+                elif self.consume_if_true(TOKEN.O_BRACKET):
+                    value = c_ast.ImmutableContainer(container=self.parse_comma_separated_items(TOKEN.C_BRACKET))
+                else:
+                    raise Exception('Immutability syntax error')
+
+            if (t:=self.consume_if_true(TOKEN.VALUE)):
+                value = t
+
+        return value
+            
 
     def parse_fun(self, indent:'TOKEN.INDENT', **kwargs:dict) -> c_ast.Fun:
         primative = False
@@ -110,7 +149,7 @@ class Parser:
         if (t:=self.consume_if_true(TOKEN.FUN)) is not None:
             return self.parse_fun(indent)
 
-        return self.parse_expr()
+        return self.parse_expr(indent, stmnt = True)
 
     def body(self, indent=TOKEN.INDENT(0)) -> c_ast.Body:
         body = []
