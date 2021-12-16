@@ -66,3 +66,6 @@ class AssignParam(Ast):
 
 class KeyValue(Ast):
     pass
+
+class ImpOp(Ast):
+    pass

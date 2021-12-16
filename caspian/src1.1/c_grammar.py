@@ -106,6 +106,11 @@ priorities = {a.name:b for a, b in {
     TOKEN.STAR: 2,
     TOKEN.DIV: 2,
     TOKEN.ASSIGN: 0,
+    TOKEN.PLUS_EQ: 0,
+    TOKEN.MINUS_EQ: 0,
+    TOKEN.STAR_EQ: 0,
+    TOKEN.DIV_EQ: 0,
+    TOKEN.MOD_EQ: 0,
     TOKEN.DOT: 0,
     TOKEN.COLON:1,
 
@@ -128,6 +133,11 @@ operators = [i.name for i in [
     TOKEN.STAR,
     TOKEN.DIV,
     TOKEN.ASSIGN,
+    TOKEN.PLUS_EQ,
+    TOKEN.MINUS_EQ,
+    TOKEN.STAR_EQ,
+    TOKEN.DIV_EQ,
+    TOKEN.MOD_EQ,
 ]]
 
 class Tokenizer:

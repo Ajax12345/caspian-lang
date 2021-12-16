@@ -127,9 +127,12 @@ class Parser:
                     self.release_token(t)
                     return value
 
-                if t.matches(TOKEN.ASSIGN):
-                    return (c_ast.Assign if stmnt else c_ast.AssignParam)(obj = value, value = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
-                
+                if t.matches(TOKEN.IMP_OP): 
+                    if t.matches(TOKEN.ASSIGN):
+                        return (c_ast.Assign if stmnt else c_ast.AssignParam)(obj = value, value = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
+                    
+                    return c_ast.ImpOp(obj=value, operator = t, value = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
+
                 value = c_ast.Operation(operand1=value, operator=t, operand2 = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
             
             elif (t:=self.consume_if_true(TOKEN.COLON)):
