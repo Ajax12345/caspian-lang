@@ -103,21 +103,24 @@ class Parser:
                     raise Exception('Immutability syntax error')
 
             elif (t:=self.consume_if_true(TOKEN.VALUE)):
+                print('got t in here', t.value)
                 value = t
 
             elif self.consume_if_true(TOKEN.DOT):
                 if value is None:
                     self.consume_if_true_or_exception(TOKEN.DOT)
                     unpack=c_ast.ArrayUnpack if not self.consume_if_true(TOKEN.DOT) else c_ast.MapUnpack
-                    value = unpack(container=self.parse_expr(indent, t_priority=priorities[TOKEN.DOT], stmnt=stmnt))
+                    value = unpack(container=self.parse_expr(indent, t_priority=priorities[TOKEN.DOT.name], stmnt=stmnt))
                 value = c_ast.GetAttr(obj=value, attr=self.consume_if_true_or_exception(TOKEN.NAME))
 
-            elif (t:=self.consume_if_custom_true(lambda x:x in operators)):
-                if t_priority is not None and priorities[t] < t_priority:
+            
+            elif (t:=self.consume_if_custom_true(lambda x:x.name in operators)):
+                print('got op here', t.value)
+                if t_priority is not None and priorities[t.name] < t_priority:
                     self.release_token(t)
                     return value
-                value = c_ast.Operation(operand1=value, operator=t, operand2 = self.parse_expr(indent, t_priority=priorities[t], stmnt=stmnt))
-
+                value = c_ast.Operation(operand1=value, operator=t, operand2 = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
+            
         return value
             
 
@@ -184,6 +187,38 @@ class Parser:
             
 
 if __name__ == "__main__":
+    import itertools as it
+    import matplotlib.pyplot as plt
+    import networkx as nx, gen_ast_tree
+    a_g, n_c = nx.Graph(), it.count(1)
+    
+    def display_ast(g, ast, p = None):
+        if isinstance(ast, list):
+            for i in ast:
+                yield from display_ast(g, i, p)
+        else:
+            yield (n:=next(n_c), ast.__class__.__name__)
+            g.add_node(n)
+            if p is not None:
+                g.add_edge(p, n)
+            p = n
+            for a, b in ast.vals.items():
+                yield (n1:=next(n_c), a)
+                g.add_node(n1)
+                g.add_edge(p, n1)
+                if isinstance(b, (c_ast.Ast, list)):
+                    if b is not None:
+                        yield from display_ast(g, b, n1)
+                else:
+                    yield (n2:=next(n_c), str(b.value))
+                    g.add_node(n2)
+                    g.add_edge(n1, n2)
+
     with open('test_file.txt') as f:
         p = Parser(Tokenizer(f.read()))
-        print(p.body())
+        body = p.body()
+        labels = dict(display_ast(a_g, body))
+        pos = gen_ast_tree.hierarchy_pos(a_g,1)    
+        nx.draw(a_g, pos, labels=labels, with_labels = True)
+        plt.show()
+        print(body)

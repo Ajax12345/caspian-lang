@@ -87,7 +87,7 @@ grammar = [
     (TOKEN.CURLYQ, re.compile(r'~')),
     (TOKEN.COMMA, re.compile(r',')),
 ]
-priorities = {
+priorities = {a.name:b for a, b in {
     TOKEN.AWAIT: 3,
     TOKEN.NOT: 3,
     TOKEN.AND: 1,
@@ -101,15 +101,16 @@ priorities = {
     TOKEN.LE: 1,
     TOKEN.LT: 1,
     TOKEN.GT: 1,
+    TOKEN.PLUS: 1,
     TOKEN.MINUS: 1,
     TOKEN.STAR: 2,
     TOKEN.DIV: 2,
     TOKEN.ASSIGN: 0,
     TOKEN.DOT: 0,
 
-}
+}.items()}
 
-operators = [
+operators = [i.name for i in [
     TOKEN.AND,
     TOKEN.OR,
     TOKEN.EQ,
@@ -121,11 +122,12 @@ operators = [
     TOKEN.LE,
     TOKEN.LT,
     TOKEN.GT,
+    TOKEN.PLUS,
     TOKEN.MINUS,
     TOKEN.STAR,
     TOKEN.DIV,
     TOKEN.ASSIGN,
-]
+]]
 
 class Tokenizer:
     def __init__(self, src:str, c_ctx=None) -> None:

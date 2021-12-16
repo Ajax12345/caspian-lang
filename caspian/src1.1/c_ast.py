@@ -54,3 +54,6 @@ class GetAttr(Ast):
 
 class Expr(Ast):
     pass
+
+class Operation(Ast):
+    pass
