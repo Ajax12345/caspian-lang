@@ -1,1 +1,1 @@
-v = await f() + (-1*1)
+james[primative::test] = f
