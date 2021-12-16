@@ -126,8 +126,18 @@ class Parser:
                 if t_priority is not None and priorities[t.name] < t_priority:
                     self.release_token(t)
                     return value
+
+                if t.matches(TOKEN.ASSIGN):
+                    return (c_ast.Assign if stmnt else c_ast.AssignParam)(obj = value, value = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
+                
                 value = c_ast.Operation(operand1=value, operator=t, operand2 = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
             
+            elif self.consume_if_true(TOKEN.COLON):
+                if value is None:
+                    raise Exception('Syntax error, got colon without previous value')
+
+                value = c_ast.KeyValue(key=value, value=self.parse_expr(indent, stmnt=stmnt))
+
             else:
                 return value
 

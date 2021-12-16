@@ -57,3 +57,12 @@ class Expr(Ast):
 
 class Operation(Ast):
     pass
+
+class Assign(Ast):
+    pass
+
+class AssignParam(Ast):
+    pass
+
+class KeyValue(Ast):
+    pass
