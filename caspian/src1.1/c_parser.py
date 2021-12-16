@@ -163,6 +163,14 @@ class Parser:
                 
                 value = c_ast.AsyncAwait(obj = self.parse_expr(indent, t_priority=priorities[t.name], stmnt = stmnt))
 
+            elif (t:=self.consume_if_true(TOKEN.NOT)):
+                if value is not None:
+                    raise Exception('invalid syntax (got not with value not none)')
+                
+                value = c_ast.NotOp(obj = self.parse_expr(indent, t_priority=priorities[t.name], stmnt = stmnt))
+
+            
+
             else:
                 return value
 
