@@ -84,3 +84,6 @@ class NegVal(Ast):
 
 class Primative(Ast):
     pass
+
+class Lambda(Ast):
+    pass

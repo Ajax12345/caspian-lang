@@ -77,19 +77,19 @@ order_of_op = (1+2)*3
 
 //unpacking
 
-a, ..b = [1, 2, 3, 4]
+[a, ..b] = [1, 2, 3, 4]
 // => a = 1; b = [2, 3, 4]
-[[a, ..b], c], ..d = [[[1, 2, 3, 4], 5], 5, 6]
+[[[a, ..b], c], ..d] = [[[1, 2, 3, 4], 5], 5, 6]
 // => a = 1; b = [2, 3, 4]; c = 5; d = [5, 6]
 v = [..[3, 4, 5]]
 //be able to retain immutability in unpacking
-a, ..b = #{1, 2, 3, 4}
+[a, ..b] = #{1, 2, 3, 4}
 //a = 1; b = #{2, 3, 4}
 //unpacking maps
-a, ...b = {'james':21, 'joe':18, 'lilly':15}
+[a, ...b] = {'james':21, 'joe':18, 'lilly':15}
 //a = 'james'; b = {'joe':18, 'lilly':15}
 //"..." syntax runs a full unpacking and passes it back to an object.create handler
-{'james':a}, ...b = {'james':21, 'joe':18, 'lilly':15}
+[{'james':a}, ...b] = {'james':21, 'joe':18, 'lilly':15}
 //a = 21; b = {'joe':18, 'lilly':15}
 
 
@@ -186,7 +186,7 @@ for i in iterable
     do_something
 
 //unpacking can also be accomplished in for loops:
-for {'a':a, 'b':[b, ..c]}, [[j, k], l] in iterable
+for [{'a':a, 'b':[b, ..c]}, [[j, k], l]] in iterable
     pass
 
 //while loops

@@ -180,6 +180,15 @@ class Parser:
                 
                 value = c_ast.NotOp(obj = self.parse_expr(indent, t_priority=priorities[t.name], stmnt = stmnt))
 
+            elif (t:=self.consume_if_true(TOKEN.LAMBDA)):
+                if value is None:
+                    raise Exception('Invalid Syntax')
+
+                if (f:=self.parse_expr(indent)) is None:
+                    raise Exception('Invalid syntax')
+                
+                value = c_ast.Lambda(params = value, body=f)
+
             else:
                 return value
 
