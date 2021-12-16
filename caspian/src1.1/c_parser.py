@@ -157,6 +157,12 @@ class Parser:
                 self.check_if_custom_true_or_exception(lambda x:x.matches(TOKEN.EOL) or x.matches(TOKEN.SEMICOLON))
                 return c_ast.InPlace(obj=value, operator=t)
 
+            elif (t:=self.consume_if_true(TOKEN.AWAIT)):
+                if value is not None:
+                    raise Exception('invalid syntax (got await with value not none)')
+                
+                value = c_ast.AsyncAwait(obj = self.parse_expr(indent, t_priority=priorities[t.name], stmnt = stmnt))
+
             else:
                 return value
 

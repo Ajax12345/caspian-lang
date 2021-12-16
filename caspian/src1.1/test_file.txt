@@ -1,1 +1,1 @@
-j.james=10
+await test()* 3+ 1

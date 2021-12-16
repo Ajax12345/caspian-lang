@@ -72,3 +72,6 @@ class ImpOp(Ast):
 
 class InPlace(Ast):
     pass
+
+class AsyncAwait(Ast):
+    pass
