@@ -68,9 +68,9 @@ class Parser:
                 break
             items.append(i)
             if self.consume_if_true(TOKEN.COMMA) is None:
-                if end is not None:
-                    self.consume_if_true_or_exception(end)
                 break
+        if end is not None:
+            self.consume_if_true_or_exception(end)
         return c_ast.CommaSeparatedItems(items = items)
 
     def parse_expr(self, indent:'TOKEN', t_priority=None, stmnt:typing.Optional[bool] = False) -> c_ast.Expr:
