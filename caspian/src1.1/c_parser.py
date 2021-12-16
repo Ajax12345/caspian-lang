@@ -63,10 +63,14 @@ class Parser:
 
     def parse_comma_separated_items(self, end:typing.Union[None, 'TOKEN']=None) -> c_ast.CommaSeparatedItems:
         items = []
-        #TODO: add logic here
-        if end is not None:
-            self.consume_if_true_or_exception(end)
-
+        while True:
+            if (i:=self.parse_expr(TOKEN.INDENT)) is None:
+                break
+            items.append(i)
+            if self.consume_if_true(TOKEN.COMMA) is None:
+                if end is not None:
+                    self.consume_if_true_or_exception(end)
+                break
         return c_ast.CommaSeparatedItems(items = items)
 
     def parse_expr(self, indent:'TOKEN', t_priority=None, stmnt:typing.Optional[bool] = False) -> c_ast.Expr:
@@ -115,12 +119,14 @@ class Parser:
 
             
             elif (t:=self.consume_if_custom_true(lambda x:x.name in operators)):
-                print('got op here', t.value)
                 if t_priority is not None and priorities[t.name] < t_priority:
                     self.release_token(t)
                     return value
                 value = c_ast.Operation(operand1=value, operator=t, operand2 = self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt))
             
+            else:
+                return value
+
         return value
             
 
@@ -195,7 +201,12 @@ if __name__ == "__main__":
     def display_ast(g, ast, p = None):
         if isinstance(ast, list):
             for i in ast:
-                yield from display_ast(g, i, p)
+                if isinstance(i, c_ast.Ast):
+                    yield from display_ast(g, i, p)
+                else:
+                    yield (n1:=next(n_c), i.value)
+                    g.add_node(n1)
+                    g.add_edge(p, n1)
         else:
             yield (n:=next(n_c), ast.__class__.__name__)
             g.add_node(n)
@@ -217,8 +228,8 @@ if __name__ == "__main__":
     with open('test_file.txt') as f:
         p = Parser(Tokenizer(f.read()))
         body = p.body()
+        print(body)
         labels = dict(display_ast(a_g, body))
         pos = gen_ast_tree.hierarchy_pos(a_g,1)    
         nx.draw(a_g, pos, labels=labels, with_labels = True)
         plt.show()
-        print(body)
