@@ -117,7 +117,6 @@ class Parser:
                     raise Exception('Immutability syntax error')
 
             elif (t:=self.consume_if_true(TOKEN.VALUE)):
-                print('got t in here', t.value)
                 value = t
 
             elif self.consume_if_true(TOKEN.DOT):
@@ -153,7 +152,14 @@ class Parser:
                 if value is None:
                     raise Exception('Syntax error, got colon without previous value')
 
-                value = c_ast.KeyValue(key=value, value=self.parse_expr(indent, t_priority = priorities[t.name], stmnt=stmnt))
+                if self.consume_if_true(TOKEN.COLON):
+                    if not value.matches(TOKEN.PRIMATIVE):
+                        raise Exception('invalid primative identifier')
+
+                    print('got in here!', value)
+                    value = c_ast.Primative(name=self.consume_if_true_or_exception(TOKEN.NAME))
+                else:
+                    value = c_ast.KeyValue(key=value, value=self.parse_expr(indent, t_priority = priorities[t.name], stmnt=stmnt))
 
             elif (t:=self.consume_if_true(TOKEN.IMP)):
                 if value is None:

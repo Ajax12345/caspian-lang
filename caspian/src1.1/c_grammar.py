@@ -44,7 +44,7 @@ grammar = [
     (TOKEN.IMPORT, re.compile(r'import\b')),
     (TOKEN.CLASS, re.compile(r'class\b')),
     (TOKEN.AT, re.compile(r'@\b')),
-    (TOKEN.PRIMATIVE, re.compile(r'primative\b')),
+    (TOKEN.PRIMATIVE.VALUE, re.compile(r'primative\b')),
     (TOKEN.INHERITS, re.compile(r'inherits\b')),
     (TOKEN.PASS, re.compile(r'pass\b')),
     (TOKEN.BREAK, re.compile(r'break\b')),

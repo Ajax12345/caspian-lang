@@ -81,3 +81,6 @@ class NotOp(Ast):
 
 class NegVal(Ast):
     pass
+
+class Primative(Ast):
+    pass
