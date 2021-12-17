@@ -17,7 +17,7 @@ grammar = [
     (TOKEN.NULL.VALUE, re.compile(r'null\b')),
     (TOKEN.AND.OP, re.compile(r'and\b')),
     (TOKEN.OR.OP, re.compile(r'or\b')),
-    (TOKEN.IN, re.compile(r'or\b')),
+    (TOKEN.IN, re.compile(r'in\b')),
     (TOKEN.NOT, re.compile(r'not\b')),
     (TOKEN.AS, re.compile(r'as\b')),
     (TOKEN.FUN, re.compile(r'fun\b')),

@@ -248,6 +248,19 @@ class Parser:
                         body=body, 
                         **kwargs)
 
+    def parse_for(self, indent:TOKEN) -> c_ast.For:
+        if (loop_param:=self.parse_expr(indent)) is None:
+            raise Exception('Invalid syntax (for loop expecting iter result target)')
+
+        self.consume_if_true_or_exception(TOKEN.IN)
+        if (iter_obj:=self.parse_expr(indent)) is None:
+            raise Exception('Invalid syntax (expecting iter object)')
+
+        self.consume_if_true_or_exception(TOKEN.EOL)
+        body = self.body(TOKEN.INDENT(indent.value+4))
+        self.release_token(TOKEN.EOL)
+        return c_ast.For(loop_param = loop_param, iter_obj = iter_obj, body=body)
+
 
     def statement(self, indent:'TOKEN.INDENT') -> c_ast.Ast:
         if (t:=self.consume_if_true(TOKEN.IMPORT)) is not None:
@@ -258,6 +271,9 @@ class Parser:
         
         if (t:=self.consume_if_true(TOKEN.FUN)) is not None:
             return self.parse_fun(indent)
+
+        if (t:=self.consume_if_true(TOKEN.FOR)) is not None:
+            return self.parse_for(indent)
 
         if (t:=self.consume_if_true(TOKEN.RETURN)) is not None:
             return c_ast.Return(expr=self.parse_expr(indent))
@@ -270,7 +286,6 @@ class Parser:
 
         if (t:=self.consume_if_true((TOKEN.ASYNC, TOKEN.STATIC, TOKEN.ABSTRACT))):
             d = [t.name.lower()]
-            print('got d in here', d)
             while (t1:=self.consume_if_true((TOKEN.ASYNC, TOKEN.STATIC, TOKEN.ABSTRACT))):
                 if t1.name.lower() in d:
                     raise Exception('Invalid syntax')
@@ -285,8 +300,13 @@ class Parser:
                     return c_ast.AsyncFun(fun=f)
                 return f
 
-            raise Exception('invalid syntax')
+            if self.consume_if_true(TOKEN.FOR):
+                if 'async' not in d or len(d) > 1:
+                    raise Exception('invalid syntax')
 
+                return c_ast.AsyncFor(for_loop = self.parse_for(indent))
+
+            raise Exception('invalid syntax')
 
         return self.parse_expr(indent, stmnt = True)
 

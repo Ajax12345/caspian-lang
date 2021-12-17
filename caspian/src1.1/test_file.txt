@@ -1,2 +1,2 @@
-static abstract async fun test()
+abstract async for i in range(10)
     pass

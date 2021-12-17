@@ -108,3 +108,9 @@ class RaiseException(Ast):
 
 class Conditional(Ast):
     pass
+
+class For(Ast):
+    pass
+
+class AsyncFor(Ast):
+    pass
