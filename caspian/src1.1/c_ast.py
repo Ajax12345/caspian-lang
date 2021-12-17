@@ -87,3 +87,6 @@ class Primative(Ast):
 
 class Lambda(Ast):
     pass
+
+class AssignExpr(Ast):
+    pass
