@@ -30,7 +30,7 @@ grammar = [
     (TOKEN.STATIC, re.compile(r'abstract\b')),
     (TOKEN.IF, re.compile(r'if\b')),
     (TOKEN.ELIF, re.compile(r'elif\b')),
-    (TOKEN.ELIF, re.compile(r'else\b')),
+    (TOKEN.ELSE, re.compile(r'else\b')),
     (TOKEN.SWITCH, re.compile(r'switch\b')),
     (TOKEN.CASE, re.compile(r'switch\b')),
     (TOKEN.DEFAULT, re.compile(r'switch\b')),

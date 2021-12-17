@@ -195,6 +195,16 @@ class Parser:
 
                 value = c_ast.AssignExpr(obj=value, value=self.parse_expr(indent, t_priority=5))
 
+            elif (t:=self.consume_if_true(TOKEN.IF)):
+                if (condition:=self.parse_expr(indent)) is None:
+                    raise Exception('inline conditional cannot be none')
+
+                self.consume_if_true_or_exception(TOKEN.ELSE)
+                if (else_val:=self.parse_expr(indent)) is None:
+                    raise Exception('inline conditional else cannot be none')
+                
+                return c_ast.Conditional(value=value, condition=condition, default=else_val)
+
             else:
                 return value
 

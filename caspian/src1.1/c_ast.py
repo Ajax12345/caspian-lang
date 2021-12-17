@@ -102,3 +102,6 @@ class YieldFrom(Ast):
 
 class RaiseException(Ast):
     pass
+
+class Conditional(Ast):
+    pass
