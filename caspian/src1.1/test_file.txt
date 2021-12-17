@@ -1,1 +1,2 @@
-i*i + 1*james.joe() > 1
+static abstract async fun test()
+    pass

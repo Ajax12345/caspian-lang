@@ -1,7 +1,7 @@
 import c_tokens, re
 import collections, typing
 
-__all__ = ('grammar', 'TOKEN', 'Tokenizer', 'priorities', 'operators')
+__all__ = ('grammar', 'TOKEN', 'Tokenizer', 'priorities', 'operators', 'fun_flags')
 
 TOKEN = c_tokens.TOKEN_BASE()
 
@@ -27,7 +27,7 @@ grammar = [
     (TOKEN.AWAIT, re.compile(r'await\b')),
     (TOKEN.ASYNC, re.compile(r'async\b')),
     (TOKEN.ABSTRACT, re.compile(r'abstract\b')),
-    (TOKEN.STATIC, re.compile(r'abstract\b')),
+    (TOKEN.STATIC, re.compile(r'static\b')),
     (TOKEN.IF, re.compile(r'if\b')),
     (TOKEN.ELIF, re.compile(r'elif\b')),
     (TOKEN.ELSE, re.compile(r'else\b')),
@@ -139,6 +139,12 @@ operators = [i.name for i in [
     TOKEN.DIV_EQ,
     TOKEN.MOD_EQ,
 ]]
+
+fun_flags = [
+    [TOKEN.STATIC, TOKEN.ASYNC],
+    [TOKEN.STATIC, TOKEN.ABSTRACT],
+    [TOKEN.ABSTRACT, TOKEN.ASYNC]
+]
 
 class Tokenizer:
     def __init__(self, src:str, c_ctx=None) -> None:

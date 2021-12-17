@@ -76,6 +76,9 @@ class InPlace(Ast):
 class AsyncAwait(Ast):
     pass
 
+class AsyncFun(Ast):
+    pass
+
 class NotOp(Ast):
     pass
 

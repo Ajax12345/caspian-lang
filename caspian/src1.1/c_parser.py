@@ -51,7 +51,13 @@ class Parser:
     def release_token(self, token:TOKEN) -> None:
         self.tokenizer.release_token(token)
 
-    def consume_if_true(self, token:TOKEN) -> typing.Union['TOKEN', None]:
+    def consume_if_true(self, token:typing.Union['TOKEN', typing.Tuple['TOKEN']]) -> typing.Union['TOKEN', None]:
+        if isinstance(token, tuple):
+            if (t:=self.peek()) is not None and any(t.matches(i) for i in token):
+                return self.consume()
+
+            return
+
         if (t:=self.peek()) is not None and t.matches(token):
             return self.consume()
 
@@ -212,6 +218,7 @@ class Parser:
             
 
     def parse_fun(self, indent:'TOKEN.INDENT', **kwargs:dict) -> c_ast.Fun:
+        kwargs = {'async':False, 'abstract':False, 'static':False, **kwargs}
         primative = False
         name = None
         settings, signature, return_type = None, None, None
@@ -260,6 +267,26 @@ class Parser:
 
         if (t:=self.consume_if_true(TOKEN.RAISE)) is not None:
             return c_ast.RaiseException(exception=self.parse_expr(indent))
+
+        if (t:=self.consume_if_true((TOKEN.ASYNC, TOKEN.STATIC, TOKEN.ABSTRACT))):
+            d = [t.name.lower()]
+            print('got d in here', d)
+            while (t1:=self.consume_if_true((TOKEN.ASYNC, TOKEN.STATIC, TOKEN.ABSTRACT))):
+                if t1.name.lower() in d:
+                    raise Exception('Invalid syntax')
+                d.append(t1.name.lower())
+            
+            if not all(d.index(a) < d.index(b) for _a, _b in fun_flags if (a:=_a.name.lower()) in d and (b:=_b.name.lower()) in d):
+                raise Exception('Invalid syntax (misplaced function identifiers)')
+            
+            if self.consume_if_true(TOKEN.FUN):
+                f = self.parse_fun(indent, **{i:True for i in d})
+                if 'async' in d:
+                    return c_ast.AsyncFun(fun=f)
+                return f
+
+            raise Exception('invalid syntax')
+
 
         return self.parse_expr(indent, stmnt = True)
 
