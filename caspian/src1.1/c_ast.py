@@ -90,3 +90,12 @@ class Lambda(Ast):
 
 class AssignExpr(Ast):
     pass
+
+class Return(Ast):
+    pass
+
+class Yield(Ast):
+    pass
+
+class YieldFrom(Ast):
+    pass

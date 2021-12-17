@@ -1,1 +1,3 @@
-x~f() + 1
+fun test()
+    yield 10
+    yield from test()

@@ -192,7 +192,7 @@ class Parser:
             elif (t:=self.consume_if_true(TOKEN.CURLYQ)):
                 if value is None:
                     raise Exception('Invalid syntax')
-                    
+
                 value = c_ast.AssignExpr(obj=value, value=self.parse_expr(indent, t_priority=5))
 
             else:
@@ -242,6 +242,13 @@ class Parser:
         if (t:=self.consume_if_true(TOKEN.FUN)) is not None:
             return self.parse_fun(indent)
 
+        if (t:=self.consume_if_true(TOKEN.RETURN)) is not None:
+            return c_ast.Return(expr=self.parse_expr(indent))
+        
+        if (t:=self.consume_if_true(TOKEN.YIELD)) is not None:
+            return (c_ast.YieldFrom if self.consume_if_true(TOKEN.FROM) else c_ast.Yield)(expr=self.parse_expr(indent))
+
+        
         return self.parse_expr(indent, stmnt = True)
 
     def body(self, indent=TOKEN.INDENT(0)) -> c_ast.Body:
@@ -292,7 +299,7 @@ if __name__ == "__main__":
                     if b is not None:
                         yield from display_ast(g, b, n1)
                 else:
-                    yield (n2:=next(n_c), str(b.value))
+                    yield (n2:=next(n_c), str(b if b is None or isinstance(b, (str, int)) else b.value))
                     g.add_node(n2)
                     g.add_edge(n1, n2)
 
