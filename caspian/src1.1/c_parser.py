@@ -218,7 +218,7 @@ class Parser:
         self.consume_if_true_or_exception(TOKEN.O_PAREN)
         signature = self.parse_comma_separated_items(end=TOKEN.C_PAREN)
         if self.consume_if_true(TOKEN.COLON):
-            return_type = self.parse_expr()
+            return_type = self.parse_expr(indent)
 
         self.consume_if_true_or_exception(TOKEN.EOL)
         body = self.body(TOKEN.INDENT(indent.value+4))
@@ -248,7 +248,9 @@ class Parser:
         if (t:=self.consume_if_true(TOKEN.YIELD)) is not None:
             return (c_ast.YieldFrom if self.consume_if_true(TOKEN.FROM) else c_ast.Yield)(expr=self.parse_expr(indent))
 
-        
+        if (t:=self.consume_if_true(TOKEN.RAISE)) is not None:
+            return c_ast.RaiseException(exception=self.parse_expr(indent))
+
         return self.parse_expr(indent, stmnt = True)
 
     def body(self, indent=TOKEN.INDENT(0)) -> c_ast.Body:

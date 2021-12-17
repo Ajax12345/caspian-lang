@@ -99,3 +99,6 @@ class Yield(Ast):
 
 class YieldFrom(Ast):
     pass
+
+class RaiseException(Ast):
+    pass
