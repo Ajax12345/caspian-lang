@@ -1,1 +1,1 @@
-i if i + 1 > 1 else 10
+i*i + 1*james.joe() > 1
