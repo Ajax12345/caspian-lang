@@ -1,2 +1,1 @@
-abstract async for i in range(10)
-    pass
+[await f(1,2,3),4, [5 for _ in range(10)], 6]

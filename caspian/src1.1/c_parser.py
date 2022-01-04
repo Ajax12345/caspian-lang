@@ -79,6 +79,30 @@ class Parser:
             if (i:=self.parse_expr(TOKEN.INDENT)) is None:
                 break
             items.append(i)
+            if self.check_if_custom_true(lambda x:x.matches(TOKEN.FOR) or x.matches(TOKEN.ASYNC)):
+                if len(items) != 1:
+                    raise Exception('invalid syntax in comprehension')
+                loop_bodies = []
+                while True:
+                    aio = False
+                    if (t:=self.consume()).matches(TOKEN.ASYNC):
+                        aio=True
+                        self.consume_if_true_or_exception(TOKEN.FOR)
+                    if (loop_param:=self.parse_expr(None)) is None:
+                        raise Exception('expecting loop param in comprehension')
+                    self.consume_if_true_or_exception(TOKEN.IN)
+                    if (iter_obj:=self.parse_expr(None)) is None:
+                        raise Exception('expecting iter object in comprehension')
+                    loop_bodies.append((c_ast.ComprehensionBlock if not aio else c_ast.AsyncComprehensionBlock)(loop_param = loop_param, iter_obj = iter_obj))
+                    if self.check_if_true(end):
+                        self.consume()
+                        return c_ast.Comprehension(value=items[0], body=loop_bodies, condition=None)
+                    if self.check_if_true(TOKEN.IF):
+                        if (condition:=self.parse_expr(None)) is None:
+                            raise Exception("Expecting conditional in comprehension")
+                        self.consume_if_true_or_exception(end)
+                        return c_ast.Comprehension(value=items[0], body=loop_bodies, condition=condition)
+                
             if self.consume_if_true(TOKEN.COMMA) is None:
                 break
             elif self.consume_if_true(TOKEN.EOL):

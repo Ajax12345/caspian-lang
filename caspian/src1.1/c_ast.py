@@ -114,3 +114,12 @@ class For(Ast):
 
 class AsyncFor(Ast):
     pass
+
+class ComprehensionBlock(Ast):
+    pass
+
+class Comprehension(Ast):
+    pass
+
+class AsyncComprehensionBlock(Ast):
+    pass
