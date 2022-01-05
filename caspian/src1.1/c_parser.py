@@ -21,7 +21,7 @@ class Parser:
         raise Exception('Syntax error')
 
     def check_if_true(self, token:'TOKEN') -> bool:
-        return (t:=self.peek()) is not None and t.matches(token)
+        return (t:=self.peek()) is not None and (t.matches(token) if not isinstance(token, tuple) else any(t.matches(i) for i in token))
 
     def consume_if_custom_true(self, m_fun:typing.Callable) -> typing.Union[None, 'TOKEN']:
         if m_fun(self.peek()):
@@ -289,7 +289,37 @@ class Parser:
         self.release_token(TOKEN.EOL)
         return c_ast.For(loop_param = loop_param, iter_obj = iter_obj, body=body)
 
+    def parse_syntactic_sugar_callables(self, indent, _callable:bool=False) -> c_ast.Ast:
+        d = [self.consume().name.lower()]
+        while (t1:=self.consume_if_true((TOKEN.ASYNC, TOKEN.STATIC, TOKEN.ABSTRACT))):
+            if t1.name.lower() in d:
+                raise Exception('Invalid syntax')
+            d.append(t1.name.lower())
+        
+        if not all(d.index(a) < d.index(b) for _a, _b in fun_flags if (a:=_a.name.lower()) in d and (b:=_b.name.lower()) in d):
+            raise Exception('Invalid syntax (misplaced function identifiers)')
+        
+        if self.consume_if_true(TOKEN.FUN):
+            f = self.parse_fun(indent, **{i:True for i in d})
+            if 'async' in d:
+                return c_ast.AsyncFun(fun=f)
+            return f
 
+        if not _callable:
+            if self.consume_if_true(TOKEN.FOR):
+                if 'async' not in d or len(d) > 1:
+                    raise Exception('invalid syntax')
+
+                return c_ast.AsyncFor(for_loop = self.parse_for(indent))
+
+    def parse_callable(self, indent) -> c_ast.Ast:
+        if self.consume_if_true(TOKEN.FUN):
+            return self.parse_fun(indent)
+
+        if (t:=self.check_if_true((TOKEN.ASYNC, TOKEN.STATIC, TOKEN.ABSTRACT))):
+            if (t:=self.parse_syntactic_sugar_callables(indent, True)):
+                return t
+        
     def statement(self, indent:'TOKEN.INDENT') -> c_ast.Ast:
         if (t:=self.consume_if_true(TOKEN.IMPORT)) is not None:
             return self.parse_import()
@@ -312,29 +342,29 @@ class Parser:
         if (t:=self.consume_if_true(TOKEN.RAISE)) is not None:
             return c_ast.RaiseException(exception=self.parse_expr(indent))
 
-        if (t:=self.consume_if_true((TOKEN.ASYNC, TOKEN.STATIC, TOKEN.ABSTRACT))):
-            d = [t.name.lower()]
-            while (t1:=self.consume_if_true((TOKEN.ASYNC, TOKEN.STATIC, TOKEN.ABSTRACT))):
-                if t1.name.lower() in d:
-                    raise Exception('Invalid syntax')
-                d.append(t1.name.lower())
-            
-            if not all(d.index(a) < d.index(b) for _a, _b in fun_flags if (a:=_a.name.lower()) in d and (b:=_b.name.lower()) in d):
-                raise Exception('Invalid syntax (misplaced function identifiers)')
-            
-            if self.consume_if_true(TOKEN.FUN):
-                f = self.parse_fun(indent, **{i:True for i in d})
-                if 'async' in d:
-                    return c_ast.AsyncFun(fun=f)
-                return f
-
-            if self.consume_if_true(TOKEN.FOR):
-                if 'async' not in d or len(d) > 1:
-                    raise Exception('invalid syntax')
-
-                return c_ast.AsyncFor(for_loop = self.parse_for(indent))
+        if (t:=self.check_if_true((TOKEN.ASYNC, TOKEN.STATIC, TOKEN.ABSTRACT))):
+            if (t:=self.parse_syntactic_sugar_callables(indent)):
+                return t
 
             raise Exception('invalid syntax')
+
+        if (t:=self.check_if_true(TOKEN.AT)):
+            wrappers = []
+            while True:
+                if not self.consume_if_true(TOKEN.AT):
+                    break
+                wrappers.append(self.parse_expr(indent,stmnt=True))
+                self.consume_if_true_or_exception(TOKEN.EOL)
+                if self.check_if_custom_true(lambda t:t.matches(TOKEN.INDENT) and t.value > indent.value):
+                    raise Exception('invalid indent')
+            
+                self.consume_if_true_or_exception(TOKEN.INDENT)
+                
+            print(wrappers)
+            if (wrapped:=self.parse_callable(indent)) is None:
+                raise Exception("'@' requires a callable")
+            
+            return c_ast.DecoratedCallable(wrappers=wrappers, wrapped=wrapped)
 
         return self.parse_expr(indent, stmnt = True)
 

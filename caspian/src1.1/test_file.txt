@@ -1,1 +1,3 @@
-[5*5+1 for _ in range(10)]
+@wrapper('handler')
+async fun test()
+    return 100

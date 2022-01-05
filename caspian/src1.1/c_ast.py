@@ -123,3 +123,6 @@ class Comprehension(Ast):
 
 class AsyncComprehensionBlock(Ast):
     pass
+
+class DecoratedCallable(Ast):
+    pass
