@@ -91,13 +91,13 @@ class Parser:
                     if (loop_param:=self.parse_expr(None)) is None:
                         raise Exception('expecting loop param in comprehension')
                     self.consume_if_true_or_exception(TOKEN.IN)
-                    if (iter_obj:=self.parse_expr(None)) is None:
+                    if (iter_obj:=self.parse_expr(None, terminate=TOKEN.IF)) is None:
                         raise Exception('expecting iter object in comprehension')
                     loop_bodies.append((c_ast.ComprehensionBlock if not aio else c_ast.AsyncComprehensionBlock)(loop_param = loop_param, iter_obj = iter_obj))
                     if self.check_if_true(end):
                         self.consume()
                         return c_ast.Comprehension(value=items[0], body=loop_bodies, condition=None)
-                    if self.check_if_true(TOKEN.IF):
+                    if self.consume_if_true(TOKEN.IF):
                         if (condition:=self.parse_expr(None)) is None:
                             raise Exception("Expecting conditional in comprehension")
                         self.consume_if_true_or_exception(end)
@@ -113,15 +113,19 @@ class Parser:
             self.consume_if_true_or_exception(end)
         return c_ast.CommaSeparatedItems(items = items)
 
-    def parse_expr(self, indent:'TOKEN', t_priority=None, stmnt:typing.Optional[bool] = False) -> c_ast.Expr:
+    def parse_expr(self, indent:'TOKEN', t_priority=None, stmnt:typing.Optional[bool] = False, terminate:typing.Optional['TOKEN']=None) -> c_ast.Expr:
         value = None
         while not self.check_if_true(TOKEN.EOL):
+            if terminate is not None and self.check_if_true(terminate):
+                return value
             if self.consume_if_true(TOKEN.O_PAREN):
                 v = c_ast.ParenItems(items=self.parse_comma_separated_items(TOKEN.C_PAREN))
                 if value is None:
                     value = v
                 else:
                     value = c_ast.Call(obj = value, signature = v)
+
+                print('after o paren', value, terminate)
 
             elif self.consume_if_true(TOKEN.O_BRACE):
                 v = c_ast.BraceItems(items=self.parse_comma_separated_items(TOKEN.C_BRACE))
@@ -153,21 +157,21 @@ class Parser:
                 if value is None:
                     self.consume_if_true_or_exception(TOKEN.DOT)
                     unpack=c_ast.ArrayUnpack if not self.consume_if_true(TOKEN.DOT) else c_ast.MapUnpack
-                    value = unpack(container=self.parse_expr(indent, t_priority=priorities[TOKEN.DOT.name], stmnt=stmnt))
+                    value = unpack(container=self.parse_expr(indent, t_priority=priorities[TOKEN.DOT.name], stmnt=stmnt, terminate=terminate))
                 else:
                     value = c_ast.GetAttr(obj=value, attr=self.consume_if_true_or_exception(TOKEN.NAME))
 
             
             elif (t:=self.consume_if_custom_true(lambda x:x.name in operators)):
                 if t.matches(TOKEN.MINUS) and value is None:
-                    value = c_ast.NegVal(obj=self.parse_expr(indent, t_priority=5, stmnt = stmnt))
+                    value = c_ast.NegVal(obj=self.parse_expr(indent, t_priority=5, stmnt = stmnt, terminate=terminate))
                     continue
 
                 if t_priority is not None and priorities[t.name] < t_priority:
                     self.release_token(t)
                     return value
 
-                if (v:=self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt)) is None:
+                if (v:=self.parse_expr(indent, t_priority=priorities[t.name], stmnt=stmnt, terminate=terminate)) is None:
                     raise Exception('syntax error')
 
                 if t.matches(TOKEN.IMP_OP): 
@@ -189,7 +193,7 @@ class Parser:
                     print('got in here!', value)
                     value = c_ast.Primative(name=self.consume_if_true_or_exception(TOKEN.NAME))
                 else:
-                    value = c_ast.KeyValue(key=value, value=self.parse_expr(indent, t_priority = priorities[t.name], stmnt=stmnt))
+                    value = c_ast.KeyValue(key=value, value=self.parse_expr(indent, t_priority = priorities[t.name], stmnt=stmnt, terminate=terminate))
 
             elif (t:=self.consume_if_true(TOKEN.IMP)):
                 if value is None:
@@ -202,13 +206,13 @@ class Parser:
                 if value is not None:
                     raise Exception('invalid syntax (got await with value not none)')
                 
-                value = c_ast.AsyncAwait(obj = self.parse_expr(indent, t_priority=priorities[t.name], stmnt = stmnt))
+                value = c_ast.AsyncAwait(obj = self.parse_expr(indent, t_priority=priorities[t.name], stmnt = stmnt, terminate=terminate))
 
             elif (t:=self.consume_if_true(TOKEN.NOT)):
                 if value is not None:
                     raise Exception('invalid syntax (got not with value not none)')
                 
-                value = c_ast.NotOp(obj = self.parse_expr(indent, t_priority=priorities[t.name], stmnt = stmnt))
+                value = c_ast.NotOp(obj = self.parse_expr(indent, t_priority=priorities[t.name], stmnt = stmnt, terminate=terminate))
 
             elif (t:=self.consume_if_true(TOKEN.LAMBDA)):
                 if value is None:
