@@ -147,3 +147,9 @@ class IfStatement(Ast):
 
 class ElifCondition(Ast):
     pass
+
+class CaseStatement(Ast):
+    pass
+
+class SwitchCase(Ast):
+    pass

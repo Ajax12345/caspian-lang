@@ -432,6 +432,34 @@ class Parser:
             self.release_token(TOKEN.EOL)
             return c_ast.IfStatement(condition = if_condition, body=if_body, elif_statements = elif_statements, else_body = else_body)
 
+        if (t:=self.consume_if_true(TOKEN.SWITCH)):
+            s_parameter = _(self.parse_expr(indent, stmnt=True))
+            cases, default = [], None
+            self.consume_if_true_or_exception(TOKEN.EOL)
+            while True:
+                if self.peek() is not None and not (ind:=self.consume_if_custom_true(lambda x:x.matches(TOKEN.INDENT) and x.value==indent.value+4)):
+                    break
+
+                if self.consume_if_true(TOKEN.CASE):
+                    c_parameter = _(self.parse_expr(ind, stmnt=True))
+                    self.consume_if_true_or_exception(TOKEN.EOL)
+                    if not (c_body:=self.body(TOKEN.INDENT(indent.value+8))).body:
+                        raise Exception('Missing body of case statement')
+                    cases.append(c_ast.CaseStatement(parameter = c_parameter, body = c_body))
+                    continue
+                
+                if self.consume_if_true(TOKEN.DEFAULT):
+                    self.consume_if_true_or_exception(TOKEN.EOL)
+                    if not (d_body:=self.body(TOKEN.INDENT(indent.value+8))).body:
+                        raise Exception('Missing body of default statement')
+                    default = d_body
+                    break
+                    
+                break
+
+            self.release_token(TOKEN.EOL)
+            return c_ast.SwitchCase(parameter = s_parameter, cases = cases, default = default)
+
         return self.parse_expr(indent, stmnt = True)
 
     def body(self, indent=TOKEN.INDENT(0)) -> c_ast.Body:
