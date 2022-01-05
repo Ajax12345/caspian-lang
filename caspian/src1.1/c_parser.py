@@ -230,7 +230,7 @@ class Parser:
                     self.release_token(TOKEN.EOL)
                     value = c_ast.MultiLineLambda(params = value, body = body)
                     continue 
-                    
+
                 if (f:=self.parse_expr(indent)) is None:
                     raise Exception('Invalid syntax')
                 
@@ -379,7 +379,6 @@ class Parser:
             
                 self.consume_if_true_or_exception(TOKEN.INDENT)
 
-            print(wrappers)
             if (wrapped:=self.parse_callable(indent)) is None:
                 raise Exception("'@' requires a callable")
             
@@ -399,9 +398,39 @@ class Parser:
             if not (body:=self.body(TOKEN.INDENT(indent.value+4))).body:
                 raise Exception('Missing body of do-while loop')
 
-            self.consume_if_custom_true_or_exception(TOKEN.EOL)
+            self.consume_if_true_or_exception(TOKEN.INDENT)
             self.consume_if_true_or_exception(TOKEN.WHILE)
             return c_ast.DoWhileLoop(condition=self.parse_expr(indent, stmnt=True), body=body)
+
+        if (t:=self.consume_if_true(TOKEN.IF)):
+            if_condition = _(self.parse_expr(indent, stmnt=True))
+            self.consume_if_true_or_exception(TOKEN.EOL)
+            if not (if_body:=self.body(TOKEN.INDENT(indent.value+4))).body:
+                raise Exception('Missing body of if statement')
+            
+            elif_statements, else_body = [], None
+            while True:
+                ind = self.consume_if_true(TOKEN.INDENT)
+                if self.consume_if_true(TOKEN.ELSE):
+                    self.consume_if_true_or_exception(TOKEN.EOL)
+                    if not (e_body:=self.body(TOKEN.INDENT(indent.value+4))).body:
+                        raise Exception('Missing body of else statement')
+                    else_body = e_body
+                    break
+                
+                if self.consume_if_true(TOKEN.ELIF):
+                    elif_condition = _(self.parse_expr(indent, stmnt=True))
+                    self.consume_if_true_or_exception(TOKEN.EOL)
+                    if not (e_body:=self.body(TOKEN.INDENT(indent.value+4))).body:
+                        raise Exception('Missing body of else statement')
+
+                    elif_statements.append(c_ast.ElifCondition(condition = elif_condition, body = e_body))
+                    continue
+
+                self.release_token(ind)
+                break
+            self.release_token(TOKEN.EOL)
+            return c_ast.IfStatement(condition = if_condition, body=if_body, elif_statements = elif_statements, else_body = else_body)
 
         return self.parse_expr(indent, stmnt = True)
 

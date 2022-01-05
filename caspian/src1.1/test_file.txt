@@ -1,4 +1,4 @@
-j[primative::iterator] = () => #
-    fun test():iterator
-        return [i for i in range(10)]
-    yield from test()
+if x1
+    pass
+else
+    pass

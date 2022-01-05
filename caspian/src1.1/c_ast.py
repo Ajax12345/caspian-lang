@@ -141,3 +141,9 @@ class DoWhileLoop(Ast):
 
 class MultiLineLambda(Ast):
     pass
+
+class IfStatement(Ast):
+    pass
+
+class ElifCondition(Ast):
+    pass
