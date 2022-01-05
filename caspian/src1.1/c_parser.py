@@ -445,6 +445,7 @@ class Parser:
                     self.consume_if_true_or_exception(TOKEN.EOL)
                     if not (c_body:=self.body(TOKEN.INDENT(indent.value+8))).body:
                         raise Exception('Missing body of case statement')
+
                     cases.append(c_ast.CaseStatement(parameter = c_parameter, body = c_body))
                     continue
                 
@@ -452,6 +453,7 @@ class Parser:
                     self.consume_if_true_or_exception(TOKEN.EOL)
                     if not (d_body:=self.body(TOKEN.INDENT(indent.value+8))).body:
                         raise Exception('Missing body of default statement')
+
                     default = d_body
                     break
                     
@@ -460,6 +462,26 @@ class Parser:
             self.release_token(TOKEN.EOL)
             return c_ast.SwitchCase(parameter = s_parameter, cases = cases, default = default)
 
+        if (t:=self.consume_if_true(TOKEN.SUPPRESS)):
+            params, then_params = self.parse_expr(indent, stmnt=True), None
+            then_body = None
+            self.consume_if_true_or_exception(TOKEN.EOL)
+            if not (s_body:=self.body(TOKEN.INDENT(indent.value+4))).body:
+                raise Exception('Missing body of suppress statement')
+
+            if self.peek() is not None and (ind:=self.consume_if_custom_true(lambda x:x.matches(TOKEN.INDENT) and x.value == indent.value)):
+                if self.consume_if_true(TOKEN.THEN):
+                    then_params = self.parse_expr(ind, stmnt=True)
+                    self.consume_if_true_or_exception(TOKEN.EOL)
+                    if not (then_body:=self.body(TOKEN.INDENT(indent.value+4))).body:
+                        raise Exception('Missing body of then statement')
+
+                else:
+                    self.release_token(ind)
+
+            self.release_token(TOKEN.EOL)
+            return c_ast.Suppress(params = params, body = s_body, then_params = then_params, then_body = then_body)        
+            
         return self.parse_expr(indent, stmnt = True)
 
     def body(self, indent=TOKEN.INDENT(0)) -> c_ast.Body:

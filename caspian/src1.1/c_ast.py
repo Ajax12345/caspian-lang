@@ -153,3 +153,6 @@ class CaseStatement(Ast):
 
 class SwitchCase(Ast):
     pass
+
+class Suppress(Ast):
+    pass

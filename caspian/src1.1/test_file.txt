@@ -1,8 +1,5 @@
-for i in range(10)
-    switch test+1
-        case [10, val, val1]
-            break
-        case 100
-            break
-        default
-            print('yes')
+suppress (Exception, TypeError)
+    pass
+
+fun test()
+    pass

@@ -39,7 +39,7 @@ grammar = [
     (TOKEN.FOR, re.compile(r'for\b')),
     (TOKEN.SUPPRESS, re.compile(r'suppress\b')),
     (TOKEN.THEN, re.compile(r'then\b')),
-    (TOKEN.FINALLY, re.compile(r'then\b')),
+    (TOKEN.FINALLY, re.compile(r'finally\b')),
     (TOKEN.RAISE, re.compile(r'raise\b')),
     (TOKEN.IMPORT, re.compile(r'import\b')),
     (TOKEN.CLASS, re.compile(r'class\b')),
