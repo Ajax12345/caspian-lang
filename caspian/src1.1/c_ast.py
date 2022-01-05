@@ -132,3 +132,6 @@ class Break(Ast):
 
 class Continue(Ast):
     pass
+
+class WhileLoop(Ast):
+    pass

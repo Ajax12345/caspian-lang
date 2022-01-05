@@ -1,6 +1,12 @@
 import typing, c_ast
 from c_grammar import * 
 
+def _(ast:typing.Union[None, c_ast.Ast], message:typing.Optional[typing.Union[None, str]]=None) -> c_ast.Ast:
+    if ast is None:
+        raise Exception('syntax error' if message is None else message)
+    
+    return ast
+
 class Parser:
     def __init__(self, tokenizer:Tokenizer) -> None:
         self.tokenizer = tokenizer
@@ -371,6 +377,15 @@ class Parser:
                 raise Exception("'@' requires a callable")
             
             return c_ast.DecoratedCallable(wrappers=wrappers, wrapped=wrapped)
+
+        if (t:=self.consume_if_true(TOKEN.WHILE)):
+            condition = self.parse_expr(indent)
+            self.consume_if_true_or_exception(TOKEN.EOL)
+            if not (body:=self.body(TOKEN.INDENT(indent.value+4))).body:
+                raise Exception('Missing body of while loop')
+
+            self.release_token(TOKEN.EOL)
+            return c_ast.WhileLoop(condition=condition, body=body)
 
         return self.parse_expr(indent, stmnt = True)
 

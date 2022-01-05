@@ -1,2 +1,5 @@
-for i in range(10)
+while
     break
+
+for i in range(10)
+    print(i+1)
