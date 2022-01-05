@@ -135,3 +135,6 @@ class Continue(Ast):
 
 class WhileLoop(Ast):
     pass
+
+class DoWhileLoop(Ast):
+    pass

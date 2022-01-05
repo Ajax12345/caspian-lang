@@ -379,13 +379,22 @@ class Parser:
             return c_ast.DecoratedCallable(wrappers=wrappers, wrapped=wrapped)
 
         if (t:=self.consume_if_true(TOKEN.WHILE)):
-            condition = self.parse_expr(indent)
+            condition = self.parse_expr(indent, stmnt=True)
             self.consume_if_true_or_exception(TOKEN.EOL)
             if not (body:=self.body(TOKEN.INDENT(indent.value+4))).body:
                 raise Exception('Missing body of while loop')
 
             self.release_token(TOKEN.EOL)
             return c_ast.WhileLoop(condition=condition, body=body)
+
+        if (t:=self.consume_if_true(TOKEN.DO)):
+            self.consume_if_true_or_exception(TOKEN.EOL)
+            if not (body:=self.body(TOKEN.INDENT(indent.value+4))).body:
+                raise Exception('Missing body of do-while loop')
+
+            self.consume_if_custom_true_or_exception(TOKEN.EOL)
+            self.consume_if_true_or_exception(TOKEN.WHILE)
+            return c_ast.DoWhileLoop(condition=self.parse_expr(indent, stmnt=True), body=body)
 
         return self.parse_expr(indent, stmnt = True)
 

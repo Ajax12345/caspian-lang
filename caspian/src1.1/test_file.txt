@@ -1,5 +1,7 @@
-while
-    break
+fun test()
+    yield 1
+    yield from test()
 
-for i in range(10)
-    print(i+1)
+r = test()
+while k~r.next() != null
+    print(k)
