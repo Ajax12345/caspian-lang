@@ -326,6 +326,12 @@ class Parser:
         
         if (t:=self.consume_if_true(TOKEN.PASS)) is not None:
             return c_ast.Pass(line=t.line)
+
+        if (t:=self.consume_if_true(TOKEN.BREAK)) is not None:
+            return c_ast.Break()
+
+        if (t:=self.consume_if_true(TOKEN.CONTINUE)) is not None:
+            return c_ast.Break()
         
         if (t:=self.consume_if_true(TOKEN.FUN)) is not None:
             return self.parse_fun(indent)
@@ -359,7 +365,7 @@ class Parser:
                     raise Exception('invalid indent')
             
                 self.consume_if_true_or_exception(TOKEN.INDENT)
-                
+
             print(wrappers)
             if (wrapped:=self.parse_callable(indent)) is None:
                 raise Exception("'@' requires a callable")

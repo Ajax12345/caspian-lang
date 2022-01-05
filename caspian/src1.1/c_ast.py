@@ -126,3 +126,9 @@ class AsyncComprehensionBlock(Ast):
 
 class DecoratedCallable(Ast):
     pass
+
+class Break(Ast):
+    pass
+
+class Continue(Ast):
+    pass
