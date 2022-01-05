@@ -482,17 +482,15 @@ dis(obj)
 //{'names':{'attr1':232, 'fun1':<fun at 232323231>}}
 //convert paran group in an expression to an immutable array?
 
-//Using brackets to specify an execution body:
+//Using `#` to specify an execution body:
 
-j[v] = x => {
-    return x+1
-}
+j[v] = x => #
+    return x + 1
 
-j[primative::iterator] = x => {
+j[primative::iterator] = () => #
     for i in this.val_stream
         yield i+1
 
-}
 
 //be able to support single line statements
 for i in range(10) f(i) //a single expression statement after

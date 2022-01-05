@@ -224,6 +224,13 @@ class Parser:
                 if value is None:
                     raise Exception('Invalid Syntax')
 
+                if self.consume_if_true(TOKEN.POUND):
+                    self.consume_if_true_or_exception(TOKEN.EOL)
+                    body = self.body(TOKEN.INDENT(self.peek().value))
+                    self.release_token(TOKEN.EOL)
+                    value = c_ast.MultiLineLambda(params = value, body = body)
+                    continue 
+                    
                 if (f:=self.parse_expr(indent)) is None:
                     raise Exception('Invalid syntax')
                 

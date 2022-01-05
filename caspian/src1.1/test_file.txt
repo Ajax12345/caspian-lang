@@ -1,7 +1,4 @@
-fun test()
-    yield 1
+j[primative::iterator] = () => #
+    fun test():iterator
+        return [i for i in range(10)]
     yield from test()
-
-r = test()
-while k~r.next() != null
-    print(k)

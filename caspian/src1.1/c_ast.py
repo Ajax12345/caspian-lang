@@ -138,3 +138,6 @@ class WhileLoop(Ast):
 
 class DoWhileLoop(Ast):
     pass
+
+class MultiLineLambda(Ast):
+    pass
