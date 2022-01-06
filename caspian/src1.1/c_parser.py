@@ -77,7 +77,7 @@ class Parser:
         if self.consume_if_true(TOKEN.AS) is not None:
             alias = self.consume_if_true_or_exception(TOKEN.NAME)
         
-        return c_ast.Import(path=[i.value for i in path], alias=alias.value if alias is not None else None, line=path[0].line)
+        return c_ast.Import(path=path, alias=alias.value if alias is not None else None, line=path[0].line)
 
     def parse_comma_separated_items(self, end:typing.Union[None, 'TOKEN']=None) -> c_ast.CommaSeparatedItems:
         items = []

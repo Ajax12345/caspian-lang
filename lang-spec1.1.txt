@@ -12,7 +12,7 @@ function
 lambda
 class
 
-Union by itself will take anything, Union[type1, type2] will only take type1 or type2
+//Union by itself will take anything, Union[type1, type2] will only take type1 or type2
 //advanced typing formats like Union should be imported
 //operators
 <
@@ -225,7 +225,7 @@ fun get_results(a:int[weak=true], b:int[weak=true]):int[weak=true]
     return something_else
 
 fun get_results(a, ..args, ...kwargs):Any
-    ... //empty body (pass)
+    pass
 
 get_results(10, 10, 10, 10, val1=10, val2=10)
 
@@ -247,12 +247,13 @@ fun test()
 //chaining calls
 
 x = "James" |> get_length |> compute_factorial
+x1 = "james" |> get_length |> compute_factorial |> new_fact(1, 2, _, 3) |> final_result(1, 2) |> unpack_stuff(1, .._)
 
-x1 = "james" |> get_length
-    |> compute_factorial
-    |> new_fact(1, 2, _, 3) // result from compute_factorial passed to new_fact at the position of the throwaway variable
-    |> final_result(1, 2) //result from new_fact passed to final_result after "2"
-    |> unpack_stuff(1, .._) //result from final_result passed to unpack_stuff and unpacked (as an array)
+//x1 = "james" |> get_length
+//    |> compute_factorial
+//    |> new_fact(1, 2, _, 3) // result from compute_factorial passed to new_fact at the position of the throwaway variable
+//    |> final_result(1, 2) //result from new_fact passed to final_result after "2"
+//    |> unpack_stuff(1, .._) //result from final_result passed to unpack_stuff and unpacked (as an array)
 
 
 
@@ -444,10 +445,10 @@ for i in x~[1, 2, 3]
 
 print(x) //x => [1, 2, 3]
 
-//const, private [NOT RIGHT NOW]
+//const, private
 x:int[private=true] = 10
 x:int[const=true] = 10 //cannot be reassigned to a different integer
-y:List[int][private=true] = [1, 2, 3]
+y:List[int, private=true] = [1, 2, 3]
 //can do const/private with methods
 class J 
     fun get_name[private=true]() //need to add neg lookahead for this to work

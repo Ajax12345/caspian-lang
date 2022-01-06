@@ -186,7 +186,7 @@ class Tokenizer:
         
     def token_stream(self, src:str) -> typing.Iterator:
         for i, a in enumerate(src.split('\n'),1):
-            if (a:=re.sub('//[\w\W]+', '', a)):
+            if (a:=re.sub('//[\w\W]+', '', a)) and not re.findall('^\s+$', a):
                 ch_c, w_ind, s_w_ind = 0, 0, False
                 while a:
                     if (m:=next(((tk, re_m.group()) for tk, re_c in grammar if (re_m:=re_c.match(a)) is not None), None)) is None:
@@ -204,8 +204,8 @@ class Tokenizer:
                 
 
 if __name__ == '__main__':
-    '''
+    
     with open('test_file.txt') as f:
         t = Tokenizer(f.read())
-    '''
-    print({TOKEN.BOOL:"james"}[TOKEN.BOOL])
+    print(list(t))
+    #print({TOKEN.BOOL:"james"}[TOKEN.BOOL])
