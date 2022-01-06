@@ -318,6 +318,12 @@ class Parser:
                 return c_ast.AsyncFun(fun=f)
             return f
 
+        if self.consume_if_true(TOKEN.CLASS):
+            if (invalid_fields:=[j for j in ['static', 'async'] if j in d]):
+                raise Exception('Invalid syntax')
+            
+            return self.parse_class(indent, abstract = True)
+
         if not _callable:
             if self.consume_if_true(TOKEN.FOR):
                 if 'async' not in d or len(d) > 1:
@@ -329,9 +335,32 @@ class Parser:
         if self.consume_if_true(TOKEN.FUN):
             return self.parse_fun(indent)
 
+        if self.consume_if_true(TOKEN.CLASS):
+            return self.parse_class(indent)
+
         if (t:=self.check_if_true((TOKEN.ASYNC, TOKEN.STATIC, TOKEN.ABSTRACT))):
             if (t:=self.parse_syntactic_sugar_callables(indent, True)):
                 return t
+
+    def parse_class(self, indent, abstract:bool = False) -> c_ast.Ast:
+        name = self.consume_if_true_or_exception(TOKEN.NAME)
+        inherits = []
+        if self.consume_if_true(TOKEN.INHERITS):
+            while True:
+                inherits.append(self.consume_if_true_or_exception(TOKEN.NAME))
+                if self.check_if_true(TOKEN.EOL):
+                    break
+                self.consume_if_true_or_exception(TOKEN.COMMA)
+        
+        self.consume_if_true(TOKEN.EOL)
+        if not (c_body:=self.body(TOKEN.INDENT(indent.value+4))).body:
+            raise Exception('Missing body of class statement')
+        
+        self.release_token(TOKEN.EOL)
+        return c_ast.Class(name = name, 
+                            inherits = inherits, 
+                            abstract = abstract, 
+                            body = c_body)
         
     def statement(self, indent:'TOKEN.INDENT') -> c_ast.Ast:
         if (t:=self.consume_if_true(TOKEN.IMPORT)) is not None:
@@ -482,6 +511,9 @@ class Parser:
             self.release_token(TOKEN.EOL)
             return c_ast.Suppress(params = params, body = s_body, then_params = then_params, then_body = then_body)        
             
+        if (t:=self.consume_if_true(TOKEN.CLASS)):
+            return self.parse_class(indent)
+
         return self.parse_expr(indent, stmnt = True)
 
     def body(self, indent=TOKEN.INDENT(0)) -> c_ast.Body:

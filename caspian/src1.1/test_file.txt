@@ -1,5 +1,6 @@
-suppress (Exception, TypeError)
+class Test inherits A, B, C
     pass
 
-fun test()
-    pass
+for i in range(10)
+    print(i)
+

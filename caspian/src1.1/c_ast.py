@@ -156,3 +156,6 @@ class SwitchCase(Ast):
 
 class Suppress(Ast):
     pass
+
+class Class(Ast):
+    pass
