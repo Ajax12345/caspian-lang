@@ -150,12 +150,12 @@ switch something
 
 suppress
     raise Exception
-then status, e
+then [status, e]
     print(status, e)
 
-suppress TypeError, SyntaxError
+suppress [TypeError, SyntaxError]
     raise TypeError 
-then status, e //since TypeError is explicity suppressed, nothing will be passed to the "then" block
+then [status, e] //since TypeError is explicity suppressed, nothing will be passed to the "then" block
     print(status, e)
 
 //suppress does not need a "then" block
