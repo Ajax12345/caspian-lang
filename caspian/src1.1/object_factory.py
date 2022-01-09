@@ -44,13 +44,6 @@ class CaspianObjClassInstance(CaspianObj):
         
         return self.public[_name]
 
-class InstantiatePromise:
-    def __init__(self, _name:str, *args) -> None:
-        self.name, self.args = _name, args
-
-    def __repr__(self) -> str:
-        return f'{self.__class__.__name__}({self.name} => {self.args})'
-
 class CaspianObjClass(CaspianObj):
     def instantiate(self, *args, **kwargs) -> so.ObjRefId:
         #print('public bindings in here', self.name)

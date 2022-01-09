@@ -1,6 +1,6 @@
 import typing, sys, functools
-import warnings, internal_errors
-import copy, collections, contextlib
+import warnings, copy
+import collections, contextlib
 
 class BlockExits:
     class ExitStatus:
@@ -81,6 +81,20 @@ class ObjRefId:
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.id})'
 
+class ScopeLookupObj:
+    def __init__(self, **kwargs:dict) -> None:
+        self._params = kwargs
+
+    def __getattr__(self, name:str) -> typing.Any:
+        if name in self._params:
+            return self._params[name]
+
+    def get(self, param:str, default:typing.Optional = None) -> typing.Any:
+        if param in self._params:
+            return self._params[param]
+
+        return default
+
 class MemHeap:
     def __init__(self) -> None:
         self.ref_count = 0
@@ -97,52 +111,75 @@ class MemHeap:
         return ObjRefId(self.ref_count)
 
 class ScopeBindings:
-    def __init__(self, _id:int, heap:MemHeap) -> None:
+    def __init__(self, _id:int) -> None:
         self.scope_id = _id
-        self.heap = heap
         self.bindings = {}
         self.binding_parameters = {}
 
-    def __contains__(self, name:str) -> bool:
-        return name in self.bindings
+    @classmethod
+    def lookup_wrapper(cls, params:typing.Union[str, tuple]) -> ScopeLookupObj:
+        if isinstance(params, str):
+            return ScopeLookupObj(name = params)
+        
+        d, r = collections.defaultdict(list), {}
+        for i in params:
+            d[type(i)].append(i)
 
-    def __getitem__(self, name:str) -> ObjRefId:
-        if name not in self:
-            return False
-    
-        return self.bindings[name]
+        if str in d:
+            r['name'] = d[str][0]
+        
+        if slice in d:
+            r.update({i.start:i.step for i in r[slice]})
 
-    def __setitem__(self, name:str, obj:ObjRefId) -> None:
+        return ScopeLookupObj(**r)
+
+    def __getitem__(self, params:typing.Union[str, tuple]) -> ObjRefId:
+        return self.bindings[(s_params:=self.__class__.lookup_wrapper(params)).name]
+
+    def __setitem__(self, params:typing.Union[str, tuple], obj:ObjRefId) -> None:
         #will need to dereference here
         #possibily increment obj reference
-        self.bindings[name] = obj
+        self.bindings[(s_params:=self.__class__.lookup_wrapper(params)).name] = obj
     
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__}#{self.scope_id}>'
 
 class Scopes:
-    def __init__(self, heap:MemHeap) -> None:
+    def __init__(self) -> None:
         self.scope_count = 0
-        self.heap = heap
         self.scopes = {}
 
     def new_scope(self) -> int:
         self.scope_count += 1
-        self.scopes[self.scope_count] = ScopeBindings(self.scope_count, self.heap)
+        self.scopes[self.scope_count] = ScopeBindings(self.scope_count)
         return self.scope_count
 
-    def __getitem__(self, params:typing.Union[tuple, str]) -> typing.Any:
+    @classmethod
+    def lookup_wrapper(cls, params:typing.Union[str, tuple]) -> ScopeLookupObj:
         if isinstance(params, str):
-            return self.scopes[1][params]
+            return ScopeLookupObj(name = params)
 
-        return self.scopes[params[1]][params[0]]
+        d, r = collections.defaultdict(list), {}
+        for i in params:
+            d[type(i)].append(i)
+        
+        if str in d:
+            r['name'] = d[str][0]
+
+        if int in d:
+            r['scope'] = d[int][0]
+
+        if slice in d:
+            r.update({i.start:i.step for i in r[slice]})
+        
+        return ScopeLookupObj(**r)
+        
+
+    def __getitem__(self, params:typing.Union[tuple, str]) -> typing.Any:
+        return self.scopes[(s_params:=self.__class__.lookup_wrapper(params)).get('scope', 1)][s_params.name]
 
     def __setitem__(self, params:typing.Union[tuple, str], obj:ObjRefId) -> typing.Any:
-        if isinstance(params, str):
-            self.scopes[1][params] = obj
-        
-        else:
-            self.scopes[params[1]][params[0]] = obj
+        self.scopes[(s_params:=self.__class__.lookup_wrapper(params)).get('scope', 1)][s_params.name] = obj
 
 class PyBaseObj:
     def __init__(self, _val:typing.Any, private=True) -> None:
@@ -164,5 +201,7 @@ class ExecSource:
         pass
 
 if __name__ == '__main__':
-    n = NameBindings()
-    print(n['james'].instantiate(3, 4, 5))
+    scopes = Scopes()
+    scopes.new_scope()
+    scopes['Call'] = ObjRefId(1)
+    scopes['Bool_'] = ObjRefId(2)
