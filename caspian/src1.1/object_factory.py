@@ -58,8 +58,7 @@ class CaspianObjClass(CaspianObj):
         self.inc_ref()
         _obj = CaspianObjClassInstance(
             heap = self.heap, 
-            call_stack = self.call_stack,
-            name_bindings = self.name_bindings,
+            scopes = self.scopes,
             ref_count = 1,
             is_primative = False,
             o_type = None,
@@ -74,13 +73,12 @@ class CaspianObjClass(CaspianObj):
         )
         if 'constructor' in self.bindings.public:
             if isinstance((_call:=self.heap[self.bindings.public['constructor']].private['Call']), so.HeapPromise):
-                _call = self.name_bindings[_call]
+                _call = self.scopes[_call]
             else:
                 _call = self.heap[_call]
                 
             #print('finalized call object', _call.__dict__)
-            with self.call_stack('constructor'):
-                _call.exec_source['payload']['callable'](_obj, None, self.name_bindings, *args, **kwargs)
+            _call.exec_source['payload']['callable'](_obj, None, self.scopes, *args, **kwargs)
         
         self.heap[_id] = _obj
         return _id
@@ -138,17 +136,17 @@ class CaspianObjFactory:
         @list parents //stores the parent base classes
 
     '''
-    def __init__(self, _heap:typing.Union[so.MemHeap, None] = None, _call_stack:typing.Union[so.CallStack, None] = None) -> None:
-        self.heap = _heap if _heap is not None else so.MemHeap()
-        self.call_stack = _call_stack if _call_stack is not None else so.CallStack()
-        self.name_bindings = so.NameBindings(self.heap)
+    def __init__(self, heap:typing.Union[so.MemHeap, None] = None, scopes:typing.Union[so.Scopes, None]) -> None:
+        self.heap = heap if heap is not None else so.MemHeap()
+        self.scopes = scopes if scopes is not None else so.Scopes(self.heap)
+        #self.scopes = so.NameBindings(self.heap)
 
     def call_clone_handler(self, _f:typing.Callable) -> so.ObjRefId:
-        if isinstance((_s_obj:=self.name_bindings['Call']), so.HeapPromise):
+        if isinstance((_s_obj:=self.scopes['Call']), so.HeapPromise):
             return _s_obj(_f)
 
         _id = next(self.heap)
-        _new_call = self.heap[self.name_bindings['Call']](_f, False)
+        _new_call = self.heap[self.scopes['Call']](_f, False)
         self.heap[_id] = _new_call
         return _id
 
@@ -164,24 +162,24 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = CaspianObj(
             heap = self.heap, 
-            name_bindings = self.name_bindings,
+            scopes = self.scopes,
             ref_count = 1,
             is_primative = False,
             o_type = _type,
             _type = f'{"" if _type is None else _type+" "}function',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.name_bindings['String', True].instantiate(_f.__name__), 
-                    '__type__':self._(self.name_bindings['Fun']),
-                    '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self._(self.name_bindings['toString']),
-                        'Eq':self._(self.name_bindings['Eq']),
-                        'Bool':self._(self.name_bindings['bool_']),
+            public = {'__name__':self.scopes['String', True].instantiate(_f.__name__), 
+                    '__type__':self._(self.scopes['Fun']),
+                    '__id__':self.scopes['Integer'].instantiate(_id.id)},
+            private = {'toString':self._(self.scopes['toString']),
+                        'Eq':self._(self.scopes['Eq']),
+                        'Bool':self._(self.scopes['bool_']),
                         'Call':self.call_clone_handler(_f)}
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
-            self.name_bindings[_f.__name__] = _id
+            self.scopes[_f.__name__] = _id
         #print('primative object after creation (function)', _obj.__dict__)
 
         return _id
@@ -193,25 +191,24 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = CaspianObj(
             heap = self.heap, 
-            call_stack = self.call_stack,
-            name_bindings = self.name_bindings,
+            scopes = self.scopes,
             ref_count = 1,
             is_primative = True,
             o_type = _type,
             _type = f'{"" if _type is None else _type+" "}primative::{name}',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.name_bindings['String', True].instantiate(name), 
-                    '__type__':self._(self.name_bindings['Primative']),
-                    '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self._(self.name_bindings['toString']),
-                        'Eq':self._(self.name_bindings['Eq']),
-                        'Bool':self._(self.name_bindings['bool_']),
+            public = {'__name__':self.scopes['String'].instantiate(name), 
+                    '__type__':self._(self.scopes['Primative']),
+                    '__id__':self.scopes['Integer'].instantiate(_id.id)},
+            private = {'toString':self._(self.scopes['toString']),
+                        'Eq':self._(self.scopes['Eq']),
+                        'Bool':self._(self.scopes['bool_']),
                         'Call':self.call_clone_handler(_f)}
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
-            self.name_bindings[_f.__name__] = _id
+            self.scopes[_f.__name__] = _id
         #print('primative object after creation (primative)', _obj.__dict__)
         return _id
 
@@ -222,25 +219,24 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = CaspianObjCall(
             heap = self.heap, 
-            call_stack = self.call_stack,
-            name_bindings = self.name_bindings,
+            scopes = self.scopes,
             is_primative = True,
             o_type = _type,
             ref_count = 1,
             _type = f'{"" if _type is None else _type+" "}primative::{name}',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.name_bindings['String', True].instantiate(name), 
-                    '__type__':self._(self.name_bindings['Primative']),
-                    '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self._(self.name_bindings['toString']),
-                        'Eq':self._(self.name_bindings['Eq']),
-                        'Bool':self._(self.name_bindings['bool_']),
+            public = {'__name__':self.scopes['String'].instantiate(name), 
+                    '__type__':self._(self.scopes['Primative']),
+                    '__id__':self.scopes['Integer'].instantiate(_id.id)},
+            private = {'toString':self._(self.scopes['toString']),
+                        'Eq':self._(self.scopes['Eq']),
+                        'Bool':self._(self.scopes['bool_']),
                         'Call':so.NameSelf}
         )
         self.heap[_id] = _obj(_f)
         if _f.__annotations__['return']:
-            self.name_bindings[_f.__name__] = _id
+            self.scopes[_f.__name__] = _id
         #print('primative object after creation (call)', _obj.__dict__)
         return _id
 
@@ -249,24 +245,23 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = CaspianObj(
             heap = self.heap, 
-            call_stack = self.call_stack,
-            name_bindings = self.name_bindings,
+            scopes = self.scopes,
             ref_count = 1,
             is_primative = False,
             o_type = None,
             _type = 'null',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.name_bindings['String', True].instantiate('null'), 
-                    '__type__':self._(self.name_bindings['NullType']),
-                    '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
-            private = {'toString':self._(self.name_bindings['toStringName']),
-                        'Eq':self._(self.name_bindings['Eq']),
-                        'Bool':self._(self.name_bindings['bool__'])}
+            public = {'__name__':self.scopes['String'].instantiate('null'), 
+                    '__type__':self._(self.scopes['NullType']),
+                    '__id__':self.scopes['Integer'].instantiate(_id.id)},
+            private = {'toString':self._(self.scopes['toStringName']),
+                        'Eq':self._(self.scopes['Eq']),
+                        'Bool':self._(self.scopes['bool__'])}
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
-            self.name_bindings[_f.__name__] = _id
+            self.scopes[_f.__name__] = _id
         #print('primative object after creation (null)', _obj.__dict__)
         return _id
     
@@ -274,33 +269,32 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = CaspianObjClass(
             heap = self.heap, 
-            call_stack = self.call_stack,
-            name_bindings = self.name_bindings,
+            scopes = self.scopes,
             ref_count = 1,
             is_primative = False,
             o_type = None,
             _type = 'BaseClass',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.name_bindings['String', True].instantiate('BaseClass'), 
+            public = {'__name__':self.scopes['String'].instantiate('BaseClass'), 
                     '__type__':so.NameSelf,
-                    '__id__':self.name_bindings['Integer', True].instantiate(_id.id)},
+                    '__id__':self.scopes['Integer'].instantiate(_id.id)},
             private = {'toString':_f()[0],
-                        'Eq':self._(self.name_bindings['Eq']),
-                        'Bool':self._(self.name_bindings['bool_']),
-                        'Call':self._(self.name_bindings['InstantiateClassCall'])},
+                        'Eq':self._(self.scopes['Eq']),
+                        'Bool':self._(self.scopes['bool_']),
+                        'Call':self._(self.scopes['InstantiateClassCall'])},
             bindings = CaspianClassBindings(
                 public = {
 
                 },
-                private={'toString':self._(self.name_bindings['toString']),
-                        'Eq':self._(self.name_bindings['Eq']),
-                        'Bool':self._(self.name_bindings['bool_'])}
+                private={'toString':self._(self.scopes['toString']),
+                        'Eq':self._(self.scopes['Eq']),
+                        'Bool':self._(self.scopes['bool_'])}
             )
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
-            self.name_bindings[_f.__name__] = _id
+            self.scopes[_f.__name__] = _id
         #print('primative object after creation (base class)', _obj.__dict__)
         return _id
 
@@ -315,34 +309,33 @@ class CaspianObjFactory:
         _id = next(self.heap)
         _obj = CaspianObjClass(
             heap = self.heap, 
-            call_stack = self.call_stack,
-            name_bindings = self.name_bindings,
+            scopes = self.scopes,
             ref_count = 1,
             is_primative = False,
             o_type = 'Class',
             _type = 'Class',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.name_bindings['String', True].instantiate('BaseClass'), 
-                    '__type__':self._(self.name_bindings['BaseClass']),
-                    '__id__':self.name_bindings['Integer', True].instantiate(_id.id),
+            public = {'__name__':self.scopes['String'].instantiate('BaseClass'), 
+                    '__type__':self._(self.scopes['BaseClass']),
+                    '__id__':self.scopes['Integer'].instantiate(_id.id),
                     **{o.name:i for o, i in attr_bindings.get(1, {}).get(0, [])}},
-            private = {'toString':self._(self.name_bindings['toString']),
-                        'Eq':self._(self.name_bindings['Eq']),
-                        'Bool':self._(self.name_bindings['bool_']),
-                        'Call':self._(self.name_bindings['InstantiateClassCall']),
+            private = {'toString':self._(self.scopes['toString']),
+                        'Eq':self._(self.scopes['Eq']),
+                        'Bool':self._(self.scopes['bool_']),
+                        'Call':self._(self.scopes['InstantiateClassCall']),
                         **{self.create_primative_name(o.name):i for o, i in attr_bindings.get(1, {}).get(1, [])}},
             bindings = CaspianClassBindings(
                 public = {o.name:i for o, i in attr_bindings.get(0, {}).get(0, [])},
-                private={'toString':self._(self.name_bindings['toString']),
-                        'Eq':self._(self.name_bindings['Eq']),
-                        'Bool':self._(self.name_bindings['bool_']),
+                private={'toString':self._(self.scopes['toString']),
+                        'Eq':self._(self.scopes['Eq']),
+                        'Bool':self._(self.scopes['bool_']),
                         **{self.create_primative_name(o.name):i for o, i in attr_bindings.get(0, {}).get(1, [])}}
             )
         )
         self.heap[_id] = _obj
         if _f.__annotations__['return']:
-            self.name_bindings[_f.__name__] = _id
+            self.scopes[_f.__name__] = _id
 
         return _id
 
@@ -393,5 +386,4 @@ class CaspianObjFactory:
 
     def __call__(self, stack_heap:'CaspianCompile') -> 'CaspianObjFactory':
         self.heap = stack_heap.heap
-        self.call_stack = stack_heap.call_stack
         return self
