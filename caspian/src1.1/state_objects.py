@@ -18,36 +18,6 @@ class BlockExits:
     class Yield(ExitStatus):
         pass
 
-class Scopes:
-    class ScopeBase:
-        def __str__(self) -> str:
-            return f"<scope '{self.name}'>"
-
-        @property
-        def name(self) -> str:
-            return self.__class__.__name__
-
-        def __repr__(self) -> str:
-            return str(self)
-    
-    class MainBlock(ScopeBase):
-        pass
-
-    class WhileBlock(ScopeBase):
-        pass
-
-    class ForBlock(ScopeBase):
-        pass
-
-    class ClassBlock(ScopeBase):
-        pass
-    
-    class FunctionBlock(ScopeBase):
-        pass
-
-    class YieldFunctionBlock(ScopeBase):
-        pass
-
 class ExecStatus:
     def __init__(self, **kwargs) -> None:
         self._status = kwargs
@@ -150,7 +120,7 @@ class ScopeBindings:
             r['name'] = d[str][0]
         
         if slice in d:
-            r.update({i.start:i.step for i in r[slice]})
+            r.update({i.start:i.stop for i in d[slice]})
 
         return ScopeLookupObj(**r)
 
@@ -199,16 +169,16 @@ class Scopes:
             r['scope'] = d[int][0]
 
         if slice in d:
-            r.update({i.start:i.step for i in r[slice]})
+            r.update({i.start:i.stop for i in d[slice]})
         
         return ScopeLookupObj(**r)
         
 
     def __getitem__(self, params:typing.Union[tuple, str]) -> typing.Any:
-        return self.scopes[(s_params:=self.__class__.lookup_wrapper(params)).get('scope', 1)][s_params.name]
+        return self.scopes[(s_params:=self.__class__.lookup_wrapper(params)).get('scope', 1)][params]
 
     def __setitem__(self, params:typing.Union[tuple, str], obj:ObjRefId) -> typing.Any:
-        self.scopes[(s_params:=self.__class__.lookup_wrapper(params)).get('scope', 1)][s_params.name] = obj
+        self.scopes[(s_params:=self.__class__.lookup_wrapper(params)).get('scope', 1)][params] = obj
 
 class Scope:
     def __init__(self, scopes:Scopes, default_scope:typing.Optional=None) -> None:
@@ -243,5 +213,4 @@ class ExecSource:
 if __name__ == '__main__':
     heap = MemHeap()
     scopes = Scopes(heap)
-    scope = Scope(scopes)
-    print(scopes['Call'].instantiate())
+    scopes.new_scope()
