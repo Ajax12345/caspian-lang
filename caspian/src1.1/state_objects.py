@@ -131,7 +131,8 @@ class NamePromise:
         return f'<{self.__class__.__name__} {", ".join("(...)" for _ in self.op_path)}>'
 
 class ScopeBindings:
-    def __init__(self, _id:int) -> None:
+    def __init__(self, heap:MemHeap, _id:int) -> None:
+        self.heap = heap
         self.scope_id = _id
         self.bindings = {}
         self.binding_parameters = {}
@@ -155,6 +156,9 @@ class ScopeBindings:
 
     def __getitem__(self, params:typing.Union[str, tuple]) -> ObjRefId:
         if (s_params:=self.__class__.lookup_wrapper(params)).name in self.bindings:
+            if s_params.eval:
+                return self.heap[self.bindings[s_params.name]]
+
             return self.bindings[s_params.name]
         
         if s_params.get('provide_promise', True):
@@ -169,13 +173,14 @@ class ScopeBindings:
         return f'<{self.__class__.__name__}#{self.scope_id}>'
 
 class Scopes:
-    def __init__(self) -> None:
+    def __init__(self, heap:MemHeap) -> None:
+        self.heap = heap
         self.scope_count = 0
         self.scopes = {}
 
     def new_scope(self) -> int:
         self.scope_count += 1
-        self.scopes[self.scope_count] = ScopeBindings(self.scope_count)
+        self.scopes[self.scope_count] = ScopeBindings(self.heap, self.scope_count)
         return self.scope_count
 
     @classmethod
@@ -236,6 +241,7 @@ class ExecSource:
         pass
 
 if __name__ == '__main__':
-    scopes = Scopes()
+    heap = MemHeap()
+    scopes = Scopes(heap)
     scope = Scope(scopes)
     print(scopes['Call'].instantiate())
