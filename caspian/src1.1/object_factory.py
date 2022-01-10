@@ -1,5 +1,5 @@
 import typing, state_objects as so
-import internal_errors, collections
+import collections
 import re, copy
 
 class CaspianClassBindings:
@@ -40,7 +40,7 @@ class CaspianObjClassInstance(CaspianObj):
 
     def __getitem__(self, _name:str) -> so.ObjRefId:
         if _name not in self.public:
-            raise internal_errors.MissingBindingName(f"'{_name}' not found in public bindings of '{self.name}'")
+            raise Exception(f"'{_name}' not found in public bindings of '{self.name}'")
         
         return self.public[_name]
 
@@ -58,9 +58,9 @@ class CaspianObjClass(CaspianObj):
             _type = 'Class Instance',
             name = self.name,
             id = _id.id,
-            public = {'__name__':self.scopes['String', 'eval':True].instantiate(self.name), 
+            public = {'__name__':self.scopes['String'].instantiate(self.name), 
                     '__type__':so.ObjRefId(self.id),
-                    '__id__':self.scopes['Integer', 'eval':True].instantiate(_id.id),
+                    '__id__':self.scopes['Integer'].instantiate(_id.id),
                     **self.bindings.public},
             private = self.bindings.private
         )
@@ -138,7 +138,7 @@ class CaspianObjFactory:
         if isinstance((_s_obj:=self.scopes['Call']), so.NamePromise):
             return _s_obj(_f)
 
-        self.heap[(_id:=next(self.heap))] = self.scopes['Call', 'eval':True](_f, False)
+        self.heap[(_id:=next(self.heap))] = self.scopes['Call'](_f, False)
         return _id
 
     def _(self, _obj:typing.Union[so.ObjRefId, so.NamePromise]) -> typing.Union[CaspianObj, so.NamePromise]:
@@ -159,9 +159,9 @@ class CaspianObjFactory:
             _type = f'{"" if _type is None else _type+" "}function',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.scopes['String', 'eval':True].instantiate(_f.__name__), 
+            public = {'__name__':self.scopes['String'].instantiate(_f.__name__), 
                     '__type__':self._(self.scopes['Fun']),
-                    '__id__':self.scopes['Integer', 'eval':True].instantiate(_id.id)},
+                    '__id__':self.scopes['Integer'].instantiate(_id.id)},
             private = {'toString':self._(self.scopes['toString']),
                         'Eq':self._(self.scopes['Eq']),
                         'Bool':self._(self.scopes['bool_']),
@@ -176,7 +176,7 @@ class CaspianObjFactory:
 
     def create_primative_Py(self, _f:typing.Callable, name:typing.Union[str, None]=None, _type:typing.Union[str, None]=None) -> so.ObjRefId:
         if name is None:
-            raise internal_errors.InvalidPrimativeName(f"primative name cannot be 'None'")
+            raise Exception(f"primative name cannot be 'None'")
         
         _id = next(self.heap)
         _obj = CaspianObj(
@@ -189,9 +189,9 @@ class CaspianObjFactory:
             _type = f'{"" if _type is None else _type+" "}primative::{name}',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.scopes['String', 'eval':True].instantiate(name), 
+            public = {'__name__':self.scopes['String'].instantiate(name), 
                     '__type__':self._(self.scopes['Primative']),
-                    '__id__':self.scopes['Integer', 'eval':True].instantiate(_id.id)},
+                    '__id__':self.scopes['Integer'].instantiate(_id.id)},
             private = {'toString':self._(self.scopes['toString']),
                         'Eq':self._(self.scopes['Eq']),
                         'Bool':self._(self.scopes['bool_']),
@@ -205,7 +205,7 @@ class CaspianObjFactory:
 
     def create_primative_Call_Py(self, _f:typing.Callable, name:typing.Union[str, None]=None, _type:typing.Union[str, None]=None) -> so.ObjRefId:
         if name is None:
-            raise internal_errors.InvalidPrimativeName(f"primative name cannot be 'None'")
+            raise Exception(f"primative name cannot be 'None'")
         
         _id = next(self.heap)
         _obj = CaspianObjCall(
@@ -218,9 +218,9 @@ class CaspianObjFactory:
             _type = f'{"" if _type is None else _type+" "}primative::{name}',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.scopes['String', 'eval':True].instantiate(name), 
+            public = {'__name__':self.scopes['String'].instantiate(name), 
                     '__type__':self._(self.scopes['Primative']),
-                    '__id__':self.scopes['Integer', 'eval':True].instantiate(_id.id)},
+                    '__id__':self.scopes['Integer'].instantiate(_id.id)},
             private = {'toString':self._(self.scopes['toString']),
                         'Eq':self._(self.scopes['Eq']),
                         'Bool':self._(self.scopes['bool_']),
@@ -233,7 +233,7 @@ class CaspianObjFactory:
         return _id
 
     def create_null_Py(self, _f:typing.Callable) -> so.ObjRefId:
-        raise internal_errors.DepreciatedMethod('null method no longer supported')
+        raise Exception('null method no longer supported')
         _id = next(self.heap)
         _obj = CaspianObj(
             heap = self.heap, 
@@ -245,9 +245,9 @@ class CaspianObjFactory:
             _type = 'null',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.scopes['String', 'eval':True].instantiate('null'), 
+            public = {'__name__':self.scopes['String'].instantiate('null'), 
                     '__type__':self._(self.scopes['NullType']),
-                    '__id__':self.scopes['Integer', 'eval':True].instantiate(_id.id)},
+                    '__id__':self.scopes['Integer'].instantiate(_id.id)},
             private = {'toString':self._(self.scopes['toStringName']),
                         'Eq':self._(self.scopes['Eq']),
                         'Bool':self._(self.scopes['bool__'])}
@@ -270,9 +270,9 @@ class CaspianObjFactory:
             _type = 'BaseClass',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.scopes['String', 'eval':True].instantiate('BaseClass'), 
+            public = {'__name__':self.scopes['String'].instantiate('BaseClass'), 
                     '__type__':so.NameSelf,
-                    '__id__':self.scopes['Integer', 'eval':True].instantiate(_id.id)},
+                    '__id__':self.scopes['Integer'].instantiate(_id.id)},
             private = {'toString':_f()[0],
                         'Eq':self._(self.scopes['Eq']),
                         'Bool':self._(self.scopes['bool_']),
@@ -311,9 +311,9 @@ class CaspianObjFactory:
             _type = 'Class',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.scopes['String', 'eval':True].instantiate('BaseClass'), 
+            public = {'__name__':self.scopes['String'].instantiate('BaseClass'), 
                     '__type__':self._(self.scopes['BaseClass']),
-                    '__id__':self.scopes['Integer', 'eval':True].instantiate(_id.id),
+                    '__id__':self.scopes['Integer'].instantiate(_id.id),
                     **{o.name:i for o, i in attr_bindings.get(1, {}).get(0, [])}},
             private = {'toString':self._(self.scopes['toString']),
                         'Eq':self._(self.scopes['Eq']),
@@ -376,7 +376,7 @@ class CaspianObjFactory:
         return _static()
 
     def null(self, _f:typing.Callable) -> typing.Callable:
-        raise internal_errors.DepreciatedMethod('null method no longer supported')
+        raise Exception('null method no longer supported')
         return self.create_null_Py(_f)
 
     def __call__(self, stack_heap:'CaspianCompile') -> 'CaspianObjFactory':
