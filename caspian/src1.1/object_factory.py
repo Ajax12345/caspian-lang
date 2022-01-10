@@ -162,7 +162,7 @@ class CaspianObjFactory:
             _type = f'{"" if _type is None else _type+" "}function',
             name = _f.__name__,
             id = _id.id,
-            public = {'__name__':self.scopes['String', True].instantiate(_f.__name__), 
+            public = {'__name__':self.scopes['String'].instantiate(_f.__name__), 
                     '__type__':self._(self.scopes['Fun']),
                     '__id__':self.scopes['Integer'].instantiate(_id.id)},
             private = {'toString':self._(self.scopes['toString']),

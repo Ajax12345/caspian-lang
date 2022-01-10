@@ -1,5 +1,5 @@
 import typing, sys, functools
-import warnings, copy
+import warnings, copy, operator
 import collections, contextlib
 
 class BlockExits:
@@ -110,6 +110,26 @@ class MemHeap:
         self.ref_count += 1
         return ObjRefId(self.ref_count)
 
+class NamePromise:
+    def __init__(self, name:str) -> None:
+        self.name = name
+        self.op_path = []
+
+    def __getattr__(self, name:str) -> 'NamePromise':
+        self.op_path.append(lambda obj:getattr(obj, name))
+        return self
+    
+    def __getitem__(self, params:typing.Union[str, tuple]) -> 'NamePromise':
+        self.op_path.append(lambda obj:operator.getitem(obj, params))
+        return self
+
+    def __call__(self, *args, **kwargs) -> 'NamePromise':
+        self.op_path.append(lambda obj:obj(*args, **kwargs))
+        return self
+
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} {", ".join("(...)" for _ in self.op_path)}>'
+
 class ScopeBindings:
     def __init__(self, _id:int) -> None:
         self.scope_id = _id
@@ -134,7 +154,11 @@ class ScopeBindings:
         return ScopeLookupObj(**r)
 
     def __getitem__(self, params:typing.Union[str, tuple]) -> ObjRefId:
-        return self.bindings[(s_params:=self.__class__.lookup_wrapper(params)).name]
+        if (s_params:=self.__class__.lookup_wrapper(params)).name in self.bindings:
+            return self.bindings[s_params.name]
+        
+        if s_params.get('provide_promise', True):
+            return NamePromise(s_params.name)
 
     def __setitem__(self, params:typing.Union[str, tuple], obj:ObjRefId) -> None:
         #will need to dereference here
@@ -181,6 +205,17 @@ class Scopes:
     def __setitem__(self, params:typing.Union[tuple, str], obj:ObjRefId) -> typing.Any:
         self.scopes[(s_params:=self.__class__.lookup_wrapper(params)).get('scope', 1)][s_params.name] = obj
 
+class Scope:
+    def __init__(self, scopes:Scopes, default_scope:typing.Optional=None) -> None:
+        self.scopes = scopes
+        self.scope_path = [self.scopes.new_scope()] if default_scope is None else default_scope
+    
+    def new_scope(self) -> 'Scope':
+        return self.__class__(self.scopes, self.scope_path+[self.scopes.new_scope()])
+
+    def __repr__(self) -> str:
+        return f'<scope {" -> ".join(map(str, self.scope_path[::-1]))}>'
+
 class PyBaseObj:
     def __init__(self, _val:typing.Any, private=True) -> None:
         self.val, self.private = _val, private
@@ -202,6 +237,5 @@ class ExecSource:
 
 if __name__ == '__main__':
     scopes = Scopes()
-    scopes.new_scope()
-    scopes['Call'] = ObjRefId(1)
-    scopes['Bool_'] = ObjRefId(2)
+    scope = Scope(scopes)
+    print(scopes['Call'].instantiate())
