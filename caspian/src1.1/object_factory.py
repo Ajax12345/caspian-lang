@@ -20,16 +20,13 @@ class CaspianObj:
         return f'{self.__class__.__name__}({self.name})'
 
 class CaspianObjCall(CaspianObj):
-    def __call__(self, _source_f:typing.Callable, new_obj:bool = True) -> 'CaspianObjCall':
+    def __call__(self, _source_f:typing.Callable, produce_obj:bool = False) -> 'CaspianObjCall':
         _c = self.__class__()
         _c.__dict__ = {a:b for a, b in self.__dict__.items()}
         _c.exec_source = {'type':so.ExecSource.Py(), 'payload':{'callable':_source_f}}
         _c.ref_count = 1
-        if new_obj:
-            _id = next(self.heap)
-            self.heap[_id] = _c
-
-        return _c
+        self.heap[(_id:=next(self.heap))] = _c
+        return _c if produce_obj else _id
         
 class CaspianObjClassInstance(CaspianObj):
     def __setitem__(self, _name:str, _id:typing.Union[so.ObjRefId, so.PyBaseObj]) -> None:
@@ -138,8 +135,7 @@ class CaspianObjFactory:
         if isinstance((_s_obj:=self.scopes['Call']), so.NamePromise):
             return _s_obj(_f)
 
-        self.heap[(_id:=next(self.heap))] = self.scopes['Call'](_f, False)
-        return _id
+        return self.heap[_s_obj](_f)
 
     def _(self, _obj:typing.Union[so.ObjRefId, so.NamePromise]) -> typing.Union[CaspianObj, so.NamePromise]:
         if not isinstance(_obj, so.NamePromise):
@@ -226,7 +222,7 @@ class CaspianObjFactory:
                         'Bool':self._(self.scopes['bool_']),
                         'Call':so.NameSelf}
         )
-        self.heap[_id] = _obj(_f)
+        self.heap[_id] = _obj(_f, True)
         if _f.__annotations__['return']:
             self.scopes[_f.__name__] = _id
         #print('primative object after creation (call)', _obj.__dict__)
