@@ -81,8 +81,8 @@ class MemHeap:
         return ObjRefId(self.ref_count)
 
 class NamePromise:
-    def __init__(self, name:str) -> None:
-        self.name = name
+    def __init__(self, name:str, scope:typing.Optional[int]=1) -> None:
+        self.name, self.scope = name, scope
         self.op_path = []
 
     def __getattr__(self, name:str) -> 'NamePromise':
@@ -175,7 +175,10 @@ class Scopes:
         
 
     def __getitem__(self, params:typing.Union[tuple, str]) -> typing.Any:
-        return self.scopes[(s_params:=self.__class__.lookup_wrapper(params)).get('scope', 1)][params]
+        if (s_params:=self.__class__.lookup_wrapper(params)).suppress_eval:
+            return NamePromise(s_params.name, s_params.get('scope', 1))
+
+        return self.scopes[s_params.get('scope', 1)][params]
 
     def __setitem__(self, params:typing.Union[tuple, str], obj:ObjRefId) -> typing.Any:
         self.scopes[(s_params:=self.__class__.lookup_wrapper(params)).get('scope', 1)][params] = obj

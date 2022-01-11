@@ -161,5 +161,5 @@ def null() -> True:
     return toString, bool__, toString_
 
 if __name__ == '__main__':
-    pass
+    print(o.heap[o.scopes['Call']].__dict__)
     
