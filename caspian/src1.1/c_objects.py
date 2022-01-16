@@ -94,6 +94,11 @@ def String() -> True:
 
 @o.class_
 def Integer() -> True:
+    valid_op_types = [
+        'Integer',
+        'Bool',
+        'Float'
+    ]
     @o.fun
     def constructor(this, stack_heap:'CaspianCompile', scopes:so.Scopes, _val:int) -> False:
         this['_val'] = so.PyBaseObj(_val)
@@ -112,35 +117,35 @@ def Integer() -> True:
 
     @o.primative.Eq
     def Eq(this, _, scopes:so.Scopes, c_Int_obj:'CaspianObjectClassInstance') -> False:
-        if this.public['__type__'].not_eq(c_Int_obj.public['__type__']):
+        if not any(c_Int_obj.public['__type__'].eq(scopes[_type]) for _type in valid_op_types):
             raise Exception(f'Integer cannot compare type "{c_Int_obj.name}"')
         
         return scopes['Bool', 'eval':True].instantiate(this['_val'].val == c_Int_obj['_val'].val)
 
     @o.primative.Add
     def Add(this, _, scopes:so.Scopes, c_Int_obj:'CaspianObjectClassInstance') -> False:
-        if this.public['__type__'].not_eq(c_Int_obj.public['__type__']):
+        if not any(c_Int_obj.public['__type__'].eq(scopes[_type]) for _type in valid_op_types):
             raise Exception(f'Integer cannot add type "{c_Int_obj.name}"')
         
         return scopes['Integer', 'eval':True].instantiate(this['_val'].val + c_Int_obj['_val'].val)
 
     @o.primative.Sub
     def Sub(this, _, scopes:so.Scopes, c_Int_obj:'CaspianObjectClassInstance') -> False:
-        if this.public['__type__'].not_eq(c_Int_obj.public['__type__']):
+        if not any(c_Int_obj.public['__type__'].eq(scopes[_type]) for _type in valid_op_types):
             raise Exception(f'Integer cannot subtract type "{c_Int_obj.name}"')
         
         return scopes['Integer', 'eval':True].instantiate(this['_val'].val - c_Int_obj['_val'].val)
 
     @o.primative.Mul
     def Mul(this, _, scopes:so.Scopes, c_Int_obj:'CaspianObjectClassInstance') -> False:
-        if this.public['__type__'].not_eq(c_Int_obj.public['__type__']):
+        if not any(c_Int_obj.public['__type__'].eq(scopes[_type]) for _type in valid_op_types):
             raise Exception(f'Integer cannot multiply type "{c_Int_obj.name}"')
         
         return scopes['Integer', 'eval':True].instantiate(this['_val'].val * c_Int_obj['_val'].val)
 
     @o.primative.Div
     def Div(this, _, scopes:so.Scopes, c_Int_obj:'CaspianObjectClassInstance') -> False:
-        if this.public['__type__'].not_eq(c_Int_obj.public['__type__']):
+        if not any(c_Int_obj.public['__type__'].eq(scopes[_type]) for _type in valid_op_types):
             raise Exception(f'Integer cannot multiply type "{c_Int_obj.name}"')
         
         return scopes['Float', 'eval':True].instantiate(this['_val'].val / c_Int_obj['_val'].val)
@@ -196,8 +201,13 @@ def null() -> True:
     return toString, bool__, toString_
 
 if __name__ == '__main__':
-    
     v1 = o.heap[o.scopes['Integer']].instantiate(1)
+    print(id(o.scopes['Integer']))
+    print(id(o.heap[v1].public['__type__']))
+    print(o.heap[o.scopes['Integer']])
     v2 = o.heap[o.scopes['Integer']].instantiate(2)
+    v3 = o.heap[o.scopes['Float']].instantiate(1.4)
     print(o.heap[o.heap[o.heap[o.heap[v1].private['Div']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v2])])
-    
+    print(o.heap[o.heap[o.heap[o.heap[v1].private['Div']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v3])])
+    v4 = o.scopes['null']
+    print(o.heap[o.heap[o.heap[o.heap[v1].private['Div']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v4])])
