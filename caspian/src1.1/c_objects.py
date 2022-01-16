@@ -284,17 +284,17 @@ def Primative() -> True:
 def null() -> True:
     @o.primative.toString
     def toString(this, _, scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate("null")
+        return scopes['String', 'eval':True].instantiate("null")
     
     @o.static.primative.Bool
-    def bool__(this, _, scopes:so.Scopes) -> False:
+    def Bool(this, _, scopes:so.Scopes) -> False:
         return scopes['Bool', 'eval':True].instantiate(False)
 
     @o.static.primative.toString
     def toString_(this, _, scopes:so.Scopes) -> False:
         return scopes['String', 'eval':True].instantiate("null")
 
-    return toString, bool__, toString_
+    return toString, Bool, toString_
 
 if __name__ == '__main__':
     print('-'*10,'testing integers/floats', '-'*10)
@@ -312,7 +312,7 @@ if __name__ == '__main__':
     print('-'*10,'testing null', '-'*10)
     v4 = o.scopes['null']
     print(o.heap[o.heap[o.heap[o.heap[o.scopes['null']].private['toString']].private['Call']].exec_source['payload']['callable'](o.heap[o.scopes['null']], None, o.scopes)]['_val'])
-    print('testing this', o.heap[o.heap[o.heap[o.heap[o.scopes['null']].private['Bool']].private['Call']].exec_source['payload']['callable'](o.heap[o.scopes['null']], None, o.scopes)]['_val'])
+    print(o.heap[o.heap[o.heap[o.heap[o.scopes['null']].private['Bool']].private['Call']].exec_source['payload']['callable'](o.heap[o.scopes['null']], None, o.scopes)]['_val'])
     #line should raise an error
     #print(o.heap[o.heap[o.heap[o.heap[v1].private['Div']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v4])])
     print('-'*10,'testing bool', '-'*10)
