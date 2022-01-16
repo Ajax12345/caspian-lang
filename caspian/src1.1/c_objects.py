@@ -26,27 +26,27 @@ def Call(this, stack_heap:'CaspianCompile', scopes:so.Scopes, *args, **kwargs) -
     pass
 
 @o.primative.Bool
-def bool_(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> True:
-    return scopes['Bool'].instantiate(True)
+def bool_(this, _, scopes:so.Scopes) -> True:
+    return scopes['Bool', 'eval':True].instantiate(True)
 
 
 @o.primative.Bool
-def bool__(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> True:
-    return scopes['Bool'].instantiate(False)
+def bool__(this, _, scopes:so.Scopes) -> True:
+    return scopes['Bool', 'eval':True].instantiate(False)
 
 @o.base_class
 def BaseClass() -> True:
     @o.static.primative.toString
-    def toString_(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate('<type "BaseClass">')
+    def toString_(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate('<type "BaseClass">')
     
     return toString_,
 
 @o.class_
 def Fun() -> True:
     @o.static.primative.toString
-    def toString_(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate('<type "Function">')
+    def toString_(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate('<type "Function">')
 
     return toString_,
 
@@ -58,20 +58,20 @@ def Bool() -> True:
         'Float'
     ]
     @o.fun
-    def constructor(this, stack_heap:'CaspianCompile', scopes:so.Scopes, _bool:bool) -> False:
+    def constructor(this, _, scopes:so.Scopes, _bool:bool) -> False:
         this['_val'] = so.PyBaseObj(_bool)
 
     @o.primative.Bool
-    def Bool(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return this
+    def Bool(this, _, scopes:so.Scopes) -> False:
+        return this._id
     
     @o.primative.toString
-    def toString(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate(str(this['_val'].val).lower())
+    def toString(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate(str(this['_val'].val).lower())
 
     @o.static.primative.toString
-    def toString_(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate('<type "Bool">')
+    def toString_(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate('<type "Bool">')
 
     @o.primative.Eq
     def Eq(this, _, scopes:so.Scopes, c_obj:'CaspianObjectClassInstance') -> False:
@@ -114,22 +114,37 @@ def Bool() -> True:
 @o.class_
 def String() -> True:
     @o.fun
-    def constructor(this, stack_heap:'CaspianCompile', scopes:so.Scopes, _str:str) -> False:
+    def constructor(this, _, scopes:so.Scopes, _str:str) -> False:
         this['_val'] = so.PyBaseObj(_str)
 
     @o.primative.Bool
-    def Bool(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['Bool'].instantiate(bool(this['_val'].val))
+    def Bool(this, _, scopes:so.Scopes) -> False:
+        return scopes['Bool', 'eval':True].instantiate(bool(this['_val'].val))
 
     @o.primative.toString
-    def toString(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return this
+    def toString(this, _, scopes:so.Scopes) -> False:
+        return this._id
 
     @o.static.primative.toString
-    def toString_(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate('<type "String">')
+    def toString_(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate('<type "String">')
 
-    return constructor, toString, toString_, Bool
+    @o.primative.Add
+    def Add(this, _, scopes:so.Scopes, c_obj:'CaspianObjectClassInstance') -> False:
+        if scopes['String'].not_eq(c_obj.public['__type__']):
+            raise Exception(f'Cannot concatentate type "{c_obj.name}" to String')
+
+        return scopes['String', 'eval':True].instantiate(this['_val'].val + c_obj['_val'].val)
+
+    @o.primative.Add
+    def Mul(this, _, scopes:so.Scopes, c_obj:'CaspianObjectClassInstance') -> False:
+        if scopes['Integer'].not_eq(c_obj.public['__type__']):
+            raise Exception(f'Cannot extend String by type "{c_obj.name}"')
+
+        return scopes['String', 'eval':True].instantiate(this['_val'].val * c_obj['_val'].val)
+
+
+    return constructor, toString, toString_, Bool, Add, Mul
 
 
 @o.class_
@@ -140,20 +155,20 @@ def Integer() -> True:
         'Float'
     ]
     @o.fun
-    def constructor(this, stack_heap:'CaspianCompile', scopes:so.Scopes, _val:int) -> False:
+    def constructor(this, _, scopes:so.Scopes, _val:int) -> False:
         this['_val'] = so.PyBaseObj(_val)
 
     @o.primative.Bool
-    def Bool(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['Bool'].instantiate(bool(this['_val'].val))
+    def Bool(this, _, scopes:so.Scopes) -> False:
+        return scopes['Bool', 'eval':True].instantiate(bool(this['_val'].val))
 
     @o.primative.toString
-    def toString(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate(str(this['_val']))
+    def toString(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate(str(this['_val']))
 
     @o.static.primative.toString
-    def toString_(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate('<type "Integer">')
+    def toString_(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate('<type "Integer">')
 
     @o.primative.Eq
     def Eq(this, _, scopes:so.Scopes, c_obj:'CaspianObjectClassInstance') -> False:
@@ -204,16 +219,16 @@ def Float() -> True:
         this['_val'] = so.PyBaseObj(_val)
 
     @o.primative.Bool
-    def Bool(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['Bool'].instantiate(bool(this['_val'].val))
+    def Bool(this, _, scopes:so.Scopes) -> False:
+        return scopes['Bool', 'eval':True].instantiate(bool(this['_val'].val))
 
     @o.primative.toString
-    def toString(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate(str(this['_val']))
+    def toString(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate(str(this['_val']))
 
     @o.static.primative.toString
-    def toString_(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate('<type "Float">')
+    def toString_(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate('<type "Float">')
 
     @o.primative.Eq
     def Eq(this, _, scopes:so.Scopes, c_obj:'CaspianObjectClassInstance') -> False:
@@ -256,32 +271,33 @@ def Float() -> True:
 @o.class_
 def Primative() -> True:
     @o.fun
-    def constructor(this, stack_heap:'CaspianCompile', scopes:so.Scopes, _type:typing.Union[str, None] = None) -> False:
+    def constructor(this, _, scopes:so.Scopes, _type:typing.Union[str, None] = None) -> False:
         this['_val'] = so.PyBaseObj(_type)
 
     @o.static.primative.toString
-    def toString(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate("<type Primative>" if this['_val'].val is None else f"primative::{this['_val'].val}")
+    def toString(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate("<type Primative>" if this['_val'].val is None else f"primative::{this['_val'].val}")
 
     return constructor, toString
 
 @o.class_
 def null() -> True:
     @o.primative.toString
-    def toString(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
+    def toString(this, _, scopes:so.Scopes) -> False:
         return scopes['String'].instantiate("null")
     
-    @o.primative.Bool
-    def bool__(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['Bool'].instantiate(False)
+    @o.static.primative.Bool
+    def bool__(this, _, scopes:so.Scopes) -> False:
+        return scopes['Bool', 'eval':True].instantiate(False)
 
     @o.static.primative.toString
-    def toString_(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> False:
-        return scopes['String'].instantiate("<type NullType>")
+    def toString_(this, _, scopes:so.Scopes) -> False:
+        return scopes['String', 'eval':True].instantiate("null")
 
     return toString, bool__, toString_
 
 if __name__ == '__main__':
+    print('-'*10,'testing integers/floats', '-'*10)
     v1 = o.heap[o.scopes['Integer']].instantiate(1)
     print(id(o.scopes['Integer']))
     print(id(o.heap[v1].public['__type__']))
@@ -289,12 +305,29 @@ if __name__ == '__main__':
     print(o.heap[o.scopes['Integer']])
     v2 = o.heap[o.scopes['Integer']].instantiate(2)
     v3 = o.heap[o.scopes['Float']].instantiate(1.4)
-    print(o.heap[o.heap[o.heap[o.heap[v1].private['Add']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v2])])
-    print(o.heap[o.heap[o.heap[o.heap[v1].private['Add']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v3])])
+    print(o.heap[o.heap[o.heap[o.heap[v1].private['Add']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v2])]['_val'])
+    print(o.heap[o.heap[o.heap[o.heap[v1].private['Add']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v3])]['_val'])
+    print(o.heap[o.heap[o.heap[o.heap[v3].private['Bool']].private['Call']].exec_source['payload']['callable'](o.heap[v3], None, o.scopes)]['_val'])
+    print(o.heap[o.heap[o.heap[o.heap[o.scopes['Float']].private['toString']].private['Call']].exec_source['payload']['callable'](o.heap[o.scopes['Float']], None, o.scopes)]['_val'])
+    print('-'*10,'testing null', '-'*10)
     v4 = o.scopes['null']
+    print(o.heap[o.heap[o.heap[o.heap[o.scopes['null']].private['toString']].private['Call']].exec_source['payload']['callable'](o.heap[o.scopes['null']], None, o.scopes)]['_val'])
+    print('testing this', o.heap[o.heap[o.heap[o.heap[o.scopes['null']].private['Bool']].private['Call']].exec_source['payload']['callable'](o.heap[o.scopes['null']], None, o.scopes)]['_val'])
     #line should raise an error
     #print(o.heap[o.heap[o.heap[o.heap[v1].private['Div']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v4])])
+    print('-'*10,'testing bool', '-'*10)
     v5 = o.heap[o.scopes['Bool']].instantiate(True)
-    v6 = o.heap[o.scopes['Bool']].instantiate(True)
+    v6 = o.heap[o.scopes['Bool']].instantiate(False)
+    print(o.heap[o.heap[o.heap[o.heap[o.scopes['Bool']].private['toString']].private['Call']].exec_source['payload']['callable'](o.heap[o.scopes['Bool']], None, o.scopes)]['_val'])
+    print(o.heap[o.heap[o.heap[o.heap[v6].private['toString']].private['Call']].exec_source['payload']['callable'](o.heap[v6], None, o.scopes)]['_val'])
     print(o.heap[o.heap[o.heap[o.heap[v5].private['Add']].private['Call']].exec_source['payload']['callable'](o.heap[v5], None, o.scopes, o.heap[v6])]['_val'])
-    
+    print('-'*10,'testing string', '-'*10)
+    v7 = o.heap[o.scopes['String']].instantiate('James')
+    v8 = o.heap[o.scopes['String']].instantiate('Joe')
+    v8 = o.heap[o.scopes['String']].instantiate('')
+    print(o.heap[o.heap[o.heap[o.heap[v7].private['Add']].private['Call']].exec_source['payload']['callable'](o.heap[v7], None, o.scopes, o.heap[v8])]['_val'])
+    print(o.heap[o.heap[o.heap[o.heap[v7].private['Mul']].private['Call']].exec_source['payload']['callable'](o.heap[v7], None, o.scopes, o.heap[v2])]['_val'])
+    print(o.heap[o.heap[o.heap[o.heap[v7].private['Bool']].private['Call']].exec_source['payload']['callable'](o.heap[v7], None, o.scopes)]['_val'])
+    print(o.heap[o.heap[o.heap[o.heap[v8].private['Bool']].private['Call']].exec_source['payload']['callable'](o.heap[v8], None, o.scopes)]['_val'])
+    print(o.heap[o.heap[o.heap[o.heap[o.scopes['String']].private['toString']].private['Call']].exec_source['payload']['callable'](o.heap[o.scopes['String']], None, o.scopes)]['_val'])
+    #print(o.heap[o.heap[o.heap[o.scopes['String']].private['toString']].exec_source['payload']['callable'](o.heap[o.scopes['String']], None, o.scopes)])

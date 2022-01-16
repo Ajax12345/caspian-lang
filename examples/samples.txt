@@ -476,3 +476,7 @@ next(g) // => 20 ???
 dis(obj)
 //{'names':{'attr1':232, 'fun1':<fun at 232323231>}}
 //convert paran group in an expression to an immutable array?
+
+//`this` and `that`
+//`that` is a generic pointer to nearest parent object reference. Even a method will have a `that` pointing to itself
+//`this` points to the most expedient object reference. Methods will have a `this` pointing to the class instance

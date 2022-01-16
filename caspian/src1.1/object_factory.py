@@ -55,6 +55,7 @@ class CaspianObjClass(CaspianObj):
             _type = 'Class Instance',
             name = self.name,
             id = _id.id,
+            _id = _id,
             public = {'__name__':self.scopes['String', 'suppress_eval':True].instantiate(self.name), 
                     '__type__':self._id,
                     '__id__':self.scopes['Integer', 'suppress_eval':True].instantiate(_id.id),
