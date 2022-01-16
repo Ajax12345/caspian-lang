@@ -47,6 +47,12 @@ def log_errors(_f:typing.Callable) -> typing.Callable:
 class ObjRefId:
     def __init__(self, _id:int) -> None:
         self.id = _id
+
+    def eq(self, _objref:'ObjRefId') -> bool:
+        return self.id == _objref.id
+
+    def not_eq(self, _objref:'ObjRefId') -> bool:
+        return not self.eq(_objref)
     
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.id})'

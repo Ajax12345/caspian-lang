@@ -93,6 +93,18 @@ class _primative:
     def Bool(self, _f:typing.Callable) -> typing.Callable:
         return self.factory.create_primative_Py(_f, name='Bool', _type=self._type)
 
+    def Add(self, _f:typing.Callable) -> typing.Callable:
+        return self.factory.create_primative_Py(_f, name='Add', _type=self._type)
+
+    def Sub(self, _f:typing.Callable) -> typing.Callable:
+        return self.factory.create_primative_Py(_f, name='Sub', _type=self._type)
+
+    def Mul(self, _f:typing.Callable) -> typing.Callable:
+        return self.factory.create_primative_Py(_f, name='Mul', _type=self._type)
+
+    def Div(self, _f:typing.Callable) -> typing.Callable:
+        return self.factory.create_primative_Py(_f, name='Div', _type=self._type)
+
 class CaspianObjFactory:
     '''
     caspian object model
