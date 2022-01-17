@@ -163,7 +163,7 @@ class Parser:
                 if value is None:
                     self.consume_if_true_or_exception(TOKEN.DOT)
                     unpack=c_ast.ArrayUnpack if not self.consume_if_true(TOKEN.DOT) else c_ast.MapUnpack
-                    value = unpack(container=self.parse_expr(indent, t_priority=priorities[TOKEN.DOT.name], stmnt=stmnt, terminate=terminate))
+                    value = unpack(container=self.parse_expr(indent, t_priority=5, stmnt=stmnt, terminate=terminate))
                 else:
                     value = c_ast.GetAttr(obj=value, attr=self.consume_if_true_or_exception(TOKEN.NAME))
 
