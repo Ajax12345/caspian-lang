@@ -35,61 +35,95 @@ class BracketItems(Ast):
     pass
 
 class GetItem(Ast):
-    pass
+    assign = True
+    signature = False
+    container = False
 
 class Call(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class ImmutableContainer(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class MapUnpack(Ast):
-    pass
+    assign = False
+    signature = True
+    container = True
 
 class ArrayUnpack(Ast):
-    pass
+    assign = False
+    signature = True
+    container = True
 
 class GetAttr(Ast):
-    pass
+    assign = True
+    signature = False
+    container = False
 
 class Expr(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class Operation(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class Assign(Ast):
-    pass
+    assign = False
+    signature = True
+    container = False
 
 class AssignParam(Ast):
-    pass
+    assign = False
+    signature = True
+    container = False
 
 class KeyValue(Ast):
-    pass
+    assign = True
+    signature = True
+    container = True
 
 class ImpOp(Ast):
     pass
 
 class InPlace(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class AsyncAwait(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class AsyncFun(Ast):
     pass
 
 class NotOp(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class NegVal(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class Primative(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class Lambda(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class AssignExpr(Ast):
     pass
@@ -116,13 +150,19 @@ class AsyncFor(Ast):
     pass
 
 class ComprehensionBlock(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class Comprehension(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class AsyncComprehensionBlock(Ast):
-    pass
+    assign = False
+    signature = False
+    container = False
 
 class DecoratedCallable(Ast):
     pass

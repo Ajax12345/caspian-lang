@@ -1,6 +1,23 @@
 import typing, state_objects, c_objects
-import c_ast, c_parser
+import c_ast, c_parser, collections
 
+__set_shadow_roots__ = True
+
+if __set_shadow_roots__:
+    shadow_assign_asts = collections.defaultdict(list)
+    for i in dir(c_ast):
+        if i[0].isupper() and i != 'Ast':
+            if not getattr((o:=getattr(c_ast, i)), 'assign', True):
+                shadow_assign_asts[0].append(o.__name__)
+            
+            if not getattr(o, 'signature', True):
+                shadow_assign_asts[1].append(o.__name__)
+            
+            if not getattr(o, 'container', True):
+                shadow_assign_asts[2].append(o.__name__)
+            
+
+    #print(shadow_assign_asts)
 
 
 class Compiler:
@@ -17,11 +34,13 @@ class Compiler:
     def __exit__(self, *_) -> None:
         pass   
 
-    def shadow_param_assign(self, ast:c_ast.Ast, context:typing.Optional[typing.Union[0, 1]]=0) -> typing.Any:
-        pass
+    def shadow_param_assign(self, ast:c_ast.Ast, context:int=0) -> typing.Any:
+        if ast.__class__.__name__ in shadow_assign_asts[context]:
+            raise Exception(f'Cannot assign to "{ast.__class__.__name__}"')
+        
 
     def exec_Assign(self, ast:c_ast.Assign, scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> None:
-        print(ast)
+        shadow_param = self.shadow_param_assign(ast.obj)
 
     def exec_Body(self, ast:c_ast.Body, scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> None:
         for block in ast.body:
@@ -38,8 +57,10 @@ class Compiler:
 
 
 if __name__ == '__main__':
+    
     with open('test_file.txt') as f, Compiler() as compiler:
         p = c_parser.Parser(c_parser.Tokenizer(f.read()))
         body = p.body()
         #print(body)
         compiler.compile(body)
+    
