@@ -2,22 +2,6 @@ import typing, sys, functools
 import warnings, copy, operator
 import collections, contextlib
 
-class BlockExits:
-    class ExitStatus:
-        pass
-    
-    class Break(ExitStatus):
-        pass
-
-    class Continue(ExitStatus):
-        pass
-    
-    class Return(ExitStatus):
-        pass
-    
-    class Yield(ExitStatus):
-        pass
-
 class ExecStatus:
     def __init__(self, **kwargs) -> None:
         self._status = kwargs
@@ -217,6 +201,10 @@ class ExecSource:
         pass
 
     class Caspian:
+        pass
+
+class BodyScopes:
+    class Main:
         pass
 
 if __name__ == '__main__':

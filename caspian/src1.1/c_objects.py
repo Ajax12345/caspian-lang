@@ -330,4 +330,7 @@ if __name__ == '__main__':
     print(o.heap[o.heap[o.heap[o.heap[v7].private['Bool']].private['Call']].exec_source['payload']['callable'](o.heap[v7], None, o.scopes)]['_val'])
     print(o.heap[o.heap[o.heap[o.heap[v8].private['Bool']].private['Call']].exec_source['payload']['callable'](o.heap[v8], None, o.scopes)]['_val'])
     print(o.heap[o.heap[o.heap[o.heap[o.scopes['String']].private['toString']].private['Call']].exec_source['payload']['callable'](o.heap[o.scopes['String']], None, o.scopes)]['_val'])
+    print('-'*10,'testing primatives','-'*10)
+    print(o.heap[o.heap[o.heap[v7].private['Add']].private['toString']])
+    print(o.heap[o.scopes['Call']].__dict__)
     #print(o.heap[o.heap[o.heap[o.scopes['String']].private['toString']].exec_source['payload']['callable'](o.heap[o.scopes['String']], None, o.scopes)])

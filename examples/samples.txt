@@ -480,3 +480,4 @@ dis(obj)
 //`this` and `that`
 //`that` is a generic pointer to nearest parent object reference. Even a method will have a `that` pointing to itself
 //`this` points to the most expedient object reference. Methods will have a `this` pointing to the class instance
+//be able to view entire stacktrace
