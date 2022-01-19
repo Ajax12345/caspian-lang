@@ -373,7 +373,7 @@ class Parser:
             return c_ast.Break()
 
         if (t:=self.consume_if_true(TOKEN.CONTINUE)) is not None:
-            return c_ast.Break()
+            return c_ast.Continue()
         
         if (t:=self.consume_if_true(TOKEN.FUN)) is not None:
             return self.parse_fun(indent)
