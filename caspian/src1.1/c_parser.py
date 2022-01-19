@@ -396,6 +396,12 @@ class Parser:
 
             raise Exception('invalid syntax')
 
+        if (t:=self.consume_if_true(TOKEN.ASSERT)):
+            if (assert_condition:=self.parse_expr(indent)) is None:
+                raise Exception('missing assertion condition')
+
+            return c_ast.Assert(condition = assert_condition)
+
         if (t:=self.check_if_true(TOKEN.AT)):
             wrappers = []
             while True:

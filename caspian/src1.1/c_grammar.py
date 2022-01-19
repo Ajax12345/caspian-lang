@@ -42,6 +42,7 @@ grammar = [
     (TOKEN.FINALLY, re.compile(r'finally\b')),
     (TOKEN.RAISE, re.compile(r'raise\b')),
     (TOKEN.IMPORT, re.compile(r'import\b')),
+    (TOKEN.ASSERT, re.compile(r'assert\b')),
     (TOKEN.CLASS, re.compile(r'class\b')),
     (TOKEN.AT, re.compile(r'@\b')),
     (TOKEN.PRIMATIVE.VALUE, re.compile(r'primative\b')),

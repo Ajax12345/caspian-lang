@@ -199,3 +199,6 @@ class Suppress(Ast):
 
 class Class(Ast):
     pass
+
+class Assert(Ast):
+    pass
