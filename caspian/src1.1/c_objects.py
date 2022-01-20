@@ -333,4 +333,8 @@ if __name__ == '__main__':
     print('-'*10,'testing primatives','-'*10)
     print(o.heap[o.heap[o.heap[v7].private['Add']].private['toString']])
     print(o.heap[o.scopes['Call']].__dict__)
+    print('-'*10, 'testing parents', '-'*10)
+    print(o.heap[o.scopes['Call']].parents[0].__dict__)
+    print(o.heap[o.heap[o.heap[v8].public['__type__']].parents[0]].parents)
+    print(o.heap[o.scopes['toString']].parents[0].__dict__)
     #print(o.heap[o.heap[o.heap[o.scopes['String']].private['toString']].exec_source['payload']['callable'](o.heap[o.scopes['String']], None, o.scopes)])

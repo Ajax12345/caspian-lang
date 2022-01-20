@@ -38,6 +38,7 @@ class Compiler:
         if ast.__class__.__name__ in shadow_assign_asts[context]:
             raise Exception(f'Cannot assign to "{ast.__class__.__name__}"')
         
+        
 
     def exec_Assign(self, ast:c_ast.Assign, scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> None:
         shadow_param = self.shadow_param_assign(ast.obj)
