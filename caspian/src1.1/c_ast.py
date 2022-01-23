@@ -11,55 +11,61 @@ class Ast:
         return f'{self.__class__.__name__}({self.vals})'
 
 class Import(Ast):
-    pass
+    _fields = ['path', 'alias', 'line']
 
 class Body(Ast):
-    pass
+    _fields = ['body']
 
 class Pass(Ast):
-    pass
+    _fields = ['line']
 
 class Fun(Ast):
-    pass
+    _fields = ['name', 'primative', 'settings', 'signature', 'return_type', 'body', None]
 
 class CommaSeparatedItems(Ast):
-    pass
+    _fields = ['items']
 
 class ParenItems(Ast):
-    pass
+    _fields = ['items']
 
 class BraceItems(Ast):
-    pass
+    _fields = ['items']
 
 class BracketItems(Ast):
-    pass
+    _fields = ['items']
 
 class GetItem(Ast):
+    _fields = ['obj', 'signature']
     assign = True
     signature = False
     container = False
 
 class Call(Ast):
+    _fields = ['obj', 'signature']
     assign = False
     signature = False
     container = False
 
 class ImmutableContainer(Ast):
+    _fields = ['container']
     assign = False
     signature = False
     container = False
 
 class MapUnpack(Ast):
+    _fields = ['container']
     assign = False
     signature = True
     container = True
 
 class ArrayUnpack(Ast):
+    _fields = ['container']
     assign = False
     signature = True
     container = True
 
 class GetAttr(Ast):
+    _fields = ['obj', 'attr']
     assign = True
     signature = False
     container = False
@@ -70,135 +76,148 @@ class Expr(Ast):
     container = False
 
 class Operation(Ast):
+    _fields = ['operand1', 'operator', 'operand2']
     assign = False
     signature = False
     container = False
 
 class Assign(Ast):
+    _fields = ['obj', 'value']
     assign = False
     signature = True
     container = False
 
 class AssignParam(Ast):
+    _fields = ['obj', 'value']
     assign = False
     signature = True
     container = False
 
 class KeyValue(Ast):
+    _fields = ['key', 'value']
     assign = True
     signature = True
     container = True
 
 class ImpOp(Ast):
-    pass
+    _fields = ['obj', 'operator', 'value']
 
 class InPlace(Ast):
+    _fields = ['obj', 'operator']
     assign = False
     signature = False
     container = False
 
 class AsyncAwait(Ast):
+    _fields = ['obj']
     assign = False
     signature = False
     container = False
 
 class AsyncFun(Ast):
-    pass
+    _fields = ['fun']
 
 class NotOp(Ast):
+    _fields = ['obj']
     assign = False
     signature = False
     container = False
 
 class NegVal(Ast):
+    _fields = ['obj']
     assign = False
     signature = False
     container = False
 
 class Primative(Ast):
+    _fields = ['name']
     assign = False
     signature = False
     container = False
 
 class Lambda(Ast):
+    _fields = ['params', 'body']
     assign = False
     signature = False
     container = False
 
 class AssignExpr(Ast):
-    pass
+    _fields = ['obj', 'value']
 
 class Return(Ast):
-    pass
+    _fields = ['expr']
 
 class Yield(Ast):
-    pass
+    _fields = ['expr']
 
 class YieldFrom(Ast):
-    pass
+    _fields = ['expr']
 
 class RaiseException(Ast):
-    pass
+    _fields = ['exception']
 
 class Conditional(Ast):
-    pass
+    _fields = ['value', 'condition', 'default']
 
 class For(Ast):
-    pass
+    _fields = ['loop_param', 'iter_obj', 'body']
 
 class AsyncFor(Ast):
-    pass
+    _fields = ['for_loop']
 
 class ComprehensionBlock(Ast):
+    _fields = ['loop_param', 'iter_obj']
     assign = False
     signature = False
     container = False
 
 class Comprehension(Ast):
+    _fields = ['value', 'body', 'condition']
     assign = False
     signature = False
     container = False
 
 class AsyncComprehensionBlock(Ast):
+    _fields = ['loop_param', 'iter_obj']
     assign = False
     signature = False
     container = False
 
 class DecoratedCallable(Ast):
-    pass
+    _fields = ['wrappers', 'wrapped']
 
 class Break(Ast):
-    pass
+    _fields = []
 
 class Continue(Ast):
-    pass
+    _fields = []
 
 class WhileLoop(Ast):
-    pass
+    _fields = ['condition', 'body']
 
 class DoWhileLoop(Ast):
-    pass
+    _fields = ['condition', 'body']
 
 class MultiLineLambda(Ast):
-    pass
+    _fields = ['params', 'body']
 
 class IfStatement(Ast):
-    pass
+    _fields = ['condition', 'body', 'elif_statements', 'else_body']
 
 class ElifCondition(Ast):
-    pass
+    _fields = ['condition', 'body']
 
 class CaseStatement(Ast):
-    pass
+    _fields = ['parameter', 'body']
 
 class SwitchCase(Ast):
-    pass
+    _fields = ['parameter', 'cases', 'default']
 
 class Suppress(Ast):
-    pass
+    _fields = ['params', 'body', 'then_params', 'then_body']
 
 class Class(Ast):
-    pass
+    _fields = ['name', 'inherits', 'abstract', 'body']
 
 class Assert(Ast):
-    pass
+    _fields = ['condition']
