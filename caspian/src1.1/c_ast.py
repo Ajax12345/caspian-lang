@@ -20,7 +20,7 @@ class Pass(Ast):
     _fields = ['line']
 
 class Fun(Ast):
-    _fields = ['name', 'primative', 'settings', 'signature', 'return_type', 'body', None]
+    _fields = ['name', 'primative', 'settings', 'signature', 'return_type', 'body']
 
 class CommaSeparatedItems(Ast):
     _fields = ['items']
