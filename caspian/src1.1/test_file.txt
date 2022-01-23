@@ -1,3 +1,1 @@
-assert 10 == 10
-for i in f()
-    pass
+james:int = 100
