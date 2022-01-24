@@ -1,5 +1,6 @@
 import typing, state_objects, c_objects
 import c_ast, c_parser, collections
+from c_grammar import * 
 
 __set_shadow_roots__ = True
 
@@ -45,7 +46,10 @@ class Compiler:
     def __exit__(self, *_) -> None:
         pass   
 
-    def shadow_param_assign(self, ast:c_ast.Ast, context:int=0) -> typing.Any:
+    def shadow_param_assign(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], context:int=0) -> typing.Any:
+        if not isinstance(ast, c_ast.Ast):
+            return ast
+        
         if ast.__class__.__name__ in shadow_assign_asts[context]:
             raise Exception(f'Cannot assign to "{ast.__class__.__name__}"')
 
@@ -60,11 +64,35 @@ class Compiler:
 
         return ast
 
+    def evaluate_name(self, ast:'TOKEN', scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
+        for i in scope_path.scope_path:
+            if (obj:=scope_path.scopes[i, 'provide_promise':False, 'name':ast.value]) is not None:
+                return obj
+        
+        raise Exception(f"name '{ast.value}' not defined")
+
+    def evaluate_value(self, ast:'TOKEN', scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
+        if ast.matches(TOKEN.NAME):
+            return self.evaluate_name(ast, scope_path, scope)
+
+        if ast.matches(TOKEN.INT):
+            return self.o_mem_main.heap[self.o_mem_main.scopes['Integer']].instantiate(int(ast.value))
+        
+
+    def exec_Expr(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
+        print('ast in exec_Expr', ast)
+        if isinstance(ast, c_ast.Ast):
+            return
+        
+        if ast.matches(TOKEN.VALUE):
+            return self.evaluate_value(ast, scope_path, scope)
+
 
     def exec_Assign(self, ast:c_ast.Assign, scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> None:
         shadow_param = self.shadow_param_assign(ast.obj)
         print('shadow param', shadow_param)
-        
+        expr_obj_id = self.exec_Expr(ast.value, scope_path, scope)
+        print('expr_obj_id', self.o_mem_main.heap[expr_obj_id].__dict__)
 
     def exec_Body(self, ast:c_ast.Body, scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> None:
         for block in ast.body:
