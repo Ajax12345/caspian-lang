@@ -78,6 +78,18 @@ class Compiler:
         if ast.matches(TOKEN.INT):
             return self.o_mem_main.heap[self.o_mem_main.scopes['Integer']].instantiate(int(ast.value))
         
+        if ast.matches(TOKEN.FLOAT):
+            return self.o_mem_main.heap[self.o_mem_main.scopes['Float']].instantiate(float(ast.value))
+
+        if ast.matches(TOKEN.BOOL):
+            return self.o_mem_main.heap[self.o_mem_main.scopes['Bool']].instantiate({'true':True, 'false':False}[ast.value])
+
+        if ast.matches(TOKEN.NULL):
+            return self.o_mem_main.heap[self.o_mem_main.scopes['Null']]
+
+        if ast.matches(TOKEN.STRING):
+            return self.o_mem_main.heap[self.o_mem_main.scopes['String']].instantiate(ast.value[1:-1])
+
 
     def exec_Expr(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
         print('ast in exec_Expr', ast)

@@ -1,1 +1,1 @@
-[james] = 10
+[james] = "true"
