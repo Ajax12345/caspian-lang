@@ -283,10 +283,30 @@ def Float() -> True:
 @o.class_
 def Primative() -> True:
     primatives = [
-        ""
+        'getitem', 
+        'setitem', 
+        'getattr', 
+        'setattr', 
+        'eq', 
+        'ne', 
+        'lt', 
+        'le', 
+        'gt', 
+        'ge', 
+        'add', 
+        'sub', 
+        'mul', 
+        'div', 
+        'iterator', 
+        'type_check',
+        'and', 
+        'or'
     ]
     @o.fun
     def constructor(this, _, scopes:so.Scopes, _type:typing.Union[str, None] = None) -> False:
+        if _type not in primatives:
+            raise Exception(f"'{_type}' is not a valid primative")
+            
         this['_val'] = so.PyBaseObj(_type)
 
     @o.primative.toString

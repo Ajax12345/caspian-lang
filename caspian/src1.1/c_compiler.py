@@ -92,8 +92,7 @@ class Compiler:
             return self.o_mem_main.heap[self.o_mem_main.scopes['String']].instantiate(ast.value[1:-1])
 
     def evaluate_primative(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
-        pass
-
+        return self.o_mem_main.heap[self.o_mem_main.scopes['Primative']].instantiate(ast.name.value)
 
     def evaluate_ast(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
         print('ast in evaluate_ast', ast)
