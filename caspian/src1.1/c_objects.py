@@ -6,23 +6,23 @@ __all__ = ('o',)
 o = object_factory.CaspianObjFactory()
 
 @o.primative.Eq
-def Eq(this, stack_heap:'CaspianCompile', scopes:so.Scopes, comp_obj:'CaspianObj') -> True:
+def Eq(this, _, scopes:so.Scopes, comp_obj:'CaspianObj') -> True:
     return scopes['Bool'].instantiate(this.id == comp_obj.id)
 
 @o.primative.toString
-def toString(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> True:
+def toString(this, _, scopes:so.Scopes) -> True:
     return scopes['String'].instantiate(f"<{this._type} '{this.name}' at {this.id}>")
 
 @o.primative.toString
-def toStringName(this, stack_heap:'CaspianCompile', scopes:so.Scopes) -> True:
+def toStringName(this, _, scopes:so.Scopes) -> True:
     return this.public['__name__']
 
 @o.primative.Call
-def InstantiateClassCall(this, stack_heap:'CaspianCompile', scopes:so.Scopes, *args, **kwargs) -> True:
+def InstantiateClassCall(this, _, scopes:so.Scopes, *args, **kwargs) -> True:
     return this.instantiate(*args, **kwargs)
  
 @o.primative.Call
-def Call(this, stack_heap:'CaspianCompile', scopes:so.Scopes, *args, **kwargs) -> True:
+def Call(this, _, scopes:so.Scopes, *args, **kwargs) -> True:
     pass
 
 @o.primative.Bool
@@ -224,7 +224,7 @@ def Float() -> True:
         'Float'
     ]
     @o.fun
-    def constructor(this, stack_heap:'CaspianCompile', scopes:so.Scopes, _val:float) -> False:
+    def constructor(this, _, scopes:so.Scopes, _val:float) -> False:
         if not isinstance(_val, (float, int)):
             raise Exception(f"{_val} is not a float or an integer")
 
