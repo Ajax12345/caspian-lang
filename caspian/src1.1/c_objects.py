@@ -59,6 +59,9 @@ def Bool() -> True:
     ]
     @o.fun
     def constructor(this, _, scopes:so.Scopes, _bool:bool) -> False:
+        if not isinstance(_bool, (bool, int)):
+            raise Exception(f"{_bool} is not a boolean or integer")
+
         this['_val'] = so.PyBaseObj(_bool)
 
     @o.primative.Bool
@@ -115,6 +118,9 @@ def Bool() -> True:
 def String() -> True:
     @o.fun
     def constructor(this, _, scopes:so.Scopes, _str:str) -> False:
+        if not isinstance(_str, str):
+            raise Exception(f"{_str} is not a string")
+
         this['_val'] = so.PyBaseObj(_str)
 
     @o.primative.Bool
@@ -156,6 +162,9 @@ def Integer() -> True:
     ]
     @o.fun
     def constructor(this, _, scopes:so.Scopes, _val:int) -> False:
+        if not isinstance(_val, int):
+            raise Exception(f"{_val} is not an integer")
+
         this['_val'] = so.PyBaseObj(_val)
 
     @o.primative.Bool
@@ -216,6 +225,9 @@ def Float() -> True:
     ]
     @o.fun
     def constructor(this, stack_heap:'CaspianCompile', scopes:so.Scopes, _val:float) -> False:
+        if not isinstance(_val, (float, int)):
+            raise Exception(f"{_val} is not a float or an integer")
+
         this['_val'] = so.PyBaseObj(_val)
 
     @o.primative.Bool
@@ -304,6 +316,8 @@ if __name__ == '__main__':
     print(o.heap[v1].name)
     print(o.heap[o.scopes['Integer']])
     v2 = o.heap[o.scopes['Integer']].instantiate(2)
+    _v1 = o.heap[o.scopes['Integer']].instantiate(0)
+    print(o.heap[o.heap[o.heap[o.heap[_v1].private['Bool']].private['Call']].exec_source['payload']['callable'](o.heap[_v1], None, o.scopes)]['_val'])
     v3 = o.heap[o.scopes['Float']].instantiate(1.4)
     print(o.heap[o.heap[o.heap[o.heap[v1].private['Add']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v2])]['_val'])
     print(o.heap[o.heap[o.heap[o.heap[v1].private['Add']].private['Call']].exec_source['payload']['callable'](o.heap[v1], None, o.scopes, o.heap[v3])]['_val'])
