@@ -1,1 +1,1 @@
-[james] = "true"
+[james] = primative::getitem

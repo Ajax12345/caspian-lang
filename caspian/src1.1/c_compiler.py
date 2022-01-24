@@ -72,6 +72,7 @@ class Compiler:
         raise Exception(f"name '{ast.value}' not defined")
 
     def evaluate_value(self, ast:'TOKEN', scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
+        print('token in evaluate_value', ast)
         if ast.matches(TOKEN.NAME):
             return self.evaluate_name(ast, scope_path, scope)
 
@@ -90,11 +91,18 @@ class Compiler:
         if ast.matches(TOKEN.STRING):
             return self.o_mem_main.heap[self.o_mem_main.scopes['String']].instantiate(ast.value[1:-1])
 
+    def evaluate_primative(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
+        pass
+
+
+    def evaluate_ast(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
+        print('ast in evaluate_ast', ast)
+        if isinstance(ast, c_ast.Primative):
+            return self.evaluate_primative(ast, scope_path, scope)
 
     def exec_Expr(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
-        print('ast in exec_Expr', ast)
         if isinstance(ast, c_ast.Ast):
-            return
+            return self.evaluate_ast(ast, scope_path, scope)
         
         if ast.matches(TOKEN.VALUE):
             return self.evaluate_value(ast, scope_path, scope)

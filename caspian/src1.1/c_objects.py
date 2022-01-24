@@ -282,11 +282,14 @@ def Float() -> True:
 
 @o.class_
 def Primative() -> True:
+    primatives = [
+        ""
+    ]
     @o.fun
     def constructor(this, _, scopes:so.Scopes, _type:typing.Union[str, None] = None) -> False:
         this['_val'] = so.PyBaseObj(_type)
 
-    @o.static.primative.toString
+    @o.primative.toString
     def toString(this, _, scopes:so.Scopes) -> False:
         return scopes['String', 'eval':True].instantiate("<type Primative>" if this['_val'].val is None else f"primative::{this['_val'].val}")
 
@@ -351,4 +354,7 @@ if __name__ == '__main__':
     print(o.heap[o.scopes['Call']].parents[0].__dict__)
     print(o.heap[o.heap[o.heap[v8].public['__type__']].parents[0]].parents)
     print(o.heap[o.scopes['toString']].parents[0].__dict__)
+    print('-'*10, 'testing primative class', '-'*10)
+    v9 = o.heap[o.scopes['Primative']].instantiate('getitem')
+    print(o.heap[o.heap[o.heap[o.heap[v9].private['toString']].private['Call']].exec_source['payload']['callable'](o.heap[v9], None, o.scopes)]['_val'])
     #print(o.heap[o.heap[o.heap[o.scopes['String']].private['toString']].exec_source['payload']['callable'](o.heap[o.scopes['String']], None, o.scopes)])
