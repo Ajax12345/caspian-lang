@@ -91,13 +91,13 @@ class Compiler:
         if ast.matches(TOKEN.STRING):
             return self.o_mem_main.heap[self.o_mem_main.scopes['String']].instantiate(ast.value[1:-1])
 
-    def evaluate_primative(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
+    def exec_Primative(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
         return self.o_mem_main.heap[self.o_mem_main.scopes['Primative']].instantiate(ast.name.value)
 
     def evaluate_ast(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
         print('ast in evaluate_ast', ast)
         if isinstance(ast, c_ast.Primative):
-            return self.evaluate_primative(ast, scope_path, scope)
+            return self.exec_Primative(ast, scope_path, scope)
 
     def exec_Expr(self, ast:typing.Union[c_ast.Ast, 'TOKEN'], scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> state_objects.ObjRefId:
         if isinstance(ast, c_ast.Ast):
@@ -116,6 +116,9 @@ class Compiler:
     def exec_Body(self, ast:c_ast.Body, scope_path:state_objects.Scope, scope:state_objects.BodyScopes) -> None:
         for block in ast.body:
             if not hasattr(self, p:=f'exec_{block.__class__.__name__}'):
+                if isinstance(block, (c_ast.Ast, TOKEN_MAIN)):
+                    return self.exec_Expr(block, scope_path, scope)
+
                 raise Exception(f'c_ast.{block.__class__.__name__} not supported yet')
             
             getattr(self, p)(block, scope_path, scope)

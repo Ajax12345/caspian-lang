@@ -1,9 +1,10 @@
 import c_tokens, re
 import collections, typing
 
-__all__ = ('grammar', 'TOKEN', 'Tokenizer', 'priorities', 'operators', 'fun_flags')
+__all__ = ('grammar', 'TOKEN', 'Tokenizer', 'priorities', 'operators', 'fun_flags', 'TOKEN_MAIN')
 
 TOKEN = c_tokens.TOKEN_BASE()
+TOKEN_MAIN = c_tokens.TOKEN
 
 grammar = [
     (TOKEN.WHITESPACE, re.compile(r'\s')),

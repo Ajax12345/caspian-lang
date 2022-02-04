@@ -1,1 +1,1 @@
-[james] = primative::getitem
+v = 1
